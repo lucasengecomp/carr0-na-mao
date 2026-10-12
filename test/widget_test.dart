@@ -1,6 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:carro_na_mao/main.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('App exibe o slogan na home', (WidgetTester tester) async {
