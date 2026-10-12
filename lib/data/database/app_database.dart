@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import 'daos/veiculos_dao.dart';
 import 'enums.dart';
 import 'tables.dart';
 
@@ -17,6 +18,7 @@ part 'app_database.g.dart';
     PostosSugestao,
     TiposManutencaoPadrao,
   ],
+  daos: [VeiculosDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'carro_na_mao'));
