@@ -31,6 +31,7 @@ class Abastecimentos extends Table {
   BoolColumn get tanqueCheio => boolean().withDefault(const Constant(true))();
 }
 
+@DataClassName('Manutencao')
 class Manutencoes extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get veiculoPlaca =>
@@ -44,6 +45,7 @@ class Manutencoes extends Table {
   TextColumn get observacoes => text().nullable()();
 }
 
+@DataClassName('DespesaRecorrente')
 class DespesasRecorrentes extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get veiculoPlaca =>
@@ -56,6 +58,7 @@ class DespesasRecorrentes extends Table {
   DateTimeColumn get dataFim => dateTime().nullable()();
 }
 
+@DataClassName('OcorrenciaDespesa')
 class OcorrenciasDespesa extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get despesaId => integer().references(
@@ -90,6 +93,7 @@ class Lembretes extends Table {
   ];
 }
 
+@DataClassName('PostoSugestao')
 class PostosSugestao extends Table {
   TextColumn get nome => text()();
 
@@ -97,6 +101,7 @@ class PostosSugestao extends Table {
   Set<Column<Object>> get primaryKey => {nome};
 }
 
+@DataClassName('TipoManutencaoPadrao')
 class TiposManutencaoPadrao extends Table {
   TextColumn get tipo => textEnum<TipoManutencao>()();
   IntColumn get intervaloKm => integer().nullable()();
