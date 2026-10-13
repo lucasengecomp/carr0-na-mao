@@ -45,4 +45,10 @@ class VeiculosDao extends DatabaseAccessor<AppDatabase>
             ..where((t) => t.arquivado.equals(false))
             ..orderBy([(t) => OrderingTerm(expression: t.apelido)]))
           .watch();
+
+  Stream<List<Veiculo>> watchArquivados() =>
+      (select(veiculos)
+            ..where((t) => t.arquivado.equals(true))
+            ..orderBy([(t) => OrderingTerm(expression: t.apelido)]))
+          .watch();
 }
