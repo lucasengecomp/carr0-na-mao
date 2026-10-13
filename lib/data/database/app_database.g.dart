@@ -3726,6 +3726,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       DespesasRecorrentesDao(this as AppDatabase);
   late final OcorrenciasDespesaDao ocorrenciasDespesaDao =
       OcorrenciasDespesaDao(this as AppDatabase);
+  late final LembretesDao lembretesDao = LembretesDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
