@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'screens/config/config_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/placeholder_screen.dart';
+import 'screens/veiculos/veiculo_form_screen.dart';
 import 'shell_scaffold.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -76,10 +78,41 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/config',
-      builder: (context, state) => const PlaceholderScreen(
-        titulo: 'Configurações',
-        descricao: 'Veículos, export, política de privacidade.',
+      builder: (context, state) => const ConfigScreen(),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/veiculos',
+      builder: (context, state) => Scaffold(
+        appBar: AppBar(title: const Text('Veículos')),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'Lista de veículos chega na issue #8.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => context.push('/veiculos/novo'),
+          icon: const Icon(Icons.add),
+          label: const Text('Novo veículo'),
+        ),
       ),
+      routes: [
+        GoRoute(
+          parentNavigatorKey: _rootNavigatorKey,
+          path: 'novo',
+          builder: (context, state) => const VeiculoFormScreen(),
+        ),
+        GoRoute(
+          parentNavigatorKey: _rootNavigatorKey,
+          path: ':placa/editar',
+          builder: (context, state) =>
+              VeiculoFormScreen(placa: state.pathParameters['placa']),
+        ),
+      ],
     ),
   ],
 );

@@ -1,0 +1,249 @@
+import 'dart:async';
+
+import 'package:drift/drift.dart' show Value;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../data/database/app_database.dart';
+import '../../../data/database/enums.dart';
+import '../../../data/providers.dart';
+import '../../../domain/placa_validator.dart';
+import 'enum_labels.dart';
+
+class VeiculoFormScreen extends ConsumerStatefulWidget {
+  const VeiculoFormScreen({this.placa, super.key});
+
+  final String? placa;
+
+  @override
+  ConsumerState<VeiculoFormScreen> createState() => _VeiculoFormScreenState();
+}
+
+class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _placaCtrl = TextEditingController();
+  final _apelidoCtrl = TextEditingController();
+  final _marcaCtrl = TextEditingController();
+  final _modeloCtrl = TextEditingController();
+  final _anoCtrl = TextEditingController();
+  final _kmCtrl = TextEditingController();
+  TipoVeiculo _tipo = TipoVeiculo.carro;
+  TipoCombustivelVeiculo _combustivel = TipoCombustivelVeiculo.flex;
+  bool _saving = false;
+
+  bool get _isEdit => widget.placa != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isEdit) {
+      unawaited(_loadExisting());
+    }
+  }
+
+  @override
+  void dispose() {
+    _placaCtrl.dispose();
+    _apelidoCtrl.dispose();
+    _marcaCtrl.dispose();
+    _modeloCtrl.dispose();
+    _anoCtrl.dispose();
+    _kmCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadExisting() async {
+    final dao = ref.read(veiculosDaoProvider);
+    final v = await dao.byPlaca(widget.placa!);
+    if (v == null || !mounted) return;
+    setState(() {
+      _placaCtrl.text = v.placa;
+      _apelidoCtrl.text = v.apelido ?? '';
+      _marcaCtrl.text = v.marca;
+      _modeloCtrl.text = v.modelo;
+      _anoCtrl.text = v.ano.toString();
+      _kmCtrl.text = v.kmInicial.toString();
+      _tipo = v.tipo;
+      _combustivel = v.combustivel;
+    });
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final placaNorm = PlacaValidator.normalize(_placaCtrl.text);
+      final apelido = _apelidoCtrl.text.trim();
+      final apelidoValue = apelido.isEmpty ? null : apelido;
+      final dao = ref.read(veiculosDaoProvider);
+      if (_isEdit) {
+        await dao.updateByPlaca(
+          placaNorm,
+          VeiculosCompanion(
+            apelido: Value(apelidoValue),
+            marca: Value(_marcaCtrl.text.trim()),
+            modelo: Value(_modeloCtrl.text.trim()),
+            ano: Value(int.parse(_anoCtrl.text)),
+            tipo: Value(_tipo),
+            combustivel: Value(_combustivel),
+            kmInicial: Value(int.parse(_kmCtrl.text)),
+          ),
+        );
+      } else {
+        await dao.insertVeiculo(
+          VeiculosCompanion.insert(
+            placa: placaNorm,
+            apelido: Value(apelidoValue),
+            marca: _marcaCtrl.text.trim(),
+            modelo: _modeloCtrl.text.trim(),
+            ano: int.parse(_anoCtrl.text),
+            tipo: _tipo,
+            combustivel: _combustivel,
+            kmInicial: int.parse(_kmCtrl.text),
+          ),
+        );
+      }
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } on Object catch (e) {
+      final msg = e.toString().contains('UNIQUE')
+          ? 'Já existe um veículo com essa placa.'
+          : 'Não foi possível salvar: $e';
+      messenger.showSnackBar(SnackBar(content: Text(msg)));
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  String? _validateObrigatorio(String? v) =>
+      (v == null || v.trim().isEmpty) ? 'Obrigatório' : null;
+
+  String? _validateAno(String? v) {
+    if (v == null || v.isEmpty) return 'Obrigatório';
+    final ano = int.tryParse(v);
+    if (ano == null) return 'Ano inválido';
+    final atual = DateTime.now().year;
+    if (ano < 1900 || ano > atual + 1) return 'Ano fora da faixa';
+    return null;
+  }
+
+  String? _validateKm(String? v) {
+    if (v == null || v.isEmpty) return 'Obrigatório';
+    final km = int.tryParse(v);
+    if (km == null || km < 0) return 'Km inválido';
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(_isEdit ? 'Editar veículo' : 'Novo veículo')),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _placaCtrl,
+                enabled: !_isEdit,
+                decoration: const InputDecoration(
+                  labelText: 'Placa',
+                  helperText: 'Mercosul (ABC1D23) ou antigo (ABC1234)',
+                ),
+                textCapitalization: TextCapitalization.characters,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                  LengthLimitingTextInputFormatter(7),
+                  _UpperCaseTextFormatter(),
+                ],
+                validator: (v) => PlacaValidator.validate(v ?? ''),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _apelidoCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Apelido (opcional)',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _marcaCtrl,
+                decoration: const InputDecoration(labelText: 'Marca'),
+                validator: _validateObrigatorio,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _modeloCtrl,
+                decoration: const InputDecoration(labelText: 'Modelo'),
+                validator: _validateObrigatorio,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _anoCtrl,
+                decoration: const InputDecoration(labelText: 'Ano'),
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+                validator: _validateAno,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<TipoVeiculo>(
+                initialValue: _tipo,
+                decoration: const InputDecoration(labelText: 'Tipo'),
+                onChanged: (v) => setState(() => _tipo = v!),
+                items: [
+                  for (final t in TipoVeiculo.values)
+                    DropdownMenuItem(value: t, child: Text(t.label)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<TipoCombustivelVeiculo>(
+                initialValue: _combustivel,
+                decoration: const InputDecoration(labelText: 'Combustível'),
+                onChanged: (v) => setState(() => _combustivel = v!),
+                items: [
+                  for (final c in TipoCombustivelVeiculo.values)
+                    DropdownMenuItem(value: c, child: Text(c.label)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _kmCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Hodômetro atual (km)',
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: _validateKm,
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _saving ? null : () => unawaited(_submit()),
+                child: _saving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Salvar'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) => newValue.copyWith(text: newValue.text.toUpperCase());
+}
