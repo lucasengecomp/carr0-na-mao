@@ -69,7 +69,10 @@ class _HomeTitle extends ConsumerWidget {
         for (final v in ativos)
           PopupMenuItem<String>(
             value: v.placa,
-            child: _VeiculoMenuTile(veiculo: v, selecionada: v.placa == atual!.placa),
+            child: _VeiculoMenuTile(
+              veiculo: v,
+              selecionada: v.placa == atual!.placa,
+            ),
           ),
       ],
       child: Row(
@@ -110,10 +113,7 @@ class _VeiculoMenuTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(_tituloVeiculo(veiculo)),
-              Text(
-                veiculo.placa,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(veiculo.placa, style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
         ),
