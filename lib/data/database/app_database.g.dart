@@ -3699,6 +3699,402 @@ class TiposManutencaoPadraoCompanion
   }
 }
 
+class $MarcasTable extends Marcas with TableInfo<$MarcasTable, Marca> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MarcasTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  @override
+  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
+    'nome',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [nome];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'marcas';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Marca> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('nome')) {
+      context.handle(
+        _nomeMeta,
+        nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nomeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {nome};
+  @override
+  Marca map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Marca(
+      nome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome'],
+      )!,
+    );
+  }
+
+  @override
+  $MarcasTable createAlias(String alias) {
+    return $MarcasTable(attachedDatabase, alias);
+  }
+}
+
+class Marca extends DataClass implements Insertable<Marca> {
+  final String nome;
+  const Marca({required this.nome});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['nome'] = Variable<String>(nome);
+    return map;
+  }
+
+  MarcasCompanion toCompanion(bool nullToAbsent) {
+    return MarcasCompanion(nome: Value(nome));
+  }
+
+  factory Marca.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Marca(nome: serializer.fromJson<String>(json['nome']));
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{'nome': serializer.toJson<String>(nome)};
+  }
+
+  Marca copyWith({String? nome}) => Marca(nome: nome ?? this.nome);
+  Marca copyWithCompanion(MarcasCompanion data) {
+    return Marca(nome: data.nome.present ? data.nome.value : this.nome);
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Marca(')
+          ..write('nome: $nome')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => nome.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is Marca && other.nome == this.nome);
+}
+
+class MarcasCompanion extends UpdateCompanion<Marca> {
+  final Value<String> nome;
+  final Value<int> rowid;
+  const MarcasCompanion({
+    this.nome = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MarcasCompanion.insert({
+    required String nome,
+    this.rowid = const Value.absent(),
+  }) : nome = Value(nome);
+  static Insertable<Marca> custom({
+    Expression<String>? nome,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (nome != null) 'nome': nome,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MarcasCompanion copyWith({Value<String>? nome, Value<int>? rowid}) {
+    return MarcasCompanion(nome: nome ?? this.nome, rowid: rowid ?? this.rowid);
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (nome.present) {
+      map['nome'] = Variable<String>(nome.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MarcasCompanion(')
+          ..write('nome: $nome, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ModelosTable extends Modelos with TableInfo<$ModelosTable, Modelo> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ModelosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _marcaMeta = const VerificationMeta('marca');
+  @override
+  late final GeneratedColumn<String> marca = GeneratedColumn<String>(
+    'marca',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES marcas (nome) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  @override
+  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
+    'nome',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, marca, nome];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'modelos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Modelo> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('marca')) {
+      context.handle(
+        _marcaMeta,
+        marca.isAcceptableOrUnknown(data['marca']!, _marcaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_marcaMeta);
+    }
+    if (data.containsKey('nome')) {
+      context.handle(
+        _nomeMeta,
+        nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nomeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Modelo map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Modelo(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      marca: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}marca'],
+      )!,
+      nome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome'],
+      )!,
+    );
+  }
+
+  @override
+  $ModelosTable createAlias(String alias) {
+    return $ModelosTable(attachedDatabase, alias);
+  }
+}
+
+class Modelo extends DataClass implements Insertable<Modelo> {
+  final int id;
+  final String marca;
+  final String nome;
+  const Modelo({required this.id, required this.marca, required this.nome});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['marca'] = Variable<String>(marca);
+    map['nome'] = Variable<String>(nome);
+    return map;
+  }
+
+  ModelosCompanion toCompanion(bool nullToAbsent) {
+    return ModelosCompanion(
+      id: Value(id),
+      marca: Value(marca),
+      nome: Value(nome),
+    );
+  }
+
+  factory Modelo.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Modelo(
+      id: serializer.fromJson<int>(json['id']),
+      marca: serializer.fromJson<String>(json['marca']),
+      nome: serializer.fromJson<String>(json['nome']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'marca': serializer.toJson<String>(marca),
+      'nome': serializer.toJson<String>(nome),
+    };
+  }
+
+  Modelo copyWith({int? id, String? marca, String? nome}) => Modelo(
+    id: id ?? this.id,
+    marca: marca ?? this.marca,
+    nome: nome ?? this.nome,
+  );
+  Modelo copyWithCompanion(ModelosCompanion data) {
+    return Modelo(
+      id: data.id.present ? data.id.value : this.id,
+      marca: data.marca.present ? data.marca.value : this.marca,
+      nome: data.nome.present ? data.nome.value : this.nome,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Modelo(')
+          ..write('id: $id, ')
+          ..write('marca: $marca, ')
+          ..write('nome: $nome')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, marca, nome);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Modelo &&
+          other.id == this.id &&
+          other.marca == this.marca &&
+          other.nome == this.nome);
+}
+
+class ModelosCompanion extends UpdateCompanion<Modelo> {
+  final Value<int> id;
+  final Value<String> marca;
+  final Value<String> nome;
+  const ModelosCompanion({
+    this.id = const Value.absent(),
+    this.marca = const Value.absent(),
+    this.nome = const Value.absent(),
+  });
+  ModelosCompanion.insert({
+    this.id = const Value.absent(),
+    required String marca,
+    required String nome,
+  }) : marca = Value(marca),
+       nome = Value(nome);
+  static Insertable<Modelo> custom({
+    Expression<int>? id,
+    Expression<String>? marca,
+    Expression<String>? nome,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (marca != null) 'marca': marca,
+      if (nome != null) 'nome': nome,
+    });
+  }
+
+  ModelosCompanion copyWith({
+    Value<int>? id,
+    Value<String>? marca,
+    Value<String>? nome,
+  }) {
+    return ModelosCompanion(
+      id: id ?? this.id,
+      marca: marca ?? this.marca,
+      nome: nome ?? this.nome,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (marca.present) {
+      map['marca'] = Variable<String>(marca.value);
+    }
+    if (nome.present) {
+      map['nome'] = Variable<String>(nome.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ModelosCompanion(')
+          ..write('id: $id, ')
+          ..write('marca: $marca, ')
+          ..write('nome: $nome')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3713,6 +4109,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PostosSugestaoTable postosSugestao = $PostosSugestaoTable(this);
   late final $TiposManutencaoPadraoTable tiposManutencaoPadrao =
       $TiposManutencaoPadraoTable(this);
+  late final $MarcasTable marcas = $MarcasTable(this);
+  late final $ModelosTable modelos = $ModelosTable(this);
   late final VeiculosDao veiculosDao = VeiculosDao(this as AppDatabase);
   late final AbastecimentosDao abastecimentosDao = AbastecimentosDao(
     this as AppDatabase,
@@ -3727,6 +4125,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final OcorrenciasDespesaDao ocorrenciasDespesaDao =
       OcorrenciasDespesaDao(this as AppDatabase);
   late final LembretesDao lembretesDao = LembretesDao(this as AppDatabase);
+  late final MarcasModelosDao marcasModelosDao = MarcasModelosDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3740,6 +4141,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     lembretes,
     postosSugestao,
     tiposManutencaoPadrao,
+    marcas,
+    modelos,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -3784,6 +4187,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('lembretes', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'marcas',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('modelos', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -6988,6 +7398,474 @@ typedef $$TiposManutencaoPadraoTableProcessedTableManager =
       TipoManutencaoPadrao,
       PrefetchHooks Function()
     >;
+typedef $$MarcasTableCreateCompanionBuilder = MarcasCompanion Function({
+  required String nome,
+  Value<int> rowid,
+});
+typedef $$MarcasTableUpdateCompanionBuilder = MarcasCompanion Function({
+  Value<String> nome,
+  Value<int> rowid,
+});
+
+final class $$MarcasTableReferences
+    extends BaseReferences<_$AppDatabase, $MarcasTable, Marca> {
+  $$MarcasTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ModelosTable, List<Modelo>> _modelosRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.modelos,
+    aliasName: 'marcas__nome__modelos__marca',
+  );
+
+  $$ModelosTableProcessedTableManager get modelosRefs {
+    final manager = $$ModelosTableTableManager(
+      $_db,
+      $_db.modelos,
+    ).filter((f) => f.marca.nome.sqlEquals($_itemColumn<String>('nome')!));
+
+    final cache = $_typedResult.readTableOrNull(_modelosRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$MarcasTableFilterComposer
+    extends Composer<_$AppDatabase, $MarcasTable> {
+  $$MarcasTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get nome => $composableBuilder(
+    column: $table.nome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> modelosRefs(
+    Expression<bool> Function($$ModelosTableFilterComposer f) f,
+  ) {
+    final $$ModelosTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.nome,
+      referencedTable: $db.modelos,
+      getReferencedColumn: (t) => t.marca,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModelosTableFilterComposer(
+            $db: $db,
+            $table: $db.modelos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$MarcasTableOrderingComposer
+    extends Composer<_$AppDatabase, $MarcasTable> {
+  $$MarcasTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get nome => $composableBuilder(
+    column: $table.nome,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MarcasTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MarcasTable> {
+  $$MarcasTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get nome =>
+      $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  Expression<T> modelosRefs<T extends Object>(
+    Expression<T> Function($$ModelosTableAnnotationComposer a) f,
+  ) {
+    final $$ModelosTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.nome,
+      referencedTable: $db.modelos,
+      getReferencedColumn: (t) => t.marca,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModelosTableAnnotationComposer(
+            $db: $db,
+            $table: $db.modelos,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$MarcasTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MarcasTable,
+          Marca,
+          $$MarcasTableFilterComposer,
+          $$MarcasTableOrderingComposer,
+          $$MarcasTableAnnotationComposer,
+          $$MarcasTableCreateCompanionBuilder,
+          $$MarcasTableUpdateCompanionBuilder,
+          (Marca, $$MarcasTableReferences),
+          Marca,
+          PrefetchHooks Function({bool modelosRefs})
+        > {
+  $$MarcasTableTableManager(_$AppDatabase db, $MarcasTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MarcasTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MarcasTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MarcasTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> nome = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => MarcasCompanion(nome: nome, rowid: rowid),
+          createCompanionCallback: ({
+            required String nome,
+            Value<int> rowid = const Value.absent(),
+          }) => MarcasCompanion.insert(nome: nome, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MarcasTable, Marca>(table),
+                  $$MarcasTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({modelosRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (modelosRefs) db.modelos],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (modelosRefs)
+                    await $_getPrefetchedData<Marca, $MarcasTable, Modelo>(
+                      currentTable: table,
+                      referencedTable: $$MarcasTableReferences
+                          ._modelosRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$MarcasTableReferences(db, table, p0).modelosRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.marca == item.nome),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$MarcasTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MarcasTable,
+      Marca,
+      $$MarcasTableFilterComposer,
+      $$MarcasTableOrderingComposer,
+      $$MarcasTableAnnotationComposer,
+      $$MarcasTableCreateCompanionBuilder,
+      $$MarcasTableUpdateCompanionBuilder,
+      (Marca, $$MarcasTableReferences),
+      Marca,
+      PrefetchHooks Function({bool modelosRefs})
+    >;
+typedef $$ModelosTableCreateCompanionBuilder = ModelosCompanion Function({
+  Value<int> id,
+  required String marca,
+  required String nome,
+});
+typedef $$ModelosTableUpdateCompanionBuilder = ModelosCompanion Function({
+  Value<int> id,
+  Value<String> marca,
+  Value<String> nome,
+});
+
+final class $$ModelosTableReferences
+    extends BaseReferences<_$AppDatabase, $ModelosTable, Modelo> {
+  $$ModelosTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $MarcasTable _marcaTable(_$AppDatabase db) =>
+      db.marcas.createAlias('modelos__marca__marcas__nome');
+
+  $$MarcasTableProcessedTableManager get marca {
+    final $_column = $_itemColumn<String>('marca')!;
+
+    final manager = $$MarcasTableTableManager(
+      $_db,
+      $_db.marcas,
+    ).filter((f) => f.nome.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_marcaTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ModelosTableFilterComposer
+    extends Composer<_$AppDatabase, $ModelosTable> {
+  $$ModelosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nome => $composableBuilder(
+    column: $table.nome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$MarcasTableFilterComposer get marca {
+    final $$MarcasTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.marca,
+      referencedTable: $db.marcas,
+      getReferencedColumn: (t) => t.nome,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MarcasTableFilterComposer(
+            $db: $db,
+            $table: $db.marcas,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ModelosTableOrderingComposer
+    extends Composer<_$AppDatabase, $ModelosTable> {
+  $$ModelosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nome => $composableBuilder(
+    column: $table.nome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$MarcasTableOrderingComposer get marca {
+    final $$MarcasTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.marca,
+      referencedTable: $db.marcas,
+      getReferencedColumn: (t) => t.nome,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MarcasTableOrderingComposer(
+            $db: $db,
+            $table: $db.marcas,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ModelosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ModelosTable> {
+  $$ModelosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get nome =>
+      $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  $$MarcasTableAnnotationComposer get marca {
+    final $$MarcasTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.marca,
+      referencedTable: $db.marcas,
+      getReferencedColumn: (t) => t.nome,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MarcasTableAnnotationComposer(
+            $db: $db,
+            $table: $db.marcas,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ModelosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ModelosTable,
+          Modelo,
+          $$ModelosTableFilterComposer,
+          $$ModelosTableOrderingComposer,
+          $$ModelosTableAnnotationComposer,
+          $$ModelosTableCreateCompanionBuilder,
+          $$ModelosTableUpdateCompanionBuilder,
+          (Modelo, $$ModelosTableReferences),
+          Modelo,
+          PrefetchHooks Function({bool marca})
+        > {
+  $$ModelosTableTableManager(_$AppDatabase db, $ModelosTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ModelosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ModelosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ModelosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> marca = const Value.absent(),
+            Value<String> nome = const Value.absent(),
+          }) => ModelosCompanion(id: id, marca: marca, nome: nome),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String marca,
+            required String nome,
+          }) => ModelosCompanion.insert(id: id, marca: marca, nome: nome),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ModelosTable, Modelo>(table),
+                  $$ModelosTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({marca = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (marca) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.marca,
+                        referencedTable: $$ModelosTableReferences._marcaTable(
+                          db,
+                        ),
+                        referencedColumn: $$ModelosTableReferences
+                            ._marcaTable(db)
+                            .nome,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ModelosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ModelosTable,
+      Modelo,
+      $$ModelosTableFilterComposer,
+      $$ModelosTableOrderingComposer,
+      $$ModelosTableAnnotationComposer,
+      $$ModelosTableCreateCompanionBuilder,
+      $$ModelosTableUpdateCompanionBuilder,
+      (Modelo, $$ModelosTableReferences),
+      Modelo,
+      PrefetchHooks Function({bool marca})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7008,4 +7886,8 @@ class $AppDatabaseManager {
       $$PostosSugestaoTableTableManager(_db, _db.postosSugestao);
   $$TiposManutencaoPadraoTableTableManager get tiposManutencaoPadrao =>
       $$TiposManutencaoPadraoTableTableManager(_db, _db.tiposManutencaoPadrao);
+  $$MarcasTableTableManager get marcas =>
+      $$MarcasTableTableManager(_db, _db.marcas);
+  $$ModelosTableTableManager get modelos =>
+      $$ModelosTableTableManager(_db, _db.modelos);
 }

@@ -30,3 +30,21 @@ fvm flutter run
 
 - [Documento de requisitos V1](https://claude.ai/code/artifact/62b88c1f-8df8-46f0-ba76-1824e5853abe)
 - [Board de tasks](https://github.com/users/lucasengecomp/projects/1)
+
+## Base de marcas e modelos
+
+A lista curada vive em `assets/data/marcas_modelos.json` e é 100% offline
+(nenhum consumo de API). No boot do app o conteúdo é lido via `rootBundle` e
+inserido nas tabelas `marcas`/`modelos` com `INSERT OR IGNORE`, então rodar
+várias vezes é idempotente e dados que o usuário adicionou livremente ficam
+preservados.
+
+Para atualizar:
+
+1. Edite `assets/data/marcas_modelos.json` adicionando/alterando marcas e
+   modelos. Incremente `assetsVersion` por disciplina (hoje não dispara
+   nenhum comportamento diferente, mas serve de pista para reseed futuro).
+2. Rode `fvm flutter test` para garantir que o seed e os queries continuam
+   verdes.
+3. Novos itens aparecem automaticamente no form de veículo após o próximo
+   boot do app.
