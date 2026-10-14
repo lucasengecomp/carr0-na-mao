@@ -7,6 +7,7 @@ import 'database/daos/abastecimentos_dao.dart';
 import 'database/daos/despesas_dao.dart';
 import 'database/daos/lembretes_dao.dart';
 import 'database/daos/manutencoes_dao.dart';
+import 'database/daos/marcas_modelos_dao.dart';
 import 'database/daos/veiculos_dao.dart';
 
 /// Instância singleton do banco. Fechada quando o container Riverpod é
@@ -43,4 +44,19 @@ final ocorrenciasDespesaDaoProvider = Provider<OcorrenciasDespesaDao>(
 
 final lembretesDaoProvider = Provider<LembretesDao>(
   (ref) => ref.watch(appDatabaseProvider).lembretesDao,
+);
+
+final marcasModelosDaoProvider = Provider<MarcasModelosDao>(
+  (ref) => ref.watch(appDatabaseProvider).marcasModelosDao,
+);
+
+/// Lista de marcas disponíveis para o form de veículo. Alimentado pelo seed
+/// do asset `assets/data/marcas_modelos.json`.
+final marcasProvider = FutureProvider<List<String>>(
+  (ref) => ref.watch(marcasModelosDaoProvider).listMarcas(),
+);
+
+/// Lista de modelos de uma marca específica. Família por marca.
+final modelosPorMarcaProvider = FutureProvider.family<List<String>, String>(
+  (ref, marca) => ref.watch(marcasModelosDaoProvider).listModelosByMarca(marca),
 );

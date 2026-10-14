@@ -1,0 +1,148 @@
+{
+  "assetsVersion": 1,
+  "marcas": [
+    {
+      "marca": "Volkswagen",
+      "modelos": [
+        "Gol", "Voyage", "Polo", "Virtus", "T-Cross", "Nivus", "Taos",
+        "Saveiro", "Amarok", "Fox", "up!", "Jetta", "Passat", "Tiguan",
+        "Golf"
+      ]
+    },
+    {
+      "marca": "Fiat",
+      "modelos": [
+        "Mobi", "Argo", "Cronos", "Pulse", "Fastback", "Strada", "Toro",
+        "Fiorino", "Ducato", "Uno", "Palio", "Siena", "Grand Siena",
+        "Punto", "Linea", "500", "Idea"
+      ]
+    },
+    {
+      "marca": "Chevrolet",
+      "modelos": [
+        "Onix", "Onix Plus", "Tracker", "Spin", "Montana", "S10", "Trailblazer",
+        "Equinox", "Cobalt", "Prisma", "Celta", "Corsa", "Classic", "Agile",
+        "Cruze", "Camaro"
+      ]
+    },
+    {
+      "marca": "Hyundai",
+      "modelos": [
+        "HB20", "HB20S", "Creta", "Tucson", "Santa Fe", "ix35", "i30",
+        "Azera", "Elantra", "Veloster", "Vera Cruz"
+      ]
+    },
+    {
+      "marca": "Toyota",
+      "modelos": [
+        "Corolla", "Corolla Cross", "Yaris", "Etios", "Hilux", "SW4", "RAV4",
+        "Camry", "Prius", "Bandeirante"
+      ]
+    },
+    {
+      "marca": "Honda",
+      "modelos": [
+        "Civic", "City", "Fit", "HR-V", "WR-V", "CR-V", "Accord"
+      ]
+    },
+    {
+      "marca": "Renault",
+      "modelos": [
+        "Kwid", "Sandero", "Logan", "Stepway", "Duster", "Oroch", "Captur",
+        "Kardian", "Kangoo", "Clio", "Fluence", "Megane", "Symbol"
+      ]
+    },
+    {
+      "marca": "Ford",
+      "modelos": [
+        "Ka", "Ka Sedan", "Fiesta", "EcoSport", "Territory", "Ranger", "Edge",
+        "Fusion", "Focus", "F-250", "F-1000", "Maverick", "Bronco Sport"
+      ]
+    },
+    {
+      "marca": "Jeep",
+      "modelos": [
+        "Renegade", "Compass", "Commander", "Wrangler", "Gladiator",
+        "Grand Cherokee"
+      ]
+    },
+    {
+      "marca": "Nissan",
+      "modelos": [
+        "Kicks", "Versa", "Sentra", "March", "Frontier", "Leaf"
+      ]
+    },
+    {
+      "marca": "Peugeot",
+      "modelos": [
+        "208", "2008", "3008", "408", "5008", "Partner", "Expert", "Boxer",
+        "207", "307"
+      ]
+    },
+    {
+      "marca": "Citroën",
+      "modelos": [
+        "C3", "C3 Aircross", "C4 Cactus", "Basalt", "Jumpy", "Jumper", "Berlingo",
+        "C4 Lounge"
+      ]
+    },
+    {
+      "marca": "Mitsubishi",
+      "modelos": [
+        "L200 Triton", "Pajero Sport", "Pajero TR4", "Pajero Full", "ASX",
+        "Outlander", "Eclipse Cross", "Lancer"
+      ]
+    },
+    {
+      "marca": "BYD",
+      "modelos": [
+        "Dolphin", "Dolphin Mini", "Yuan Plus", "Song Plus", "Han", "Seal",
+        "King", "Shark"
+      ]
+    },
+    {
+      "marca": "GWM",
+      "modelos": ["Haval H6", "Ora 03"]
+    },
+    {
+      "marca": "Caoa Chery",
+      "modelos": ["Tiggo 2", "Tiggo 3x", "Tiggo 5x", "Tiggo 7", "Tiggo 8", "Arrizo 5", "Arrizo 6"]
+    },
+    {
+      "marca": "BMW",
+      "modelos": [
+        "Série 1", "Série 2", "Série 3", "Série 4", "Série 5", "Série 7",
+        "X1", "X2", "X3", "X4", "X5", "X6", "X7", "iX1", "iX3"
+      ]
+    },
+    {
+      "marca": "Mercedes-Benz",
+      "modelos": [
+        "Classe A", "Classe B", "Classe C", "Classe E", "Classe S",
+        "GLA", "GLB", "GLC", "GLE", "GLS", "CLA", "CLS"
+      ]
+    },
+    {
+      "marca": "Audi",
+      "modelos": [
+        "A1", "A3", "A4", "A5", "A6", "A7", "A8", "Q3", "Q4", "Q5", "Q7", "Q8",
+        "RS3", "RS6"
+      ]
+    },
+    {
+      "marca": "Volvo",
+      "modelos": ["XC40", "XC60", "XC90", "S60", "S90", "V60"]
+    },
+    {
+      "marca": "Kia",
+      "modelos": [
+        "Picanto", "Rio", "Cerato", "Sportage", "Sorento", "Soul", "Mohave",
+        "Stonic", "Niro"
+      ]
+    },
+    {
+      "marca": "RAM",
+      "modelos": ["Rampage", "1500", "2500", "3000"]
+    }
+  ]
+}

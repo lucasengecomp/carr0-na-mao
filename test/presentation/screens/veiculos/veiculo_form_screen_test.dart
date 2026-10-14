@@ -158,6 +158,60 @@ void main() {
     expect(placaField.enabled, isFalse);
   });
 
+  testWidgets('mostra sugestões da base ao digitar na marca', (tester) async {
+    await db.marcasModelosDao.seedFromJson(
+      '{"assetsVersion": 1, "marcas": ['
+      '{"marca": "Fiat", "modelos": ["Uno", "Mobi", "Argo"]},'
+      '{"marca": "Volkswagen", "modelos": ["Gol"]}'
+      ']}',
+    );
+
+    await _pumpForm(tester, db: db);
+
+    await tester.enterText(_byLabel('Marca'), 'Fia');
+    await tester.pumpAndSettle();
+
+    // Overlay de sugestões lista a marca filtrada.
+    expect(find.text('Fiat'), findsOneWidget);
+    expect(find.text('Volkswagen'), findsNothing);
+
+    // Clicando numa sugestão, a marca fica preenchida e os modelos daquela
+    // marca passam a aparecer como sugestões.
+    await tester.tap(find.text('Fiat'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(_byLabel('Modelo'), 'U');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Uno'), findsOneWidget);
+    // Mobi e Argo não deveriam aparecer no filtro por 'U'.
+    expect(find.text('Mobi'), findsNothing);
+    expect(find.text('Argo'), findsNothing);
+  });
+
+  testWidgets('aceita marca/modelo livres fora da base', (tester) async {
+    // Base vazia: nenhuma sugestão. Usuário ainda consegue cadastrar.
+    await _pumpForm(tester, db: db);
+
+    await tester.enterText(_byLabel('Placa'), 'abc1d23');
+    await tester.enterText(_byLabel('Marca'), 'MarcaRara');
+    await tester.enterText(_byLabel('Modelo'), 'ModeloCustom');
+    await tester.enterText(_byLabel('Ano'), '2020');
+    await tester.enterText(_byLabel('Hodômetro atual (km)'), '10000');
+
+    await tester.scrollUntilVisible(
+      find.byType(FilledButton),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byType(FilledButton));
+    await tester.pumpAndSettle();
+
+    final lista = await db.veiculosDao.listAtivos();
+    expect(lista.single.marca, 'MarcaRara');
+    expect(lista.single.modelo, 'ModeloCustom');
+  });
+
   testWidgets('salvar edição persiste alterações', (tester) async {
     await db.veiculosDao.insertVeiculo(
       VeiculosCompanion.insert(

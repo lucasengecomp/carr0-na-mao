@@ -26,17 +26,24 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
   final _apelidoCtrl = TextEditingController();
   final _marcaCtrl = TextEditingController();
   final _modeloCtrl = TextEditingController();
+  final _marcaFocus = FocusNode();
+  final _modeloFocus = FocusNode();
   final _anoCtrl = TextEditingController();
   final _kmCtrl = TextEditingController();
   TipoVeiculo _tipo = TipoVeiculo.carro;
   TipoCombustivelVeiculo _combustivel = TipoCombustivelVeiculo.flex;
   bool _saving = false;
 
+  List<String> _marcas = const [];
+  List<String> _modelos = const [];
+  String _marcaCarregada = '';
+
   bool get _isEdit => widget.placa != null;
 
   @override
   void initState() {
     super.initState();
+    unawaited(_loadMarcas());
     if (_isEdit) {
       unawaited(_loadExisting());
     }
@@ -48,9 +55,37 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
     _apelidoCtrl.dispose();
     _marcaCtrl.dispose();
     _modeloCtrl.dispose();
+    _marcaFocus.dispose();
+    _modeloFocus.dispose();
     _anoCtrl.dispose();
     _kmCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadMarcas() async {
+    final list = await ref.read(marcasModelosDaoProvider).listMarcas();
+    if (!mounted) return;
+    setState(() => _marcas = list);
+  }
+
+  Future<void> _ensureModelosDaMarca(String marca) async {
+    final norm = marca.trim();
+    if (norm.isEmpty) {
+      setState(() {
+        _modelos = const [];
+        _marcaCarregada = '';
+      });
+      return;
+    }
+    if (norm == _marcaCarregada) return;
+    final list = await ref
+        .read(marcasModelosDaoProvider)
+        .listModelosByMarca(norm);
+    if (!mounted) return;
+    setState(() {
+      _modelos = list;
+      _marcaCarregada = norm;
+    });
   }
 
   Future<void> _loadExisting() async {
@@ -67,6 +102,7 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
       _tipo = v.tipo;
       _combustivel = v.combustivel;
     });
+    unawaited(_ensureModelosDaMarca(v.marca));
   }
 
   Future<void> _submit() async {
@@ -136,6 +172,12 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
     return null;
   }
 
+  Iterable<String> _filtrar(List<String> fonte, String q) {
+    final norm = q.trim().toLowerCase();
+    if (norm.isEmpty) return fonte;
+    return fonte.where((item) => item.toLowerCase().contains(norm));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,16 +211,64 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _marcaCtrl,
-                decoration: const InputDecoration(labelText: 'Marca'),
-                validator: _validateObrigatorio,
+              RawAutocomplete<String>(
+                textEditingController: _marcaCtrl,
+                focusNode: _marcaFocus,
+                optionsBuilder: (tev) => _filtrar(_marcas, tev.text),
+                onSelected: (sel) {
+                  _marcaCtrl.text = sel;
+                  _modeloCtrl.clear();
+                  unawaited(_ensureModelosDaMarca(sel));
+                },
+                fieldViewBuilder:
+                    (context, controller, focusNode, onFieldSubmitted) =>
+                        TextFormField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          decoration: const InputDecoration(
+                            labelText: 'Marca',
+                            helperText:
+                                'Sugestões da base. Pode digitar livremente.',
+                          ),
+                          textCapitalization: TextCapitalization.words,
+                          validator: _validateObrigatorio,
+                          onFieldSubmitted: (_) => onFieldSubmitted(),
+                          onChanged: (v) => unawaited(_ensureModelosDaMarca(v)),
+                        ),
+                optionsViewBuilder: (ctx, onSelected, options) =>
+                    _OpcoesOverlay(
+                      options: options.toList(growable: false),
+                      onSelected: onSelected,
+                    ),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _modeloCtrl,
-                decoration: const InputDecoration(labelText: 'Modelo'),
-                validator: _validateObrigatorio,
+              RawAutocomplete<String>(
+                textEditingController: _modeloCtrl,
+                focusNode: _modeloFocus,
+                optionsBuilder: (tev) => _filtrar(_modelos, tev.text),
+                onSelected: (sel) {
+                  _modeloCtrl.text = sel;
+                },
+                fieldViewBuilder:
+                    (context, controller, focusNode, onFieldSubmitted) =>
+                        TextFormField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          decoration: InputDecoration(
+                            labelText: 'Modelo',
+                            helperText: _modelos.isEmpty
+                                ? 'Digite livremente (sem sugestões para esta marca).'
+                                : 'Sugestões da base. Pode digitar livremente.',
+                          ),
+                          textCapitalization: TextCapitalization.words,
+                          validator: _validateObrigatorio,
+                          onFieldSubmitted: (_) => onFieldSubmitted(),
+                        ),
+                optionsViewBuilder: (ctx, onSelected, options) =>
+                    _OpcoesOverlay(
+                      options: options.toList(growable: false),
+                      onSelected: onSelected,
+                    ),
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -233,6 +323,41 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
                     : const Text('Salvar'),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OpcoesOverlay extends StatelessWidget {
+  const _OpcoesOverlay({required this.options, required this.onSelected});
+
+  final List<String> options;
+  final AutocompleteOnSelected<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Material(
+        elevation: 4,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 240, maxWidth: 400),
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            itemCount: options.length,
+            itemBuilder: (ctx, i) => InkWell(
+              onTap: () => onSelected(options[i]),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Text(options[i]),
+              ),
+            ),
           ),
         ),
       ),

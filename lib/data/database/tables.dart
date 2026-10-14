@@ -110,3 +110,25 @@ class TiposManutencaoPadrao extends Table {
   @override
   Set<Column<Object>> get primaryKey => {tipo};
 }
+
+/// Base curada de marcas de veículos, alimentada do asset
+/// `assets/data/marcas_modelos.json`. Usuário pode criar entradas livres se
+/// a marca desejada não estiver listada.
+class Marcas extends Table {
+  TextColumn get nome => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {nome};
+}
+
+/// Modelos pertencentes a uma marca. Mesma lógica de seed curado + fallback
+/// livre.
+class Modelos extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get marca =>
+      text().references(Marcas, #nome, onDelete: KeyAction.cascade)();
+  TextColumn get nome => text()();
+
+  @override
+  List<String> get customConstraints => ['UNIQUE (marca, nome)'];
+}
