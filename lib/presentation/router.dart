@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/placeholder_screen.dart';
@@ -71,10 +72,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/comparador',
-      builder: (context, state) => const PlaceholderScreen(
-        titulo: 'Comparador',
-        descricao: 'Comparador álcool x gasolina (issue #30).',
-      ),
+      builder: (context, state) => const ComparadorScreen(),
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
