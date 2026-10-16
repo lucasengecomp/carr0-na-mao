@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'screens/abastecimentos/abastecimento_form_screen.dart';
+import 'screens/abastecimentos/abastecimentos_screen.dart';
 import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
 import 'screens/home_screen.dart';
@@ -27,10 +29,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/abastecimentos',
-              builder: (context, state) => const PlaceholderScreen(
-                titulo: 'Abastecimentos',
-                descricao: 'Lista e cadastro de abastecimentos (issue #12).',
-              ),
+              builder: (context, state) => const AbastecimentosScreen(),
             ),
           ],
         ),
@@ -68,6 +67,17 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/abastecimentos/novo',
+      builder: (context, state) => const AbastecimentoFormScreen(),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/abastecimentos/:id/editar',
+      builder: (context, state) =>
+          AbastecimentoFormScreen(id: int.parse(state.pathParameters['id']!)),
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
