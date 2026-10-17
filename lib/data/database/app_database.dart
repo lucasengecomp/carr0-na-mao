@@ -6,6 +6,7 @@ import 'daos/despesas_dao.dart';
 import 'daos/lembretes_dao.dart';
 import 'daos/manutencoes_dao.dart';
 import 'daos/marcas_modelos_dao.dart';
+import 'daos/posto_sugestao_dao.dart';
 import 'daos/veiculos_dao.dart';
 import 'enums.dart';
 import 'tables.dart';
@@ -34,6 +35,7 @@ part 'app_database.g.dart';
     OcorrenciasDespesaDao,
     LembretesDao,
     MarcasModelosDao,
+    PostoSugestaoDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -42,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -54,6 +56,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(marcas);
         await m.createTable(modelos);
+      }
+      if (from < 3) {
+        // Adiciona colunas ultimo_uso e uso_count à tabela postos_sugestao.
+        // Bancos criados antes da v3 podem ter a tabela sem essas colunas.
+        await m.addColumn(postosSugestao, postosSugestao.ultimoUso);
+        await m.addColumn(postosSugestao, postosSugestao.usoCount);
       }
     },
     beforeOpen: (details) async {

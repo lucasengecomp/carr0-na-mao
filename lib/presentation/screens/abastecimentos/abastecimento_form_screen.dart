@@ -161,6 +161,10 @@ class _AbastecimentoFormScreenState
           ),
         );
       }
+      // Salva o posto no histórico de sugestões (se preenchido)
+      if (postoTxt.isNotEmpty) {
+        await ref.read(postoSugestaoDaoProvider).upsert(postoTxt);
+      }
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } on Object catch (e) {
@@ -302,12 +306,7 @@ class _AbastecimentoFormScreenState
               onChanged: (_) => _recalcular(_CampoCalculo.valor),
             ),
             const SizedBox(height: 12),
-            TextFormField(
-              key: const Key('abast_posto'),
-              controller: _postoCtrl,
-              decoration: const InputDecoration(labelText: 'Posto (opcional)'),
-              textCapitalization: TextCapitalization.words,
-            ),
+            _PostoAutocomplete(controller: _postoCtrl),
             const SizedBox(height: 12),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
@@ -386,6 +385,110 @@ class _VeiculoChip extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Widget de autocomplete para o campo Posto.
+/// Busca sugestões no [PostoSugestaoDao] ordenadas por frequência de uso.
+class _PostoAutocomplete extends ConsumerStatefulWidget {
+  const _PostoAutocomplete({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  ConsumerState<_PostoAutocomplete> createState() => _PostoAutocompleteState();
+}
+
+class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
+  /// Controller e FocusNode próprios, criados uma única vez no initState.
+  /// Evita que o fieldViewBuilder execute atribuição em todo build().
+  late final TextEditingController _fieldController;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializa com o valor atual do controller externo (caso de edição).
+    _fieldController = TextEditingController(text: widget.controller.text);
+    _focusNode = FocusNode();
+    // Sincroniza field → controller externo (digitação normal).
+    // Não há listener no sentido inverso para evitar loop de notificações
+    // que dispara _onChangedField múltiplas vezes e descarta os resultados.
+    _fieldController.addListener(_syncToExternal);
+  }
+
+  void _syncToExternal() {
+    if (widget.controller.text != _fieldController.text) {
+      widget.controller.text = _fieldController.text;
+    }
+  }
+
+  @override
+  void dispose() {
+    _fieldController.removeListener(_syncToExternal);
+    _fieldController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<Iterable<String>> _fetchSugestoes(String query) async {
+    final dao = ref.read(postoSugestaoDaoProvider);
+    return dao.search(query);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RawAutocomplete<String>(
+      textEditingController: _fieldController,
+      focusNode: _focusNode,
+      optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
+      optionsBuilder: (textEditingValue) {
+        final query = textEditingValue.text.trim();
+        if (query.isEmpty) return const Iterable<String>.empty();
+        return _fetchSugestoes(query);
+      },
+      displayStringForOption: (s) => s,
+      fieldViewBuilder:
+          (context, fieldController, focusNode, onFieldSubmitted) {
+            return TextFormField(
+              key: const Key('abast_posto'),
+              controller: fieldController,
+              focusNode: focusNode,
+              decoration: const InputDecoration(labelText: 'Posto (opcional)'),
+              textCapitalization: TextCapitalization.words,
+              onFieldSubmitted: (_) => onFieldSubmitted(),
+            );
+          },
+      onSelected: (option) {
+        // onSelected é chamado pelo RawAutocomplete que já atualiza
+        // _fieldController; atualizamos o controller externo também.
+        widget.controller.text = option;
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (context, index) {
+                  final option = options.elementAt(index);
+                  return ListTile(
+                    dense: true,
+                    title: Text(option),
+                    onTap: () => onSelected(option),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
