@@ -5,7 +5,7 @@ import 'screens/abastecimentos/abastecimento_form_screen.dart';
 import 'screens/abastecimentos/abastecimentos_list_screen.dart';
 import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/dashboard/dashboard_home_screen.dart';
 import 'screens/placeholder_screen.dart';
 import 'screens/veiculos/veiculo_form_screen.dart';
 import 'screens/veiculos/veiculos_list_screen.dart';
@@ -22,7 +22,10 @@ final GoRouter appRouter = GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
-            GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+            GoRoute(
+              path: '/',
+              builder: (context, state) => const DashboardHomeScreen(),
+            ),
           ],
         ),
         StatefulShellBranch(
