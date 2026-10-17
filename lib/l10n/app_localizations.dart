@@ -770,6 +770,30 @@ abstract class AppLocalizations {
   /// **'Não foi possível salvar: {erro}'**
   String manutencaoNaoPossivel(String erro);
 
+  /// Título da tela de lista de despesas
+  ///
+  /// In pt, this message translates to:
+  /// **'Despesas'**
+  String get despesasTitulo;
+
+  /// Título da tela de nova despesa recorrente
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova despesa'**
+  String get despesaNovoTitulo;
+
+  /// Título da tela de editar despesa recorrente
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar despesa'**
+  String get despesaEditarTitulo;
+
+  /// Snackbar de erro ao salvar despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar: {erro}'**
+  String despesaNaoPossivel(String erro);
+
   /// Aviso exibido no form de manutenção quando não há veículo
   ///
   /// In pt, this message translates to:
@@ -877,6 +901,144 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Outros'**
   String get tipoManutencaoOutros;
+
+  /// Label do campo Nome no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome'**
+  String get despesaCampoNome;
+
+  /// Label do campo Categoria no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Categoria'**
+  String get despesaCampoCategoria;
+
+  /// Label do campo Valor no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor (R\$)'**
+  String get despesaCampoValor;
+
+  /// Label do campo Frequência no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Frequência'**
+  String get despesaCampoFrequencia;
+
+  /// Label do campo Dia do mês no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Dia do mês (1-28)'**
+  String get despesaCampoDiaDoMes;
+
+  /// Helper text do campo Dia do mês
+  ///
+  /// In pt, this message translates to:
+  /// **'Dia de vencimento mensal/anual (máx. 28).'**
+  String get despesaCampoDiaDoMesHelper;
+
+  /// Label do campo Data de início no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de início'**
+  String get despesaCampoDataInicio;
+
+  /// Label do campo Data de fim no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de fim (opcional)'**
+  String get despesaCampoDataFim;
+
+  /// Texto quando nenhuma data de fim foi selecionada
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem data de fim'**
+  String get despesaDataFimVazia;
+
+  /// Tooltip do botão de limpar data de fim
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar data de fim'**
+  String get despesaLimparDataFim;
+
+  /// Label do switch Ativa no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativa'**
+  String get despesaCampoAtiva;
+
+  /// Subtítulo do switch Ativa no form de despesa
+  ///
+  /// In pt, this message translates to:
+  /// **'Desative para suspender as ocorrências futuras.'**
+  String get despesaCampoAtivaSubtitulo;
+
+  /// Aviso no form de despesa quando não há veículo
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre um veículo antes de registrar despesas.'**
+  String get semVeiculoCadastrarDespesaForm;
+
+  /// Mensagem de validação de dia do mês inválido
+  ///
+  /// In pt, this message translates to:
+  /// **'Dia inválido (1-28)'**
+  String get validacaoDiaDoMesInvalido;
+
+  /// Label da categoria de despesa Lavagem
+  ///
+  /// In pt, this message translates to:
+  /// **'Lavagem'**
+  String get categoriaDespesaLavagem;
+
+  /// Label da categoria de despesa Estacionamento
+  ///
+  /// In pt, this message translates to:
+  /// **'Estacionamento'**
+  String get categoriaDespesaEstacionamento;
+
+  /// Label da categoria de despesa Pedágio
+  ///
+  /// In pt, this message translates to:
+  /// **'Pedágio'**
+  String get categoriaDespesaPedagio;
+
+  /// Label da categoria de despesa Financiamento
+  ///
+  /// In pt, this message translates to:
+  /// **'Financiamento'**
+  String get categoriaDespesaFinanciamento;
+
+  /// Label da categoria de despesa Outra
+  ///
+  /// In pt, this message translates to:
+  /// **'Outra'**
+  String get categoriaDespesaOutra;
+
+  /// Label da frequência de despesa Única
+  ///
+  /// In pt, this message translates to:
+  /// **'Única'**
+  String get frequenciaDespesaUnica;
+
+  /// Label da frequência de despesa Semanal
+  ///
+  /// In pt, this message translates to:
+  /// **'Semanal'**
+  String get frequenciaDespesaSemanal;
+
+  /// Label da frequência de despesa Mensal
+  ///
+  /// In pt, this message translates to:
+  /// **'Mensal'**
+  String get frequenciaDespesaMensal;
+
+  /// Label da frequência de despesa Anual
+  ///
+  /// In pt, this message translates to:
+  /// **'Anual'**
+  String get frequenciaDespesaAnual;
 }
 
 class _AppLocalizationsDelegate

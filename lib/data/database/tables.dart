@@ -54,8 +54,13 @@ class DespesasRecorrentes extends Table {
   TextColumn get categoria => textEnum<CategoriaDespesa>()();
   RealColumn get valor => real()();
   TextColumn get frequencia => textEnum<FrequenciaDespesa>()();
+
+  /// Dia do mês (1-28) usado para despesas mensais e anuais.
+  /// Nulo para despesas únicas.
+  IntColumn get diaDoMes => integer().nullable()();
   DateTimeColumn get dataInicio => dateTime()();
   DateTimeColumn get dataFim => dateTime().nullable()();
+  BoolColumn get ativa => boolean().withDefault(const Constant(true))();
 }
 
 @DataClassName('OcorrenciaDespesa')
