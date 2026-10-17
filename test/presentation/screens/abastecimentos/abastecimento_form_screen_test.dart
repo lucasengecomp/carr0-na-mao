@@ -202,6 +202,293 @@ void main() {
     await _teardownUI(tester);
   });
 
+  // ---------------------------------------------------------------------------
+  // RF-06: aviso não-bloqueante de km retroativo
+  // ---------------------------------------------------------------------------
+
+  testWidgets(
+    'RF-06 — sem histórico (primeiro abastecimento): banner NÃO aparece',
+    (tester) async {
+      // DB só tem o veículo, nenhum abastecimento ainda.
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_km'), '12000');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsNothing,
+      );
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('RF-06 — km maior que último: banner NÃO aparece', (
+    tester,
+  ) async {
+    // Insere um abastecimento com km = 10 000.
+    await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 1, 1),
+        km: 10000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 240,
+        litros: 40,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    // Digita km MAIOR que 10 000.
+    await tester.enterText(_byKey('abast_km'), '11000');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('menor que o último registrado'), findsNothing);
+    await _teardownUI(tester);
+  });
+
+  testWidgets('RF-06 — km menor que último: banner APARECE', (tester) async {
+    await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 1, 1),
+        km: 50000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 240,
+        litros: 40,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    // Digita km MENOR que 50 000.
+    await tester.enterText(_byKey('abast_km'), '45000');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('menor que o último registrado'),
+      findsOneWidget,
+    );
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'RF-06 — km menor que último: botão Salvar permanece habilitado (não-bloqueante)',
+    (tester) async {
+      await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 1, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 240,
+          litros: 40,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_km'), '45000');
+      await tester.pumpAndSettle();
+
+      // O botão Salvar deve existir e estar habilitado (onPressed != null).
+      final btn = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(btn.onPressed, isNotNull);
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('RF-06 — corrigir km para valor maior que último: banner SOME', (
+    tester,
+  ) async {
+    await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 1, 1),
+        km: 50000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 240,
+        litros: 40,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    // Acende o banner.
+    await tester.enterText(_byKey('abast_km'), '45000');
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('menor que o último registrado'),
+      findsOneWidget,
+    );
+
+    // Corrige para km válido (maior que 50 000).
+    await tester.enterText(_byKey('abast_km'), '55000');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('menor que o último registrado'), findsNothing);
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'RF-06 — km igual ao último: banner NÃO aparece (igual não é retroativo)',
+    (tester) async {
+      await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 1, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 240,
+          litros: 40,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_km'), '50000');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsNothing,
+      );
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets(
+    'RF-06 — km retroativo salva normalmente (abastecimento retroativo persistido)',
+    (tester) async {
+      await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 6, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 240,
+          litros: 40,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Preenche campos com km retroativo.
+      await tester.enterText(_byKey('abast_km'), '48000');
+      await tester.enterText(_byKey('abast_preco'), '5');
+      await tester.enterText(_byKey('abast_litros'), '30');
+      await tester.pumpAndSettle();
+
+      // Confirma banner visível mas não bloqueante.
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsOneWidget,
+      );
+
+      await tester.scrollUntilVisible(
+        find.byType(FilledButton),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byType(FilledButton));
+      await tester.pumpAndSettle();
+
+      // O abastecimento retroativo deve ter sido persistido.
+      final lista = await db.abastecimentosDao.listByVeiculo('ABC1D23');
+      expect(lista, hasLength(2));
+      expect(lista.map((a) => a.km), containsAll([50000, 48000]));
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets(
+    'RF-06 — campo km apagado: banner some (campo vazio não dispara aviso)',
+    (tester) async {
+      await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 1, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 240,
+          litros: 40,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Acende o banner.
+      await tester.enterText(_byKey('abast_km'), '45000');
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsOneWidget,
+      );
+
+      // Apaga o campo.
+      await tester.enterText(_byKey('abast_km'), '');
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsNothing,
+      );
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('RF-06 — modo edição: alterar km para retroativo exibe banner', (
+    tester,
+  ) async {
+    // Insere um abastecimento existente com km = 50 000 e outro com 45 000
+    // (o maior é 50 000 — o do id será 50 000, que ao ser editado para
+    // 44 000 deve mostrar aviso, pois 44 000 < 50 000).
+    final id = await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 3, 1),
+        km: 50000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 300,
+        litros: 50,
+      ),
+    );
+    // Segundo abastecimento com km maior para servir de referência.
+    await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 6, 1),
+        km: 60000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 300,
+        litros: 50,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, id: id);
+
+    // Aguarda o carregamento do modo edição.
+    await tester.pumpAndSettle();
+
+    // Altera km para valor abaixo do maior registrado (60 000).
+    await tester.enterText(_byKey('abast_km'), '44000');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('menor que o último registrado'),
+      findsOneWidget,
+    );
+    await _teardownUI(tester);
+  });
+
   testWidgets('veículo álcool-only filtra combustíveis do dropdown', (
     tester,
   ) async {
