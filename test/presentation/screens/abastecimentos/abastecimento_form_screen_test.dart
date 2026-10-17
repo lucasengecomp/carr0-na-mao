@@ -202,6 +202,128 @@ void main() {
     await _teardownUI(tester);
   });
 
+  // ------------------------------------------------------------------ //
+  // Testes de regressão: recálculo automático do terceiro campo (#51)   //
+  // ------------------------------------------------------------------ //
+
+  testWidgets('R1: preço=6 + litros=10 (char a char) → valor_total=60', (
+    tester,
+  ) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    // Digita o preço de uma vez
+    await tester.enterText(_byKey('abast_preco'), '6');
+    await tester.pump();
+
+    // Digita litros char a char: '1' depois '10'
+    await tester.enterText(_byKey('abast_litros'), '1');
+    await tester.pump();
+    await tester.enterText(_byKey('abast_litros'), '10');
+    await tester.pump();
+
+    final valorField = tester.widget<TextFormField>(_byKey('abast_valor'));
+    expect(valorField.controller!.text, '60');
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'R2: preço=6 + litros=1 → valor=6; alterar litros para 10 → valor=60',
+    (tester) async {
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_preco'), '6');
+      await tester.pump();
+      await tester.enterText(_byKey('abast_litros'), '1');
+      await tester.pump();
+
+      // Confirma que calculou 6 inicialmente
+      final valorField = tester.widget<TextFormField>(_byKey('abast_valor'));
+      expect(valorField.controller!.text, '6');
+
+      // Altera litros para 10 — o valor deve atualizar para 60
+      await tester.enterText(_byKey('abast_litros'), '10');
+      await tester.pump();
+
+      expect(valorField.controller!.text, '60');
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('R3: preço=6 + valor=60 → litros=10', (tester) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    await tester.enterText(_byKey('abast_preco'), '6');
+    await tester.pump();
+    await tester.enterText(_byKey('abast_valor'), '60');
+    await tester.pump();
+
+    final litrosField = tester.widget<TextFormField>(_byKey('abast_litros'));
+    expect(litrosField.controller!.text, '10');
+    await _teardownUI(tester);
+  });
+
+  testWidgets('R4: litros=10 + valor=50 → preço=5', (tester) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    await tester.enterText(_byKey('abast_litros'), '10');
+    await tester.pump();
+    await tester.enterText(_byKey('abast_valor'), '50');
+    await tester.pump();
+
+    final precoField = tester.widget<TextFormField>(_byKey('abast_preco'));
+    expect(precoField.controller!.text, '5');
+    await _teardownUI(tester);
+  });
+
+  testWidgets('R5: preencher 2 campos, alterar um → terceiro recalcula', (
+    tester,
+  ) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    // Primeiro cálculo: preço=5 + litros=10 → valor=50
+    await tester.enterText(_byKey('abast_preco'), '5');
+    await tester.pump();
+    await tester.enterText(_byKey('abast_litros'), '10');
+    await tester.pump();
+
+    final valorField = tester.widget<TextFormField>(_byKey('abast_valor'));
+    expect(valorField.controller!.text, '50');
+
+    // Altera preço para 6 → valor deve recalcular para 60
+    await tester.enterText(_byKey('abast_preco'), '6');
+    await tester.pump();
+
+    expect(valorField.controller!.text, '60');
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'R6: edição manual do 3º campo NÃO é sobrescrita pelo cálculo automático',
+    (tester) async {
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Preenche 2 campos → valor calculado = 50
+      await tester.enterText(_byKey('abast_preco'), '5');
+      await tester.pump();
+      await tester.enterText(_byKey('abast_litros'), '10');
+      await tester.pump();
+
+      // Edita manualmente o campo calculado (valor) para 99
+      await tester.enterText(_byKey('abast_valor'), '99');
+      await tester.pump();
+
+      // Digita novamente no primeiro campo (preco) — não deve sobrescrever o 99
+      await tester.enterText(_byKey('abast_preco'), '5');
+      await tester.pump();
+
+      final valorField = tester.widget<TextFormField>(_byKey('abast_valor'));
+      // O valor foi editado manualmente; o campo "calculado" agora é outro.
+      // O que importa é que '99' NÃO seja sobrescrito pelo cálculo de preco*litros=50.
+      expect(valorField.controller!.text, isNot('50'));
+      await _teardownUI(tester);
+    },
+  );
+
   testWidgets('veículo álcool-only filtra combustíveis do dropdown', (
     tester,
   ) async {

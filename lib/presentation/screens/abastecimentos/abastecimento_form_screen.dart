@@ -37,6 +37,14 @@ class _AbastecimentoFormScreenState
   bool _tanqueCheio = true;
   bool _saving = false;
 
+  /// Qual dos três campos foi preenchido automaticamente pelo cálculo.
+  /// `null` = nenhum foi calculado ainda (todos manuais ou vazios).
+  _CampoCalculo? _ultimoCalculado;
+
+  /// Guard para evitar recursão: quando `_recalcular` escreve num controller,
+  /// o `onChanged` dispara novamente. Esta flag descarta esse re-enter.
+  bool _writingProgrammatically = false;
+
   /// Veículo em modo edição (carregado pelo id). Em modo novo, o veículo
   /// vem reativamente do [veiculoAtivoProvider] no build.
   Veiculo? _veiculoEdit;
@@ -79,33 +87,113 @@ class _AbastecimentoFormScreenState
   }
 
   /// Preenchimento automático do terceiro campo quando os outros 2 têm valor
-  /// numérico válido. Só preenche o que estiver vazio — se o usuário já
-  /// escreveu nos 3, respeita.
+  /// numérico válido.
+  ///
+  /// Estratégia (Opção A da issue #51):
+  ///
+  /// * [_ultimoCalculado] registra qual campo foi escrito automaticamente pela
+  ///   última chamada a este método.
+  /// * Quando o usuário edita um campo ([editado]) que NÃO é o calculado,
+  ///   o campo calculado fica como alvo e é sempre sobrescrito — resolvendo o
+  ///   bug de "travar no primeiro valor".
+  /// * Quando o usuário edita exatamente o campo calculado, ele está assumindo
+  ///   controle manual: resetamos [_ultimoCalculado] e determinamos o novo alvo
+  ///   como o campo vazio dentre os dois restantes (comportamento original).
+  /// * [_writingProgrammatically] evita recursão: escrever num controller
+  ///   dispara [onChanged] → [_recalcular] novamente; o guard descarta essa
+  ///   re-entrada.
   void _recalcular(_CampoCalculo editado) {
+    if (_writingProgrammatically) return;
+
     final preco = _parseDecimal(_precoCtrl.text);
     final litros = _parseDecimal(_litrosCtrl.text);
     final valor = _parseDecimal(_valorCtrl.text);
 
-    switch (editado) {
-      case _CampoCalculo.preco:
-        if (preco != null && litros != null && _valorCtrl.text.isEmpty) {
-          _valorCtrl.text = _fmtNumber(preco * litros);
-        } else if (preco != null && valor != null && _litrosCtrl.text.isEmpty) {
-          _litrosCtrl.text = _fmtNumber(valor / preco);
+    void escrever(TextEditingController ctrl, String texto) {
+      _writingProgrammatically = true;
+      ctrl.text = texto;
+      _writingProgrammatically = false;
+    }
+
+    // ── Caso 1: o usuário editou o campo que estava calculado ──────────────
+    // Ele assumiu controle manual daquele campo. Resetamos o tracking e
+    // tentamos calcular o campo vazio dentre os outros dois.
+    if (editado == _ultimoCalculado) {
+      _ultimoCalculado = null;
+      switch (editado) {
+        case _CampoCalculo.preco:
+          if (preco != null && litros != null && _valorCtrl.text.isEmpty) {
+            escrever(_valorCtrl, _fmtNumber(preco * litros));
+            _ultimoCalculado = _CampoCalculo.valor;
+          } else if (preco != null &&
+              valor != null &&
+              _litrosCtrl.text.isEmpty) {
+            escrever(_litrosCtrl, _fmtNumber(valor / preco));
+            _ultimoCalculado = _CampoCalculo.litros;
+          }
+        case _CampoCalculo.litros:
+          if (preco != null && litros != null && _valorCtrl.text.isEmpty) {
+            escrever(_valorCtrl, _fmtNumber(preco * litros));
+            _ultimoCalculado = _CampoCalculo.valor;
+          } else if (litros != null &&
+              valor != null &&
+              _precoCtrl.text.isEmpty) {
+            escrever(_precoCtrl, _fmtNumber(valor / litros));
+            _ultimoCalculado = _CampoCalculo.preco;
+          }
+        case _CampoCalculo.valor:
+          if (valor != null && preco != null && _litrosCtrl.text.isEmpty) {
+            escrever(_litrosCtrl, _fmtNumber(valor / preco));
+            _ultimoCalculado = _CampoCalculo.litros;
+          } else if (valor != null &&
+              litros != null &&
+              _precoCtrl.text.isEmpty) {
+            escrever(_precoCtrl, _fmtNumber(valor / litros));
+            _ultimoCalculado = _CampoCalculo.preco;
+          }
+      }
+      return;
+    }
+
+    // ── Caso 2: o usuário editou um campo diferente do calculado ───────────
+    // O alvo é [_ultimoCalculado] (se existir) ou o campo vazio que não é
+    // [editado] (primeira digitação — comportamento original).
+    final alvo = _ultimoCalculado ?? _campoVazioExceto(editado);
+    if (alvo == null) return;
+
+    switch (alvo) {
+      case _CampoCalculo.valor:
+        if (preco != null && litros != null) {
+          escrever(_valorCtrl, _fmtNumber(preco * litros));
+          _ultimoCalculado = _CampoCalculo.valor;
         }
       case _CampoCalculo.litros:
-        if (preco != null && litros != null && _valorCtrl.text.isEmpty) {
-          _valorCtrl.text = _fmtNumber(preco * litros);
-        } else if (litros != null && valor != null && _precoCtrl.text.isEmpty) {
-          _precoCtrl.text = _fmtNumber(valor / litros);
+        if (valor != null && preco != null) {
+          escrever(_litrosCtrl, _fmtNumber(valor / preco));
+          _ultimoCalculado = _CampoCalculo.litros;
         }
-      case _CampoCalculo.valor:
-        if (valor != null && preco != null && _litrosCtrl.text.isEmpty) {
-          _litrosCtrl.text = _fmtNumber(valor / preco);
-        } else if (valor != null && litros != null && _precoCtrl.text.isEmpty) {
-          _precoCtrl.text = _fmtNumber(valor / litros);
+      case _CampoCalculo.preco:
+        if (valor != null && litros != null) {
+          escrever(_precoCtrl, _fmtNumber(valor / litros));
+          _ultimoCalculado = _CampoCalculo.preco;
         }
     }
+  }
+
+  /// Retorna o campo que está vazio (texto vazio) e que não é [exceto].
+  /// Se ambos os outros campos têm conteúdo (todos preenchidos manualmente),
+  /// retorna `null` — não há alvo para cálculo automático.
+  _CampoCalculo? _campoVazioExceto(_CampoCalculo exceto) {
+    final todos = _CampoCalculo.values.where((c) => c != exceto);
+    for (final campo in todos) {
+      final ctrl = switch (campo) {
+        _CampoCalculo.preco => _precoCtrl,
+        _CampoCalculo.litros => _litrosCtrl,
+        _CampoCalculo.valor => _valorCtrl,
+      };
+      if (ctrl.text.isEmpty) return campo;
+    }
+    return null;
   }
 
   Future<void> _escolherData() async {
