@@ -514,5 +514,175 @@
   "filtroPeriodoTudo": "Tudo",
   "@filtroPeriodoTudo": {
     "description": "Label do filtro de período Tudo"
+  },
+
+  "manutencoesTitulo": "Manutenções",
+  "@manutencoesTitulo": {
+    "description": "Título da tela de lista de manutenções"
+  },
+
+  "manutencaoNovoTitulo": "Nova manutenção",
+  "@manutencaoNovoTitulo": {
+    "description": "Título da tela de nova manutenção"
+  },
+
+  "manutencaoEditarTitulo": "Editar manutenção",
+  "@manutencaoEditarTitulo": {
+    "description": "Título da tela de editar manutenção"
+  },
+
+  "manutencaoFab": "Nova manutenção",
+  "@manutencaoFab": {
+    "description": "Label do FAB da tela de manutenções"
+  },
+
+  "manutencaoCampoTipo": "Tipo",
+  "@manutencaoCampoTipo": {
+    "description": "Label do campo Tipo no form de manutenção"
+  },
+
+  "manutencaoCampoNomeLivre": "Descrição",
+  "@manutencaoCampoNomeLivre": {
+    "description": "Label do campo Descrição (nome_livre) no form de manutenção"
+  },
+
+  "manutencaoCampoData": "Data",
+  "@manutencaoCampoData": {
+    "description": "Label do campo Data no form de manutenção"
+  },
+
+  "manutencaoCampoKm": "Hodômetro (km)",
+  "@manutencaoCampoKm": {
+    "description": "Label do campo Hodômetro no form de manutenção"
+  },
+
+  "manutencaoCampoValor": "Valor (R$) (opcional)",
+  "@manutencaoCampoValor": {
+    "description": "Label do campo Valor no form de manutenção"
+  },
+
+  "manutencaoCampoOficina": "Oficina (opcional)",
+  "@manutencaoCampoOficina": {
+    "description": "Label do campo Oficina no form de manutenção"
+  },
+
+  "manutencaoCampoObservacoes": "Observações (opcional)",
+  "@manutencaoCampoObservacoes": {
+    "description": "Label do campo Observações no form de manutenção"
+  },
+
+  "manutencaoProximoIntervalo": "Sugestão de próximo intervalo",
+  "@manutencaoProximoIntervalo": {
+    "description": "Título da seção de sugestão de próximo intervalo"
+  },
+
+  "manutencaoCampoProximoKm": "Próximo km (sugestão)",
+  "@manutencaoCampoProximoKm": {
+    "description": "Label do campo Próximo km no form de manutenção"
+  },
+
+  "manutencaoCampoProximoMeses": "Meses até o próximo (sugestão)",
+  "@manutencaoCampoProximoMeses": {
+    "description": "Label do campo Próximo em meses no form de manutenção"
+  },
+
+  "manutencaoNaoPossivel": "Não foi possível salvar: {erro}",
+  "@manutencaoNaoPossivel": {
+    "description": "Snackbar de erro ao salvar manutenção",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
+  "semVeiculoCadastrarManutencaoForm": "Cadastre um veículo antes de registrar manutenções.",
+  "@semVeiculoCadastrarManutencaoForm": {
+    "description": "Aviso exibido no form de manutenção quando não há veículo"
+  },
+
+  "tipoManutencaoOleoMotor": "Óleo do motor",
+  "@tipoManutencaoOleoMotor": {
+    "description": "Label do tipo de manutenção Óleo do motor"
+  },
+
+  "tipoManutencaoFiltroOleo": "Filtro de óleo",
+  "@tipoManutencaoFiltroOleo": {
+    "description": "Label do tipo de manutenção Filtro de óleo"
+  },
+
+  "tipoManutencaoFiltroAr": "Filtro de ar",
+  "@tipoManutencaoFiltroAr": {
+    "description": "Label do tipo de manutenção Filtro de ar"
+  },
+
+  "tipoManutencaoFiltroCombustivel": "Filtro de combustível",
+  "@tipoManutencaoFiltroCombustivel": {
+    "description": "Label do tipo de manutenção Filtro de combustível"
+  },
+
+  "tipoManutencaoFiltroCabine": "Filtro de cabine",
+  "@tipoManutencaoFiltroCabine": {
+    "description": "Label do tipo de manutenção Filtro de cabine"
+  },
+
+  "tipoManutencaoVelas": "Velas de ignição",
+  "@tipoManutencaoVelas": {
+    "description": "Label do tipo de manutenção Velas de ignição"
+  },
+
+  "tipoManutencaoCorreiaDentada": "Correia dentada",
+  "@tipoManutencaoCorreiaDentada": {
+    "description": "Label do tipo de manutenção Correia dentada"
+  },
+
+  "tipoManutencaoCorreiaAcessorios": "Correia de acessórios",
+  "@tipoManutencaoCorreiaAcessorios": {
+    "description": "Label do tipo de manutenção Correia de acessórios"
+  },
+
+  "tipoManutencaoPneus": "Pneus",
+  "@tipoManutencaoPneus": {
+    "description": "Label do tipo de manutenção Pneus"
+  },
+
+  "tipoManutencaoAlinhamentoBalanceamento": "Alinhamento e balanceamento",
+  "@tipoManutencaoAlinhamentoBalanceamento": {
+    "description": "Label do tipo de manutenção Alinhamento e balanceamento"
+  },
+
+  "tipoManutencaoPastilhasFreio": "Pastilhas de freio",
+  "@tipoManutencaoPastilhasFreio": {
+    "description": "Label do tipo de manutenção Pastilhas de freio"
+  },
+
+  "tipoManutencaoDiscosFreio": "Discos de freio",
+  "@tipoManutencaoDiscosFreio": {
+    "description": "Label do tipo de manutenção Discos de freio"
+  },
+
+  "tipoManutencaoOleoCambio": "Óleo do câmbio",
+  "@tipoManutencaoOleoCambio": {
+    "description": "Label do tipo de manutenção Óleo do câmbio"
+  },
+
+  "tipoManutencaoFluidoFreio": "Fluido de freio",
+  "@tipoManutencaoFluidoFreio": {
+    "description": "Label do tipo de manutenção Fluido de freio"
+  },
+
+  "tipoManutencaoRevisaoGeral": "Revisão geral",
+  "@tipoManutencaoRevisaoGeral": {
+    "description": "Label do tipo de manutenção Revisão geral"
+  },
+
+  "tipoManutencaoRodizioPneus": "Rodízio de pneus",
+  "@tipoManutencaoRodizioPneus": {
+    "description": "Label do tipo de manutenção Rodízio de pneus"
+  },
+
+  "tipoManutencaoOutros": "Outros",
+  "@tipoManutencaoOutros": {
+    "description": "Label do tipo de manutenção Outros"
   }
 }

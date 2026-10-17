@@ -679,6 +679,204 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tudo'**
   String get filtroPeriodoTudo;
+
+  /// Título da tela de lista de manutenções
+  ///
+  /// In pt, this message translates to:
+  /// **'Manutenções'**
+  String get manutencoesTitulo;
+
+  /// Título da tela de nova manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova manutenção'**
+  String get manutencaoNovoTitulo;
+
+  /// Título da tela de editar manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar manutenção'**
+  String get manutencaoEditarTitulo;
+
+  /// Label do FAB da tela de manutenções
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova manutenção'**
+  String get manutencaoFab;
+
+  /// Label do campo Tipo no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo'**
+  String get manutencaoCampoTipo;
+
+  /// Label do campo Descrição (nome_livre) no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição'**
+  String get manutencaoCampoNomeLivre;
+
+  /// Label do campo Data no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Data'**
+  String get manutencaoCampoData;
+
+  /// Label do campo Hodômetro no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Hodômetro (km)'**
+  String get manutencaoCampoKm;
+
+  /// Label do campo Valor no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor (R\$) (opcional)'**
+  String get manutencaoCampoValor;
+
+  /// Label do campo Oficina no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Oficina (opcional)'**
+  String get manutencaoCampoOficina;
+
+  /// Label do campo Observações no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Observações (opcional)'**
+  String get manutencaoCampoObservacoes;
+
+  /// Título da seção de sugestão de próximo intervalo
+  ///
+  /// In pt, this message translates to:
+  /// **'Sugestão de próximo intervalo'**
+  String get manutencaoProximoIntervalo;
+
+  /// Label do campo Próximo km no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo km (sugestão)'**
+  String get manutencaoCampoProximoKm;
+
+  /// Label do campo Próximo em meses no form de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Meses até o próximo (sugestão)'**
+  String get manutencaoCampoProximoMeses;
+
+  /// Snackbar de erro ao salvar manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar: {erro}'**
+  String manutencaoNaoPossivel(String erro);
+
+  /// Aviso exibido no form de manutenção quando não há veículo
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre um veículo antes de registrar manutenções.'**
+  String get semVeiculoCadastrarManutencaoForm;
+
+  /// Label do tipo de manutenção Óleo do motor
+  ///
+  /// In pt, this message translates to:
+  /// **'Óleo do motor'**
+  String get tipoManutencaoOleoMotor;
+
+  /// Label do tipo de manutenção Filtro de óleo
+  ///
+  /// In pt, this message translates to:
+  /// **'Filtro de óleo'**
+  String get tipoManutencaoFiltroOleo;
+
+  /// Label do tipo de manutenção Filtro de ar
+  ///
+  /// In pt, this message translates to:
+  /// **'Filtro de ar'**
+  String get tipoManutencaoFiltroAr;
+
+  /// Label do tipo de manutenção Filtro de combustível
+  ///
+  /// In pt, this message translates to:
+  /// **'Filtro de combustível'**
+  String get tipoManutencaoFiltroCombustivel;
+
+  /// Label do tipo de manutenção Filtro de cabine
+  ///
+  /// In pt, this message translates to:
+  /// **'Filtro de cabine'**
+  String get tipoManutencaoFiltroCabine;
+
+  /// Label do tipo de manutenção Velas de ignição
+  ///
+  /// In pt, this message translates to:
+  /// **'Velas de ignição'**
+  String get tipoManutencaoVelas;
+
+  /// Label do tipo de manutenção Correia dentada
+  ///
+  /// In pt, this message translates to:
+  /// **'Correia dentada'**
+  String get tipoManutencaoCorreiaDentada;
+
+  /// Label do tipo de manutenção Correia de acessórios
+  ///
+  /// In pt, this message translates to:
+  /// **'Correia de acessórios'**
+  String get tipoManutencaoCorreiaAcessorios;
+
+  /// Label do tipo de manutenção Pneus
+  ///
+  /// In pt, this message translates to:
+  /// **'Pneus'**
+  String get tipoManutencaoPneus;
+
+  /// Label do tipo de manutenção Alinhamento e balanceamento
+  ///
+  /// In pt, this message translates to:
+  /// **'Alinhamento e balanceamento'**
+  String get tipoManutencaoAlinhamentoBalanceamento;
+
+  /// Label do tipo de manutenção Pastilhas de freio
+  ///
+  /// In pt, this message translates to:
+  /// **'Pastilhas de freio'**
+  String get tipoManutencaoPastilhasFreio;
+
+  /// Label do tipo de manutenção Discos de freio
+  ///
+  /// In pt, this message translates to:
+  /// **'Discos de freio'**
+  String get tipoManutencaoDiscosFreio;
+
+  /// Label do tipo de manutenção Óleo do câmbio
+  ///
+  /// In pt, this message translates to:
+  /// **'Óleo do câmbio'**
+  String get tipoManutencaoOleoCambio;
+
+  /// Label do tipo de manutenção Fluido de freio
+  ///
+  /// In pt, this message translates to:
+  /// **'Fluido de freio'**
+  String get tipoManutencaoFluidoFreio;
+
+  /// Label do tipo de manutenção Revisão geral
+  ///
+  /// In pt, this message translates to:
+  /// **'Revisão geral'**
+  String get tipoManutencaoRevisaoGeral;
+
+  /// Label do tipo de manutenção Rodízio de pneus
+  ///
+  /// In pt, this message translates to:
+  /// **'Rodízio de pneus'**
+  String get tipoManutencaoRodizioPneus;
+
+  /// Label do tipo de manutenção Outros
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros'**
+  String get tipoManutencaoOutros;
 }
 
 class _AppLocalizationsDelegate

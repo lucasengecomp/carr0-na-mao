@@ -325,4 +325,107 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get filtroPeriodoTudo => 'Tudo';
+
+  @override
+  String get manutencoesTitulo => 'Manutenções';
+
+  @override
+  String get manutencaoNovoTitulo => 'Nova manutenção';
+
+  @override
+  String get manutencaoEditarTitulo => 'Editar manutenção';
+
+  @override
+  String get manutencaoFab => 'Nova manutenção';
+
+  @override
+  String get manutencaoCampoTipo => 'Tipo';
+
+  @override
+  String get manutencaoCampoNomeLivre => 'Descrição';
+
+  @override
+  String get manutencaoCampoData => 'Data';
+
+  @override
+  String get manutencaoCampoKm => 'Hodômetro (km)';
+
+  @override
+  String get manutencaoCampoValor => 'Valor (R\$) (opcional)';
+
+  @override
+  String get manutencaoCampoOficina => 'Oficina (opcional)';
+
+  @override
+  String get manutencaoCampoObservacoes => 'Observações (opcional)';
+
+  @override
+  String get manutencaoProximoIntervalo => 'Sugestão de próximo intervalo';
+
+  @override
+  String get manutencaoCampoProximoKm => 'Próximo km (sugestão)';
+
+  @override
+  String get manutencaoCampoProximoMeses => 'Meses até o próximo (sugestão)';
+
+  @override
+  String manutencaoNaoPossivel(String erro) {
+    return 'Não foi possível salvar: $erro';
+  }
+
+  @override
+  String get semVeiculoCadastrarManutencaoForm =>
+      'Cadastre um veículo antes de registrar manutenções.';
+
+  @override
+  String get tipoManutencaoOleoMotor => 'Óleo do motor';
+
+  @override
+  String get tipoManutencaoFiltroOleo => 'Filtro de óleo';
+
+  @override
+  String get tipoManutencaoFiltroAr => 'Filtro de ar';
+
+  @override
+  String get tipoManutencaoFiltroCombustivel => 'Filtro de combustível';
+
+  @override
+  String get tipoManutencaoFiltroCabine => 'Filtro de cabine';
+
+  @override
+  String get tipoManutencaoVelas => 'Velas de ignição';
+
+  @override
+  String get tipoManutencaoCorreiaDentada => 'Correia dentada';
+
+  @override
+  String get tipoManutencaoCorreiaAcessorios => 'Correia de acessórios';
+
+  @override
+  String get tipoManutencaoPneus => 'Pneus';
+
+  @override
+  String get tipoManutencaoAlinhamentoBalanceamento =>
+      'Alinhamento e balanceamento';
+
+  @override
+  String get tipoManutencaoPastilhasFreio => 'Pastilhas de freio';
+
+  @override
+  String get tipoManutencaoDiscosFreio => 'Discos de freio';
+
+  @override
+  String get tipoManutencaoOleoCambio => 'Óleo do câmbio';
+
+  @override
+  String get tipoManutencaoFluidoFreio => 'Fluido de freio';
+
+  @override
+  String get tipoManutencaoRevisaoGeral => 'Revisão geral';
+
+  @override
+  String get tipoManutencaoRodizioPneus => 'Rodízio de pneus';
+
+  @override
+  String get tipoManutencaoOutros => 'Outros';
 }

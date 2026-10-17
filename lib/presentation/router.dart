@@ -6,6 +6,7 @@ import 'screens/abastecimentos/abastecimentos_list_screen.dart';
 import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
 import 'screens/dashboard/dashboard_home_screen.dart';
+import 'screens/manutencoes/manutencao_form_screen.dart';
 import 'screens/placeholder_screen.dart';
 import 'screens/veiculos/veiculo_form_screen.dart';
 import 'screens/veiculos/veiculos_list_screen.dart';
@@ -81,6 +82,17 @@ final GoRouter appRouter = GoRouter(
       path: '/abastecimentos/:id/editar',
       builder: (context, state) =>
           AbastecimentoFormScreen(id: int.parse(state.pathParameters['id']!)),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/manutencoes/novo',
+      builder: (context, state) => const ManutencaoFormScreen(),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/manutencoes/:id/editar',
+      builder: (context, state) =>
+          ManutencaoFormScreen(id: int.parse(state.pathParameters['id']!)),
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
