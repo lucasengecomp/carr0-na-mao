@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
 import '../../data/database/enums.dart';
+import '../../l10n/app_localizations.dart';
 import 'veiculos/veiculos_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -13,6 +14,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final ativos = ref.watch(veiculosAtivosProvider).value ?? const [];
     final atual = ref.watch(veiculoAtivoProvider);
 
@@ -21,23 +23,23 @@ class HomeScreen extends ConsumerWidget {
         title: _HomeTitle(ativos: ativos, atual: atual),
         actions: [
           IconButton(
-            tooltip: 'Comparador',
+            tooltip: l10n.tooltipComparador,
             icon: const Icon(Icons.swap_horiz),
             onPressed: () => context.push('/comparador'),
           ),
           IconButton(
-            tooltip: 'Configurações',
+            tooltip: l10n.tooltipConfiguracoes,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/config'),
           ),
         ],
       ),
-      body: const Center(
+      body: Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Text(
-            'Gastos, consumo e lembretes em um só lugar.',
-            style: TextStyle(fontSize: 18),
+            l10n.appSubtitulo,
+            style: const TextStyle(fontSize: 18),
             textAlign: TextAlign.center,
           ),
         ),
@@ -54,12 +56,14 @@ class _HomeTitle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (ativos.length < 2 || atual == null) {
-      return const Text('Carro na Mão');
+      return Text(l10n.appTitle);
     }
 
     return PopupMenuButton<String>(
-      tooltip: 'Trocar veículo',
+      tooltip: l10n.tooltipTrocarVeiculo,
       position: PopupMenuPosition.under,
       initialValue: atual!.placa,
       onSelected: (placa) => unawaited(

@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../helpers/l10n_delegates.dart';
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -85,7 +87,12 @@ Future<void> _pumpScreen(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(db)],
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        routerConfig: router,
+      ),
     ),
   );
   // Aguarda stream inicial resolver
@@ -518,7 +525,12 @@ void main() {
                   Stream<List<Abastecimento>>.error('Erro simulado'),
             ),
           ],
-          child: MaterialApp.router(routerConfig: router),
+          child: MaterialApp.router(
+            locale: localeDefault,
+            localizationsDelegates: l10nDelegates,
+            supportedLocales: supportedLocales,
+            routerConfig: router,
+          ),
         ),
       );
       await tester.pumpAndSettle();

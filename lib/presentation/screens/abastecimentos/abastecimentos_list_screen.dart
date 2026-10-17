@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
+import '../../../l10n/app_localizations.dart';
 import '../veiculos/veiculos_providers.dart';
 import 'abastecimentos_list_providers.dart';
 import 'enum_labels.dart';
@@ -20,6 +22,7 @@ class AbastecimentosListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final veiculo = ref.watch(veiculoAtivoProvider);
     final abastecimentos = ref.watch(
       abastecimentosFiltradosProvider(veiculo?.placa),
@@ -27,7 +30,7 @@ class AbastecimentosListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Abastecimentos'),
+        title: Text(l10n.abastecimentosTitulo),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(108),
           child: _FiltrosBar(),
@@ -37,7 +40,8 @@ class AbastecimentosListScreen extends ConsumerWidget {
           ? const _SemVeiculo()
           : abastecimentos.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Erro: $e')),
+              error: (e, _) =>
+                  Center(child: Text(l10n.erroGenerico(e.toString()))),
               data: (lista) => lista.isEmpty
                   ? const _ListaVazia()
                   : _ListaAgrupada(itens: lista),
@@ -47,7 +51,7 @@ class AbastecimentosListScreen extends ConsumerWidget {
           : FloatingActionButton.extended(
               onPressed: () => context.push('/abastecimentos/novo'),
               icon: const Icon(Icons.add),
-              label: const Text('Abastecer'),
+              label: Text(l10n.abastecimentoFab),
             ),
     );
   }
@@ -62,6 +66,7 @@ class _FiltrosBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final filtros = ref.watch(filtrosAbastecimentoProvider);
     final notifier = ref.read(filtrosAbastecimentoProvider.notifier);
 
@@ -79,7 +84,7 @@ class _FiltrosBar extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    label: Text(p.label),
+                    label: Text(p.label(l10n)),
                     selected: filtros.periodo == p,
                     onSelected: (_) => notifier.setPeriodo(p),
                   ),
@@ -97,7 +102,7 @@ class _FiltrosBar extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: FilterChip(
-                  label: const Text('Todos'),
+                  label: Text(l10n.filtroTodos),
                   selected: filtros.tipoCombustivel == null,
                   onSelected: (_) => notifier.setTipoCombustivel(null),
                 ),
@@ -106,7 +111,7 @@ class _FiltrosBar extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    label: Text(t.label),
+                    label: Text(t.label(l10n)),
                     selected: filtros.tipoCombustivel == t,
                     onSelected: (_) => notifier.setTipoCombustivel(
                       filtros.tipoCombustivel == t ? null : t,
@@ -132,6 +137,7 @@ class _ListaAgrupada extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Agrupa por "ano-mes" mantendo a ordem desc (itens já chegam ordenados).
     final grupos = <_GrupoMes>[];
     _GrupoMes? atual;
@@ -139,7 +145,7 @@ class _ListaAgrupada extends StatelessWidget {
     for (final a in itens) {
       final chave = _chaveAnoMes(a.data);
       if (atual == null || atual.chave != chave) {
-        atual = _GrupoMes(chave: chave, cabecalho: _labelMes(a.data));
+        atual = _GrupoMes(chave: chave, cabecalho: _labelMes(a.data, l10n));
         grupos.add(atual);
       }
       atual.itens.add(a);
@@ -166,22 +172,10 @@ class _ListaAgrupada extends StatelessWidget {
   String _chaveAnoMes(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}';
 
-  String _labelMes(DateTime d) {
-    const meses = [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
-    ];
-    return '${meses[d.month - 1]} ${d.year}';
+  String _labelMes(DateTime d, AppLocalizations l10n) {
+    final raw = DateFormat('MMMM yyyy', l10n.localeName).format(d);
+    // Garante capitalização mesmo quando o locale retorna em minúsculo (ex: pt)
+    return raw[0].toUpperCase() + raw.substring(1);
   }
 }
 
@@ -218,10 +212,11 @@ class _AbastecimentoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final a = item;
     return Semantics(
       label:
-          '${a.tipoCombustivel.label}, ${_fmtData(a.data)}, ${_fmtKm(a.km)} quilômetros, '
+          '${a.tipoCombustivel.label(l10n)}, ${_fmtData(a.data)}, ${_fmtKm(a.km)} quilômetros, '
           '${_fmtLitros(a.litros)} litros, R\$ ${_fmtMoney(a.valorTotal)}'
           '${a.posto != null && a.posto!.isNotEmpty ? ", ${a.posto}" : ""}',
       child: ListTile(
@@ -231,7 +226,7 @@ class _AbastecimentoTile extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '${_fmtData(a.data)} · ${a.tipoCombustivel.label}',
+                '${_fmtData(a.data)} · ${a.tipoCombustivel.label(l10n)}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -260,6 +255,7 @@ class _SemVeiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -268,15 +264,15 @@ class _SemVeiculo extends StatelessWidget {
           children: [
             const Icon(Icons.directions_car_outlined, size: 48),
             const SizedBox(height: 12),
-            const Text(
-              'Cadastre um veículo para começar a registrar abastecimentos.',
+            Text(
+              l10n.semVeiculoCadastrarAbastecimento,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: () => context.push('/veiculos/novo'),
               icon: const Icon(Icons.add),
-              label: const Text('Cadastrar veículo'),
+              label: Text(l10n.botaoCadastrarVeiculo),
             ),
           ],
         ),
@@ -290,11 +286,12 @@ class _ListaVazia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Text(
-          'Nenhum abastecimento encontrado para os filtros selecionados.',
+          l10n.abastecimentoListaVaziaFiltro,
           textAlign: TextAlign.center,
         ),
       ),

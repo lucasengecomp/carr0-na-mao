@@ -9,6 +9,7 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../data/providers.dart';
 import '../../../domain/placa_validator.dart';
+import '../../../l10n/app_localizations.dart';
 import 'enum_labels.dart';
 
 class VeiculoFormScreen extends ConsumerStatefulWidget {
@@ -109,6 +110,7 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     try {
       final placaNorm = PlacaValidator.normalize(_placaCtrl.text);
       final apelido = _apelidoCtrl.text.trim();
@@ -145,30 +147,34 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
       Navigator.of(context).pop(true);
     } on Object catch (e) {
       final msg = e.toString().contains('UNIQUE')
-          ? 'Já existe um veículo com essa placa.'
-          : 'Não foi possível salvar: $e';
+          ? l10n.veiculoPlacaExistente
+          : l10n.veiculoNaoPossivel(e.toString());
       messenger.showSnackBar(SnackBar(content: Text(msg)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
-  String? _validateObrigatorio(String? v) =>
-      (v == null || v.trim().isEmpty) ? 'Obrigatório' : null;
+  String? _validateObrigatorio(String? v) {
+    final l10n = AppLocalizations.of(context)!;
+    return (v == null || v.trim().isEmpty) ? l10n.validacaoObrigatorio : null;
+  }
 
   String? _validateAno(String? v) {
-    if (v == null || v.isEmpty) return 'Obrigatório';
+    final l10n = AppLocalizations.of(context)!;
+    if (v == null || v.isEmpty) return l10n.validacaoObrigatorio;
     final ano = int.tryParse(v);
-    if (ano == null) return 'Ano inválido';
+    if (ano == null) return l10n.validacaoAnoInvalido;
     final atual = DateTime.now().year;
-    if (ano < 1900 || ano > atual + 1) return 'Ano fora da faixa';
+    if (ano < 1900 || ano > atual + 1) return l10n.validacaoAnoForaDaFaixa;
     return null;
   }
 
   String? _validateKm(String? v) {
-    if (v == null || v.isEmpty) return 'Obrigatório';
+    final l10n = AppLocalizations.of(context)!;
+    if (v == null || v.isEmpty) return l10n.validacaoObrigatorio;
     final km = int.tryParse(v);
-    if (km == null || km < 0) return 'Km inválido';
+    if (km == null || km < 0) return l10n.validacaoKmInvalido;
     return null;
   }
 
@@ -180,8 +186,13 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(_isEdit ? 'Editar veículo' : 'Novo veículo')),
+      appBar: AppBar(
+        title: Text(
+          _isEdit ? l10n.veiculoEditarTitulo : l10n.veiculoNovoTitulo,
+        ),
+      ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -191,9 +202,9 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
               TextFormField(
                 controller: _placaCtrl,
                 enabled: !_isEdit,
-                decoration: const InputDecoration(
-                  labelText: 'Placa',
-                  helperText: 'Mercosul (ABC1D23) ou antigo (ABC1234)',
+                decoration: InputDecoration(
+                  labelText: l10n.veiculoCampoPlaca,
+                  helperText: l10n.veiculoCampoPlacaHelper,
                 ),
                 textCapitalization: TextCapitalization.characters,
                 inputFormatters: [
@@ -206,8 +217,8 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _apelidoCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Apelido (opcional)',
+                decoration: InputDecoration(
+                  labelText: l10n.veiculoCampoApelido,
                 ),
               ),
               const SizedBox(height: 12),
@@ -225,10 +236,9 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
                         TextFormField(
                           controller: controller,
                           focusNode: focusNode,
-                          decoration: const InputDecoration(
-                            labelText: 'Marca',
-                            helperText:
-                                'Sugestões da base. Pode digitar livremente.',
+                          decoration: InputDecoration(
+                            labelText: l10n.veiculoCampoMarca,
+                            helperText: l10n.veiculoCampoMarcaHelper,
                           ),
                           textCapitalization: TextCapitalization.words,
                           validator: _validateObrigatorio,
@@ -255,10 +265,10 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
                           controller: controller,
                           focusNode: focusNode,
                           decoration: InputDecoration(
-                            labelText: 'Modelo',
+                            labelText: l10n.veiculoCampoModelo,
                             helperText: _modelos.isEmpty
-                                ? 'Digite livremente (sem sugestões para esta marca).'
-                                : 'Sugestões da base. Pode digitar livremente.',
+                                ? l10n.veiculoCampoModeloHelperSemSugestoes
+                                : l10n.veiculoCampoModeloHelperComSugestoes,
                           ),
                           textCapitalization: TextCapitalization.words,
                           validator: _validateObrigatorio,
@@ -273,7 +283,7 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _anoCtrl,
-                decoration: const InputDecoration(labelText: 'Ano'),
+                decoration: InputDecoration(labelText: l10n.veiculoCampoAno),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
@@ -284,28 +294,30 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
               const SizedBox(height: 12),
               DropdownButtonFormField<TipoVeiculo>(
                 initialValue: _tipo,
-                decoration: const InputDecoration(labelText: 'Tipo'),
+                decoration: InputDecoration(labelText: l10n.veiculoCampoTipo),
                 onChanged: (v) => setState(() => _tipo = v!),
                 items: [
                   for (final t in TipoVeiculo.values)
-                    DropdownMenuItem(value: t, child: Text(t.label)),
+                    DropdownMenuItem(value: t, child: Text(t.label(l10n))),
                 ],
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<TipoCombustivelVeiculo>(
                 initialValue: _combustivel,
-                decoration: const InputDecoration(labelText: 'Combustível'),
+                decoration: InputDecoration(
+                  labelText: l10n.veiculoCampoCombustivel,
+                ),
                 onChanged: (v) => setState(() => _combustivel = v!),
                 items: [
                   for (final c in TipoCombustivelVeiculo.values)
-                    DropdownMenuItem(value: c, child: Text(c.label)),
+                    DropdownMenuItem(value: c, child: Text(c.label(l10n))),
                 ],
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _kmCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Hodômetro atual (km)',
+                decoration: InputDecoration(
+                  labelText: l10n.veiculoCampoHodometro,
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -320,7 +332,7 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Salvar'),
+                    : Text(l10n.botaoSalvar),
               ),
             ],
           ),

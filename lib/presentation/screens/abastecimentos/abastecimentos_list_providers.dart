@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../data/providers.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Períodos de filtro disponíveis na tela de lista de abastecimentos.
 enum FiltroPeriodo {
@@ -11,11 +12,11 @@ enum FiltroPeriodo {
   ultimos12meses,
   tudo;
 
-  String get label => switch (this) {
-    FiltroPeriodo.ultimos30dias => 'Últimos 30d',
-    FiltroPeriodo.ultimos90dias => 'Últimos 90d',
-    FiltroPeriodo.ultimos12meses => 'Últimos 12m',
-    FiltroPeriodo.tudo => 'Tudo',
+  String label(AppLocalizations l10n) => switch (this) {
+    FiltroPeriodo.ultimos30dias => l10n.filtroPeriodoUltimos30d,
+    FiltroPeriodo.ultimos90dias => l10n.filtroPeriodoUltimos90d,
+    FiltroPeriodo.ultimos12meses => l10n.filtroPeriodoUltimos12m,
+    FiltroPeriodo.tudo => l10n.filtroPeriodoTudo,
   };
 
   /// Retorna a data de corte (inclusive) ou null quando o filtro é "tudo".

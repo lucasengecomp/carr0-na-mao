@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../helpers/l10n_delegates.dart';
+
 Future<void> _pumpForm(
   WidgetTester tester, {
   required AppDatabase db,
@@ -21,7 +23,12 @@ Future<void> _pumpForm(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(db)],
-      child: MaterialApp(home: AbastecimentoFormScreen(id: id)),
+      child: MaterialApp(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        home: AbastecimentoFormScreen(id: id),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -156,7 +163,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(dbVazio)],
-        child: const MaterialApp(home: AbastecimentoFormScreen()),
+        child: const MaterialApp(
+          locale: localeDefault,
+          localizationsDelegates: l10nDelegates,
+          supportedLocales: supportedLocales,
+          home: AbastecimentoFormScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -506,7 +518,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(dbAlcool)],
-        child: const MaterialApp(home: AbastecimentoFormScreen()),
+        child: const MaterialApp(
+          locale: localeDefault,
+          localizationsDelegates: l10nDelegates,
+          supportedLocales: supportedLocales,
+          home: AbastecimentoFormScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();

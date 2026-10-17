@@ -1,12 +1,13 @@
 import '../../../data/database/enums.dart';
+import '../../../l10n/app_localizations.dart';
 
 extension TipoCombustivelAbastecimentoLabel on TipoCombustivelAbastecimento {
-  String get label => switch (this) {
-    TipoCombustivelAbastecimento.gasolina => 'Gasolina',
-    TipoCombustivelAbastecimento.alcool => 'Álcool',
-    TipoCombustivelAbastecimento.diesel => 'Diesel',
-    TipoCombustivelAbastecimento.gnv => 'GNV',
-    TipoCombustivelAbastecimento.eletrico => 'Elétrico',
+  String label(AppLocalizations l10n) => switch (this) {
+    TipoCombustivelAbastecimento.gasolina => l10n.tipoCombustivelGasolina,
+    TipoCombustivelAbastecimento.alcool => l10n.tipoCombustivelAlcool,
+    TipoCombustivelAbastecimento.diesel => l10n.tipoCombustivelDiesel,
+    TipoCombustivelAbastecimento.gnv => l10n.tipoCombustivelGnv,
+    TipoCombustivelAbastecimento.eletrico => l10n.tipoCombustivelEletrico,
   };
 }
 
