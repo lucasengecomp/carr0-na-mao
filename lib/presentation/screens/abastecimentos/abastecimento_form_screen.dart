@@ -9,6 +9,7 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../data/providers.dart';
 import '../veiculos/veiculos_providers.dart';
+import 'abastecimentos_providers.dart' show ultimoKmProvider;
 import 'enum_labels.dart';
 
 /// Form de abastecimento. Em modo novo, usa o veículo ativo da Home; em modo
@@ -36,6 +37,10 @@ class _AbastecimentoFormScreenState
   TipoCombustivelAbastecimento? _combustivel;
   bool _tanqueCheio = true;
   bool _saving = false;
+
+  /// `true` quando o km informado é menor que o último registrado para o
+  /// veículo — exibe banner de aviso não-bloqueante (RF-06).
+  bool _avisoKmRetroativo = false;
 
   /// Veículo em modo edição (carregado pelo id). Em modo novo, o veículo
   /// vem reativamente do [veiculoAtivoProvider] no build.
@@ -172,6 +177,23 @@ class _AbastecimentoFormScreenState
     }
   }
 
+  /// Verifica se o km digitado é retroativo em relação ao último abastecimento
+  /// e atualiza [_avisoKmRetroativo]. Não bloqueia — apenas acende/apaga o
+  /// banner de aviso (RF-06).
+  Future<void> _verificarKm(String placa) async {
+    final kmDigitado = int.tryParse(_kmCtrl.text);
+    if (kmDigitado == null) {
+      if (_avisoKmRetroativo) setState(() => _avisoKmRetroativo = false);
+      return;
+    }
+    final ultimoKm = await ref.read(ultimoKmProvider(placa).future);
+    if (!mounted) return;
+    final retroativo = ultimoKm != null && kmDigitado < ultimoKm;
+    if (retroativo != _avisoKmRetroativo) {
+      setState(() => _avisoKmRetroativo = retroativo);
+    }
+  }
+
   String? _validateKm(String? v) {
     if (v == null || v.isEmpty) return 'Obrigatório';
     final km = int.tryParse(v);
@@ -251,7 +273,12 @@ class _AbastecimentoFormScreenState
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               validator: _validateKm,
+              onChanged: (_) => unawaited(_verificarKm(veiculo.placa)),
             ),
+            if (_avisoKmRetroativo) ...[
+              const SizedBox(height: 8),
+              const _AvisoKmRetroativo(),
+            ],
             const SizedBox(height: 12),
             DropdownButtonFormField<TipoCombustivelAbastecimento>(
               initialValue: combustivelSelecionado,
@@ -352,6 +379,46 @@ class _AvisoSemVeiculo extends StatelessWidget {
             Text(
               'Cadastre um veículo antes de registrar abastecimentos.',
               textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Banner inline exibido quando o km informado é menor que o último
+/// registrado para o veículo. Não bloqueia o salvamento (RF-06).
+class _AvisoKmRetroativo extends StatelessWidget {
+  const _AvisoKmRetroativo();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: colorScheme.tertiaryContainer,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              size: 20,
+              color: colorScheme.onTertiaryContainer,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'O km informado é menor que o último registrado. '
+                'Você pode salvar normalmente se for um abastecimento retroativo.',
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: colorScheme.onTertiaryContainer),
+              ),
             ),
           ],
         ),
