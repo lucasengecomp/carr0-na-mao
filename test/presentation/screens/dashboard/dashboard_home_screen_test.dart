@@ -247,10 +247,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 1234.56)),
-        custoPorKm: AsyncData(CustoPorKmResult(custoPorKm: 0.45)),
-        consumoMedio: AsyncData(ConsumoMedioResult(kmPorLitro: 12.5)),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 1234.56)),
+        custoPorKm: const AsyncData(CustoPorKmResult(custoPorKm: 0.45)),
+        consumoMedio: const AsyncData(ConsumoMedioResult(kmPorLitro: 12.5)),
+        proximasManutencoes: const AsyncData([]),
       );
 
       expect(find.text('Custo total no mês'), findsOneWidget);
@@ -269,10 +269,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 1234.56)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(null),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 1234.56)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(null),
+        proximasManutencoes: const AsyncData([]),
       );
 
       // Espera formatação pt-BR: R$ 1.234,56
@@ -287,10 +287,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0)),
-        custoPorKm: AsyncData(CustoPorKmResult(custoPorKm: 0.45)),
-        consumoMedio: AsyncData(null),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+        custoPorKm: const AsyncData(CustoPorKmResult(custoPorKm: 0.45)),
+        consumoMedio: const AsyncData(null),
+        proximasManutencoes: const AsyncData([]),
       );
 
       // _CustoPorKmCard usa RichText com TextSpan — buscar em texto plano
@@ -308,10 +308,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(ConsumoMedioResult(kmPorLitro: 12.5)),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(ConsumoMedioResult(kmPorLitro: 12.5)),
+        proximasManutencoes: const AsyncData([]),
       );
 
       // _ConsumoMedioCard usa RichText com TextSpan — buscar em texto plano
@@ -333,10 +333,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(null),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(null),
+        proximasManutencoes: const AsyncData([]),
       );
 
       // O texto "Dados insuficientes" deve aparecer 2x (custo/km + consumo médio)
@@ -353,10 +353,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0)),
-        custoPorKm: AsyncData(CustoPorKmResult(custoPorKm: 0.5)),
-        consumoMedio: AsyncData(null),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+        custoPorKm: const AsyncData(CustoPorKmResult(custoPorKm: 0.5)),
+        consumoMedio: const AsyncData(null),
+        proximasManutencoes: const AsyncData([]),
       );
 
       expect(find.text('Dados insuficientes'), findsOneWidget);
@@ -372,10 +372,10 @@ void main() {
           tester,
           db,
           placaAtiva: _placa,
-          custoMensal: AsyncData(CustoMensalResult(total: 0)),
-          custoPorKm: AsyncData(null),
-          consumoMedio: AsyncData(null),
-          proximasManutencoes: AsyncData(const []),
+          custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+          custoPorKm: const AsyncData(null),
+          consumoMedio: const AsyncData(null),
+          proximasManutencoes: const AsyncData([]),
         );
 
         expect(find.text('Sem lembretes pendentes'), findsOneWidget);
@@ -392,9 +392,9 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(null),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(null),
         proximasManutencoes: const AsyncData(null),
       );
 
@@ -501,9 +501,9 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(null),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(null),
         proximasManutencoes: AsyncData([l1, l2, l3]),
       );
 
@@ -526,9 +526,9 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(null),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(null),
         proximasManutencoes: AsyncData([lembrete]),
       );
 
@@ -623,10 +623,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 500)),
-        custoPorKm: AsyncData(CustoPorKmResult(custoPorKm: 0.5)),
-        consumoMedio: AsyncData(ConsumoMedioResult(kmPorLitro: 10.0)),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 500)),
+        custoPorKm: const AsyncData(CustoPorKmResult(custoPorKm: 0.5)),
+        consumoMedio: const AsyncData(ConsumoMedioResult(kmPorLitro: 10.0)),
+        proximasManutencoes: const AsyncData([]),
       );
 
       // Todos os 4 títulos presentes em tela larga
@@ -657,10 +657,10 @@ void main() {
           tester,
           db,
           placaAtiva: _placa,
-          custoMensal: AsyncData(CustoMensalResult(total: 500)),
-          custoPorKm: AsyncData(null),
-          consumoMedio: AsyncData(null),
-          proximasManutencoes: AsyncData(const []),
+          custoMensal: const AsyncData(CustoMensalResult(total: 500)),
+          custoPorKm: const AsyncData(null),
+          consumoMedio: const AsyncData(null),
+          proximasManutencoes: const AsyncData([]),
         );
 
         expect(find.text('Custo total no mês'), findsOneWidget);
@@ -686,10 +686,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0.0)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(null),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0.0)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(null),
+        proximasManutencoes: const AsyncData([]),
       );
 
       expect(find.textContaining('0,00'), findsOneWidget);
@@ -705,10 +705,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 2500.00)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(null),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 2500.00)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(null),
+        proximasManutencoes: const AsyncData([]),
       );
 
       // pt-BR: 2500.00 → "2.500,00"
@@ -725,10 +725,10 @@ void main() {
         tester,
         db,
         placaAtiva: _placa,
-        custoMensal: AsyncData(CustoMensalResult(total: 0)),
-        custoPorKm: AsyncData(null),
-        consumoMedio: AsyncData(ConsumoMedioResult(kmPorLitro: 12.3)),
-        proximasManutencoes: AsyncData(const []),
+        custoMensal: const AsyncData(CustoMensalResult(total: 0)),
+        custoPorKm: const AsyncData(null),
+        consumoMedio: const AsyncData(ConsumoMedioResult(kmPorLitro: 12.3)),
+        proximasManutencoes: const AsyncData([]),
       );
 
       // _ConsumoMedioCard usa RichText — buscar em texto plano
