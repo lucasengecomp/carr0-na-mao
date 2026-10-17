@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/database/app_database.dart';
 import '../../../domain/comparador_service.dart';
+import '../../../l10n/app_localizations.dart';
 import '../veiculos/veiculos_providers.dart';
 import 'comparador_providers.dart';
 
@@ -39,18 +40,20 @@ class _ComparadorScreenState extends ConsumerState<ComparadorScreen> {
   }
 
   String? _validatePreco(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Obrigatório';
+    final l10n = AppLocalizations.of(context)!;
+    if (v == null || v.trim().isEmpty) return l10n.validacaoObrigatorio;
     final n = _parsePreco(v);
-    if (n == null) return 'Valor inválido';
+    if (n == null) return l10n.validacaoValorInvalido;
     return null;
   }
 
   Future<void> _comparar() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     final placa = _placaSelecionada;
     if (placa == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Selecione um veículo.')));
+          .showSnackBar(SnackBar(content: Text(l10n.comparadorSemVeiculo)));
       return;
     }
     setState(() => _calculando = true);
@@ -73,13 +76,14 @@ class _ComparadorScreenState extends ConsumerState<ComparadorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final veiculos = ref.watch(veiculosAtivosProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Comparador álcool × gasolina')),
+      appBar: AppBar(title: Text(l10n.comparadorTitulo)),
       body: veiculos.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error: (e, _) => Center(child: Text(l10n.erroGenerico(e.toString()))),
         data: (lista) {
           if (lista.isEmpty) {
             return const _SemVeiculos();
@@ -101,9 +105,9 @@ class _ComparadorScreenState extends ConsumerState<ComparadorScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _alcoolCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Preço do álcool (R\$/L)',
-                    prefixText: 'R\$ ',
+                  decoration: InputDecoration(
+                    labelText: l10n.comparadorCampoAlcool,
+                    prefixText: l10n.comparadorPrefixoPreco,
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -116,9 +120,9 @@ class _ComparadorScreenState extends ConsumerState<ComparadorScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _gasolinaCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Preço da gasolina (R\$/L)',
-                    prefixText: 'R\$ ',
+                  decoration: InputDecoration(
+                    labelText: l10n.comparadorCampoGasolina,
+                    prefixText: l10n.comparadorPrefixoPreco,
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -138,7 +142,7 @@ class _ComparadorScreenState extends ConsumerState<ComparadorScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.calculate_outlined),
-                  label: const Text('Comparar'),
+                  label: Text(l10n.comparadorBotao),
                 ),
                 if (_resultado != null) ...[
                   const SizedBox(height: 24),
@@ -166,9 +170,10 @@ class _VeiculoDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return DropdownButtonFormField<String>(
       initialValue: placa,
-      decoration: const InputDecoration(labelText: 'Veículo'),
+      decoration: InputDecoration(labelText: l10n.comparadorCampoVeiculo),
       onChanged: (v) {
         if (v != null) onChanged(v);
       },
@@ -194,20 +199,21 @@ class _ResultadoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final (titulo, cor, icone) = switch (resultado.vencedor) {
       CombustivelMaisVantajoso.alcool => (
-        'Álcool compensa',
+        l10n.comparadorAlcoolCompensa,
         cs.tertiaryContainer,
         Icons.local_gas_station,
       ),
       CombustivelMaisVantajoso.gasolina => (
-        'Gasolina compensa',
+        l10n.comparadorGasolinaCompensa,
         cs.primaryContainer,
         Icons.local_gas_station,
       ),
       CombustivelMaisVantajoso.empate => (
-        'Empate técnico',
+        l10n.comparadorEmpate,
         cs.secondaryContainer,
         Icons.balance,
       ),
@@ -237,21 +243,19 @@ class _ResultadoCard extends StatelessWidget {
             const SizedBox(height: 16),
             if (resultado.metodo == MetodoComparador.historico) ...[
               _LinhaCusto(
-                label: 'Álcool',
+                label: l10n.comparadorAlcoolCompensa,
                 custoPorKm: resultado.custoPorKmAlcool!,
                 kmPorLitro: resultado.kmPorLitroAlcool!,
               ),
               const SizedBox(height: 6),
               _LinhaCusto(
-                label: 'Gasolina',
+                label: l10n.comparadorGasolinaCompensa,
                 custoPorKm: resultado.custoPorKmGasolina!,
                 kmPorLitro: resultado.kmPorLitroGasolina!,
               ),
             ] else
               Text(
-                'Sem histórico suficiente de abastecimentos com tanque cheio '
-                'para calcular o custo por km. Resultado baseado na regra '
-                'empírica de 70%.',
+                l10n.comparadorSemHistoricoTexto,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
           ],
@@ -268,12 +272,16 @@ class _MetodoBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (label, icone) = switch (metodo) {
       MetodoComparador.historico => (
-        'Baseado no histórico do veículo',
+        l10n.comparadorMetodoHistorico,
         Icons.history,
       ),
-      MetodoComparador.regraSetenta => ('Regra dos 70%', Icons.rule),
+      MetodoComparador.regraSetenta => (
+        l10n.comparadorMetodoRegra70,
+        Icons.rule,
+      ),
     };
     return Chip(
       avatar: Icon(icone, size: 18),
@@ -318,6 +326,7 @@ class _SemVeiculos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -330,8 +339,8 @@ class _SemVeiculos extends StatelessWidget {
               color: Theme.of(context).colorScheme.outline,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Cadastre um veículo primeiro para usar o comparador.',
+            Text(
+              l10n.comparadorSemVeiculoCadastrado,
               textAlign: TextAlign.center,
             ),
           ],

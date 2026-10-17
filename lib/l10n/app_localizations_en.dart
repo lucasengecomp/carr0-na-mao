@@ -1,0 +1,294 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get appTitle => 'Carro na Mão';
+
+  @override
+  String get appSubtitulo =>
+      'Expenses, fuel consumption and reminders in one place.';
+
+  @override
+  String get tooltipComparador => 'Fuel Comparator';
+
+  @override
+  String get tooltipConfiguracoes => 'Settings';
+
+  @override
+  String get tooltipTrocarVeiculo => 'Switch vehicle';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navAbastecer => 'Fuel';
+
+  @override
+  String get navManutencao => 'Maintenance';
+
+  @override
+  String get navDespesas => 'Expenses';
+
+  @override
+  String get navLembretes => 'Reminders';
+
+  @override
+  String get abastecimentosTitulo => 'Fuel History';
+
+  @override
+  String get abastecimentoNovoTitulo => 'New fuel-up';
+
+  @override
+  String get abastecimentoEditarTitulo => 'Edit fuel-up';
+
+  @override
+  String get abastecimentoFab => 'Fuel up';
+
+  @override
+  String get abastecimentoListaVaziaFiltro =>
+      'No fuel-ups found for the selected filters.';
+
+  @override
+  String get abastecimentoListaVazia =>
+      'No fuel-ups registered yet.\nTap \"Fuel up\" to get started.';
+
+  @override
+  String get semVeiculoCadastrarAbastecimento =>
+      'Register a vehicle to start recording fuel-ups.';
+
+  @override
+  String get semVeiculoCadastrarAbastecimentoForm =>
+      'Register a vehicle before recording fuel-ups.';
+
+  @override
+  String get botaoCadastrarVeiculo => 'Register vehicle';
+
+  @override
+  String erroGenerico(String mensagem) {
+    return 'Error: $mensagem';
+  }
+
+  @override
+  String get abastecimentoCampoData => 'Date';
+
+  @override
+  String get abastecimentoCampoHodometro => 'Odometer (km)';
+
+  @override
+  String get abastecimentoCampoCombustivel => 'Fuel type';
+
+  @override
+  String get abastecimentoCampoPreco => 'Price per liter (R\$)';
+
+  @override
+  String get abastecimentoCampoPrecoHelper =>
+      'Fill in 2 of the 3 fields and the third is calculated.';
+
+  @override
+  String get abastecimentoCampoLitros => 'Liters';
+
+  @override
+  String get abastecimentoCampoValorTotal => 'Total value (R\$)';
+
+  @override
+  String get abastecimentoCampoPosto => 'Gas station (optional)';
+
+  @override
+  String get abastecimentoTanqueCheio => 'Full tank';
+
+  @override
+  String get abastecimentoTanqueCheioSubtitulo =>
+      'Important for fuel consumption calculation (km/L).';
+
+  @override
+  String get abastecimentoAvisoKmRetroativo =>
+      'The odometer reading is lower than the last recorded. You can save normally if this is a retroactive fuel-up.';
+
+  @override
+  String abastecimentoNaoPossivel(String erro) {
+    return 'Could not save: $erro';
+  }
+
+  @override
+  String get validacaoObrigatorio => 'Required';
+
+  @override
+  String get validacaoKmInvalido => 'Invalid odometer';
+
+  @override
+  String get validacaoDecimalObrigatorio => 'Fill in 2 of the 3 fields';
+
+  @override
+  String get validacaoValorInvalido => 'Invalid value';
+
+  @override
+  String get botaoSalvar => 'Save';
+
+  @override
+  String get veiculosTitulo => 'Vehicles';
+
+  @override
+  String get veiculoNovoTitulo => 'New vehicle';
+
+  @override
+  String get veiculoEditarTitulo => 'Edit vehicle';
+
+  @override
+  String get veiculoFab => 'New vehicle';
+
+  @override
+  String get veiculoAtivos => 'Active';
+
+  @override
+  String get veiculoArquivados => 'Archived';
+
+  @override
+  String get veiculoNenhumAtivo =>
+      'No vehicles registered. Tap \"New vehicle\" to get started.';
+
+  @override
+  String get veiculoNenhumArquivado => 'No archived vehicles.';
+
+  @override
+  String veiculoErroCarregar(String erro) {
+    return 'Error loading: $erro';
+  }
+
+  @override
+  String get veiculoMenuEditar => 'Edit';
+
+  @override
+  String get veiculoMenuArquivar => 'Archive';
+
+  @override
+  String get veiculoMenuRestaurar => 'Restore';
+
+  @override
+  String veiculoArquivadoSnack(String placa) {
+    return '$placa archived';
+  }
+
+  @override
+  String veiculoRestauradoSnack(String placa) {
+    return '$placa restored';
+  }
+
+  @override
+  String get veiculoCampoPlaca => 'License plate';
+
+  @override
+  String get veiculoCampoPlacaHelper =>
+      'Mercosul (ABC1D23) or old format (ABC1234)';
+
+  @override
+  String get veiculoCampoApelido => 'Nickname (optional)';
+
+  @override
+  String get veiculoCampoMarca => 'Make';
+
+  @override
+  String get veiculoCampoMarcaHelper =>
+      'Suggestions from database. You can type freely.';
+
+  @override
+  String get veiculoCampoModelo => 'Model';
+
+  @override
+  String get veiculoCampoModeloHelperSemSugestoes =>
+      'Type freely (no suggestions for this make).';
+
+  @override
+  String get veiculoCampoModeloHelperComSugestoes =>
+      'Suggestions from database. You can type freely.';
+
+  @override
+  String get veiculoCampoAno => 'Year';
+
+  @override
+  String get veiculoCampoTipo => 'Type';
+
+  @override
+  String get veiculoCampoCombustivel => 'Fuel type';
+
+  @override
+  String get veiculoCampoHodometro => 'Current odometer (km)';
+
+  @override
+  String get veiculoPlacaExistente =>
+      'A vehicle with this license plate already exists.';
+
+  @override
+  String veiculoNaoPossivel(String erro) {
+    return 'Could not save: $erro';
+  }
+
+  @override
+  String get validacaoAnoInvalido => 'Invalid year';
+
+  @override
+  String get validacaoAnoForaDaFaixa => 'Year out of range';
+
+  @override
+  String get comparadorTitulo => 'Ethanol × Gasoline Comparator';
+
+  @override
+  String get comparadorCampoVeiculo => 'Vehicle';
+
+  @override
+  String get comparadorCampoAlcool => 'Ethanol price (R\$/L)';
+
+  @override
+  String get comparadorCampoGasolina => 'Gasoline price (R\$/L)';
+
+  @override
+  String get comparadorBotao => 'Compare';
+
+  @override
+  String get comparadorSemVeiculo => 'Select a vehicle.';
+
+  @override
+  String get comparadorSemVeiculoCadastrado =>
+      'Register a vehicle first to use the comparator.';
+
+  @override
+  String get comparadorAlcoolCompensa => 'Ethanol is better';
+
+  @override
+  String get comparadorGasolinaCompensa => 'Gasoline is better';
+
+  @override
+  String get comparadorEmpate => 'Technical tie';
+
+  @override
+  String get comparadorMetodoHistorico => 'Based on vehicle history';
+
+  @override
+  String get comparadorMetodoRegra70 => '70% rule';
+
+  @override
+  String get comparadorSemHistoricoTexto =>
+      'Not enough full-tank fuel-up history to calculate cost per km. Result based on the empirical 70% rule.';
+
+  @override
+  String get comparadorPrefixoPreco => 'R\$ ';
+
+  @override
+  String get configuracoesTitulo => 'Settings';
+
+  @override
+  String get configuracoesVeiculosTitulo => 'Vehicles';
+
+  @override
+  String get configuracoesVeiculosSubtitulo => 'Register, edit and archive';
+
+  @override
+  String get filtroTodos => 'All';
+}

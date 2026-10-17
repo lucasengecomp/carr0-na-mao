@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../l10n/app_localizations.dart';
 import 'router.dart';
 
 class CarroNaMaoApp extends StatelessWidget {
@@ -13,6 +15,14 @@ class CarroNaMaoApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('pt'), Locale('en')],
+      locale: const Locale('pt'),
       routerConfig: appRouter,
     );
   }

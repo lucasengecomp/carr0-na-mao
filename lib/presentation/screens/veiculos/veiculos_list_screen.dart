@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../data/providers.dart';
+import '../../../l10n/app_localizations.dart';
 import 'veiculos_providers.dart';
 
 class VeiculosListScreen extends ConsumerStatefulWidget {
@@ -20,34 +21,40 @@ class _VeiculosListScreenState extends ConsumerState<VeiculosListScreen> {
   bool _arquivados = false;
 
   Future<void> _toggleArquivado(Veiculo v) async {
+    final l10n = AppLocalizations.of(context)!;
     final dao = ref.read(veiculosDaoProvider);
     final messenger = ScaffoldMessenger.of(context);
     if (v.arquivado) {
       await dao.restaurar(v.placa);
-      messenger.showSnackBar(SnackBar(content: Text('${v.placa} restaurado')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.veiculoRestauradoSnack(v.placa))),
+      );
     } else {
       await dao.arquivar(v.placa);
-      messenger.showSnackBar(SnackBar(content: Text('${v.placa} arquivado')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.veiculoArquivadoSnack(v.placa))),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final asyncList = ref.watch(
       _arquivados ? veiculosArquivadosProvider : veiculosAtivosProvider,
     );
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Veículos'),
+        title: Text(l10n.veiculosTitulo),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(value: false, label: Text('Ativos')),
-                ButtonSegment(value: true, label: Text('Arquivados')),
+              segments: [
+                ButtonSegment(value: false, label: Text(l10n.veiculoAtivos)),
+                ButtonSegment(value: true, label: Text(l10n.veiculoArquivados)),
               ],
               selected: {_arquivados},
               onSelectionChanged: (s) => setState(() => _arquivados = s.first),
@@ -57,7 +64,8 @@ class _VeiculosListScreenState extends ConsumerState<VeiculosListScreen> {
       ),
       body: asyncList.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro ao carregar: $e')),
+        error: (e, _) =>
+            Center(child: Text(l10n.veiculoErroCarregar(e.toString()))),
         data: (list) => list.isEmpty
             ? _EmptyState(arquivados: _arquivados)
             : ListView.separated(
@@ -74,7 +82,7 @@ class _VeiculosListScreenState extends ConsumerState<VeiculosListScreen> {
           : FloatingActionButton.extended(
               onPressed: () => context.push('/veiculos/novo'),
               icon: const Icon(Icons.add),
-              label: const Text('Novo veículo'),
+              label: Text(l10n.veiculoFab),
             ),
     );
   }
@@ -88,6 +96,7 @@ class _VeiculoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final titulo = veiculo.apelido?.isNotEmpty ?? false
         ? veiculo.apelido!
         : '${veiculo.marca} ${veiculo.modelo}';
@@ -104,11 +113,11 @@ class _VeiculoTile extends StatelessWidget {
       trailing: PopupMenuButton<_TileAction>(
         itemBuilder: (context) => [
           if (!veiculo.arquivado)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: _TileAction.editar,
               child: ListTile(
-                leading: Icon(Icons.edit_outlined),
-                title: Text('Editar'),
+                leading: const Icon(Icons.edit_outlined),
+                title: Text(l10n.veiculoMenuEditar),
               ),
             ),
           PopupMenuItem(
@@ -119,7 +128,11 @@ class _VeiculoTile extends StatelessWidget {
                     ? Icons.unarchive_outlined
                     : Icons.archive_outlined,
               ),
-              title: Text(veiculo.arquivado ? 'Restaurar' : 'Arquivar'),
+              title: Text(
+                veiculo.arquivado
+                    ? l10n.veiculoMenuRestaurar
+                    : l10n.veiculoMenuArquivar,
+              ),
             ),
           ),
         ],
@@ -145,9 +158,10 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final msg = arquivados
-        ? 'Nenhum veículo arquivado.'
-        : 'Nenhum veículo cadastrado. Toque em "Novo veículo" para começar.';
+        ? l10n.veiculoNenhumArquivado
+        : l10n.veiculoNenhumAtivo;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),

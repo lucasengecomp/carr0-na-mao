@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../helpers/l10n_delegates.dart';
+
 Future<void> _pumpForm(
   WidgetTester tester, {
   required AppDatabase db,
@@ -16,7 +18,12 @@ Future<void> _pumpForm(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(db)],
-      child: MaterialApp(home: VeiculoFormScreen(placa: placa)),
+      child: MaterialApp(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        home: VeiculoFormScreen(placa: placa),
+      ),
     ),
   );
   await tester.pumpAndSettle();

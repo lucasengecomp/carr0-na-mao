@@ -1,0 +1,458 @@
+{
+  "@@locale": "pt",
+
+  "appTitle": "Carro na Mão",
+  "@appTitle": {
+    "description": "Nome do aplicativo exibido na AppBar da Home"
+  },
+
+  "appSubtitulo": "Gastos, consumo e lembretes em um só lugar.",
+  "@appSubtitulo": {
+    "description": "Subtítulo exibido na tela Home"
+  },
+
+  "tooltipComparador": "Comparador",
+  "@tooltipComparador": {
+    "description": "Tooltip do botão de comparador na AppBar"
+  },
+
+  "tooltipConfiguracoes": "Configurações",
+  "@tooltipConfiguracoes": {
+    "description": "Tooltip do botão de configurações na AppBar"
+  },
+
+  "tooltipTrocarVeiculo": "Trocar veículo",
+  "@tooltipTrocarVeiculo": {
+    "description": "Tooltip do menu popup de seleção de veículo"
+  },
+
+  "navHome": "Home",
+  "@navHome": {
+    "description": "Label da aba Home na NavigationBar"
+  },
+
+  "navAbastecer": "Abastecer",
+  "@navAbastecer": {
+    "description": "Label da aba Abastecer na NavigationBar"
+  },
+
+  "navManutencao": "Manutenção",
+  "@navManutencao": {
+    "description": "Label da aba Manutenção na NavigationBar"
+  },
+
+  "navDespesas": "Despesas",
+  "@navDespesas": {
+    "description": "Label da aba Despesas na NavigationBar"
+  },
+
+  "navLembretes": "Lembretes",
+  "@navLembretes": {
+    "description": "Label da aba Lembretes na NavigationBar"
+  },
+
+  "abastecimentosTitulo": "Abastecimentos",
+  "@abastecimentosTitulo": {
+    "description": "Título da tela de lista de abastecimentos"
+  },
+
+  "abastecimentoNovoTitulo": "Novo abastecimento",
+  "@abastecimentoNovoTitulo": {
+    "description": "Título da tela de novo abastecimento"
+  },
+
+  "abastecimentoEditarTitulo": "Editar abastecimento",
+  "@abastecimentoEditarTitulo": {
+    "description": "Título da tela de editar abastecimento"
+  },
+
+  "abastecimentoFab": "Abastecer",
+  "@abastecimentoFab": {
+    "description": "Label do FAB da tela de abastecimentos"
+  },
+
+  "abastecimentoListaVaziaFiltro": "Nenhum abastecimento encontrado para os filtros selecionados.",
+  "@abastecimentoListaVaziaFiltro": {
+    "description": "Mensagem de lista vazia na tela com filtros"
+  },
+
+  "abastecimentoListaVazia": "Nenhum abastecimento registrado ainda.\nToque em \"Abastecer\" para começar.",
+  "@abastecimentoListaVazia": {
+    "description": "Mensagem de lista vazia na tela simples de abastecimentos"
+  },
+
+  "semVeiculoCadastrarAbastecimento": "Cadastre um veículo para começar a registrar abastecimentos.",
+  "@semVeiculoCadastrarAbastecimento": {
+    "description": "Aviso exibido quando não há veículo cadastrado na tela de abastecimentos"
+  },
+
+  "semVeiculoCadastrarAbastecimentoForm": "Cadastre um veículo antes de registrar abastecimentos.",
+  "@semVeiculoCadastrarAbastecimentoForm": {
+    "description": "Aviso exibido no form de abastecimento quando não há veículo"
+  },
+
+  "botaoCadastrarVeiculo": "Cadastrar veículo",
+  "@botaoCadastrarVeiculo": {
+    "description": "Label do botão de cadastrar veículo"
+  },
+
+  "erroGenerico": "Erro: {mensagem}",
+  "@erroGenerico": {
+    "description": "Mensagem de erro genérica",
+    "placeholders": {
+      "mensagem": {
+        "type": "String"
+      }
+    }
+  },
+
+  "abastecimentoCampoData": "Data",
+  "@abastecimentoCampoData": {
+    "description": "Label do campo Data no form de abastecimento"
+  },
+
+  "abastecimentoCampoHodometro": "Hodômetro (km)",
+  "@abastecimentoCampoHodometro": {
+    "description": "Label do campo Hodômetro no form de abastecimento"
+  },
+
+  "abastecimentoCampoCombustivel": "Combustível",
+  "@abastecimentoCampoCombustivel": {
+    "description": "Label do campo Combustível no form de abastecimento"
+  },
+
+  "abastecimentoCampoPreco": "Preço por litro (R$)",
+  "@abastecimentoCampoPreco": {
+    "description": "Label do campo Preço por litro no form de abastecimento"
+  },
+
+  "abastecimentoCampoPrecoHelper": "Preencha 2 dos 3 e o terceiro é calculado.",
+  "@abastecimentoCampoPrecoHelper": {
+    "description": "Texto auxiliar do campo Preço no form de abastecimento"
+  },
+
+  "abastecimentoCampoLitros": "Litros",
+  "@abastecimentoCampoLitros": {
+    "description": "Label do campo Litros no form de abastecimento"
+  },
+
+  "abastecimentoCampoValorTotal": "Valor total (R$)",
+  "@abastecimentoCampoValorTotal": {
+    "description": "Label do campo Valor total no form de abastecimento"
+  },
+
+  "abastecimentoCampoPosto": "Posto (opcional)",
+  "@abastecimentoCampoPosto": {
+    "description": "Label do campo Posto no form de abastecimento"
+  },
+
+  "abastecimentoTanqueCheio": "Tanque cheio",
+  "@abastecimentoTanqueCheio": {
+    "description": "Label do switch de tanque cheio"
+  },
+
+  "abastecimentoTanqueCheioSubtitulo": "Importante para cálculo de consumo (km/L).",
+  "@abastecimentoTanqueCheioSubtitulo": {
+    "description": "Subtítulo do switch de tanque cheio"
+  },
+
+  "abastecimentoAvisoKmRetroativo": "O km informado é menor que o último registrado. Você pode salvar normalmente se for um abastecimento retroativo.",
+  "@abastecimentoAvisoKmRetroativo": {
+    "description": "Aviso banner de km retroativo"
+  },
+
+  "abastecimentoNaoPossivel": "Não foi possível salvar: {erro}",
+  "@abastecimentoNaoPossivel": {
+    "description": "Snackbar de erro ao salvar abastecimento",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
+  "validacaoObrigatorio": "Obrigatório",
+  "@validacaoObrigatorio": {
+    "description": "Mensagem de validação de campo obrigatório"
+  },
+
+  "validacaoKmInvalido": "Km inválido",
+  "@validacaoKmInvalido": {
+    "description": "Mensagem de validação de km inválido"
+  },
+
+  "validacaoDecimalObrigatorio": "Preencha 2 dos 3 campos",
+  "@validacaoDecimalObrigatorio": {
+    "description": "Mensagem de validação quando campo decimal está vazio"
+  },
+
+  "validacaoValorInvalido": "Valor inválido",
+  "@validacaoValorInvalido": {
+    "description": "Mensagem de validação de valor inválido"
+  },
+
+  "botaoSalvar": "Salvar",
+  "@botaoSalvar": {
+    "description": "Label do botão Salvar"
+  },
+
+  "veiculosTitulo": "Veículos",
+  "@veiculosTitulo": {
+    "description": "Título da tela de lista de veículos"
+  },
+
+  "veiculoNovoTitulo": "Novo veículo",
+  "@veiculoNovoTitulo": {
+    "description": "Título da tela de novo veículo"
+  },
+
+  "veiculoEditarTitulo": "Editar veículo",
+  "@veiculoEditarTitulo": {
+    "description": "Título da tela de editar veículo"
+  },
+
+  "veiculoFab": "Novo veículo",
+  "@veiculoFab": {
+    "description": "Label do FAB da tela de veículos"
+  },
+
+  "veiculoAtivos": "Ativos",
+  "@veiculoAtivos": {
+    "description": "Segmento Ativos no toggle de veículos"
+  },
+
+  "veiculoArquivados": "Arquivados",
+  "@veiculoArquivados": {
+    "description": "Segmento Arquivados no toggle de veículos"
+  },
+
+  "veiculoNenhumAtivo": "Nenhum veículo cadastrado. Toque em \"Novo veículo\" para começar.",
+  "@veiculoNenhumAtivo": {
+    "description": "Mensagem de empty state para veículos ativos"
+  },
+
+  "veiculoNenhumArquivado": "Nenhum veículo arquivado.",
+  "@veiculoNenhumArquivado": {
+    "description": "Mensagem de empty state para veículos arquivados"
+  },
+
+  "veiculoErroCarregar": "Erro ao carregar: {erro}",
+  "@veiculoErroCarregar": {
+    "description": "Erro ao carregar lista de veículos",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
+  "veiculoMenuEditar": "Editar",
+  "@veiculoMenuEditar": {
+    "description": "Opção Editar no menu de veículo"
+  },
+
+  "veiculoMenuArquivar": "Arquivar",
+  "@veiculoMenuArquivar": {
+    "description": "Opção Arquivar no menu de veículo"
+  },
+
+  "veiculoMenuRestaurar": "Restaurar",
+  "@veiculoMenuRestaurar": {
+    "description": "Opção Restaurar no menu de veículo"
+  },
+
+  "veiculoArquivadoSnack": "{placa} arquivado",
+  "@veiculoArquivadoSnack": {
+    "description": "Snackbar ao arquivar veículo",
+    "placeholders": {
+      "placa": {
+        "type": "String"
+      }
+    }
+  },
+
+  "veiculoRestauradoSnack": "{placa} restaurado",
+  "@veiculoRestauradoSnack": {
+    "description": "Snackbar ao restaurar veículo",
+    "placeholders": {
+      "placa": {
+        "type": "String"
+      }
+    }
+  },
+
+  "veiculoCampoPlaca": "Placa",
+  "@veiculoCampoPlaca": {
+    "description": "Label do campo Placa no form de veículo"
+  },
+
+  "veiculoCampoPlacaHelper": "Mercosul (ABC1D23) ou antigo (ABC1234)",
+  "@veiculoCampoPlacaHelper": {
+    "description": "Helper text do campo Placa"
+  },
+
+  "veiculoCampoApelido": "Apelido (opcional)",
+  "@veiculoCampoApelido": {
+    "description": "Label do campo Apelido no form de veículo"
+  },
+
+  "veiculoCampoMarca": "Marca",
+  "@veiculoCampoMarca": {
+    "description": "Label do campo Marca no form de veículo"
+  },
+
+  "veiculoCampoMarcaHelper": "Sugestões da base. Pode digitar livremente.",
+  "@veiculoCampoMarcaHelper": {
+    "description": "Helper text do campo Marca"
+  },
+
+  "veiculoCampoModelo": "Modelo",
+  "@veiculoCampoModelo": {
+    "description": "Label do campo Modelo no form de veículo"
+  },
+
+  "veiculoCampoModeloHelperSemSugestoes": "Digite livremente (sem sugestões para esta marca).",
+  "@veiculoCampoModeloHelperSemSugestoes": {
+    "description": "Helper text do campo Modelo quando sem sugestões"
+  },
+
+  "veiculoCampoModeloHelperComSugestoes": "Sugestões da base. Pode digitar livremente.",
+  "@veiculoCampoModeloHelperComSugestoes": {
+    "description": "Helper text do campo Modelo quando com sugestões"
+  },
+
+  "veiculoCampoAno": "Ano",
+  "@veiculoCampoAno": {
+    "description": "Label do campo Ano no form de veículo"
+  },
+
+  "veiculoCampoTipo": "Tipo",
+  "@veiculoCampoTipo": {
+    "description": "Label do campo Tipo no form de veículo"
+  },
+
+  "veiculoCampoCombustivel": "Combustível",
+  "@veiculoCampoCombustivel": {
+    "description": "Label do campo Combustível no form de veículo"
+  },
+
+  "veiculoCampoHodometro": "Hodômetro atual (km)",
+  "@veiculoCampoHodometro": {
+    "description": "Label do campo Hodômetro no form de veículo"
+  },
+
+  "veiculoPlacaExistente": "Já existe um veículo com essa placa.",
+  "@veiculoPlacaExistente": {
+    "description": "Erro de placa duplicada"
+  },
+
+  "veiculoNaoPossivel": "Não foi possível salvar: {erro}",
+  "@veiculoNaoPossivel": {
+    "description": "Snackbar de erro ao salvar veículo",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
+  "validacaoAnoInvalido": "Ano inválido",
+  "@validacaoAnoInvalido": {
+    "description": "Mensagem de validação de ano inválido"
+  },
+
+  "validacaoAnoForaDaFaixa": "Ano fora da faixa",
+  "@validacaoAnoForaDaFaixa": {
+    "description": "Mensagem de validação de ano fora da faixa"
+  },
+
+  "comparadorTitulo": "Comparador álcool × gasolina",
+  "@comparadorTitulo": {
+    "description": "Título da tela do comparador"
+  },
+
+  "comparadorCampoVeiculo": "Veículo",
+  "@comparadorCampoVeiculo": {
+    "description": "Label do dropdown de veículo no comparador"
+  },
+
+  "comparadorCampoAlcool": "Preço do álcool (R$/L)",
+  "@comparadorCampoAlcool": {
+    "description": "Label do campo preço do álcool"
+  },
+
+  "comparadorCampoGasolina": "Preço da gasolina (R$/L)",
+  "@comparadorCampoGasolina": {
+    "description": "Label do campo preço da gasolina"
+  },
+
+  "comparadorBotao": "Comparar",
+  "@comparadorBotao": {
+    "description": "Label do botão Comparar"
+  },
+
+  "comparadorSemVeiculo": "Selecione um veículo.",
+  "@comparadorSemVeiculo": {
+    "description": "Snackbar quando não há veículo selecionado no comparador"
+  },
+
+  "comparadorSemVeiculoCadastrado": "Cadastre um veículo primeiro para usar o comparador.",
+  "@comparadorSemVeiculoCadastrado": {
+    "description": "Mensagem de empty state no comparador"
+  },
+
+  "comparadorAlcoolCompensa": "Álcool compensa",
+  "@comparadorAlcoolCompensa": {
+    "description": "Resultado do comparador: álcool vence"
+  },
+
+  "comparadorGasolinaCompensa": "Gasolina compensa",
+  "@comparadorGasolinaCompensa": {
+    "description": "Resultado do comparador: gasolina vence"
+  },
+
+  "comparadorEmpate": "Empate técnico",
+  "@comparadorEmpate": {
+    "description": "Resultado do comparador: empate"
+  },
+
+  "comparadorMetodoHistorico": "Baseado no histórico do veículo",
+  "@comparadorMetodoHistorico": {
+    "description": "Badge de método histórico no comparador"
+  },
+
+  "comparadorMetodoRegra70": "Regra dos 70%",
+  "@comparadorMetodoRegra70": {
+    "description": "Badge de método regra 70% no comparador"
+  },
+
+  "comparadorSemHistoricoTexto": "Sem histórico suficiente de abastecimentos com tanque cheio para calcular o custo por km. Resultado baseado na regra empírica de 70%.",
+  "@comparadorSemHistoricoTexto": {
+    "description": "Texto exibido quando não há histórico para calcular"
+  },
+
+  "comparadorPrefixoPreco": "R$ ",
+  "@comparadorPrefixoPreco": {
+    "description": "Prefixo dos campos de preço no comparador"
+  },
+
+  "configuracoesTitulo": "Configurações",
+  "@configuracoesTitulo": {
+    "description": "Título da tela de configurações"
+  },
+
+  "configuracoesVeiculosTitulo": "Veículos",
+  "@configuracoesVeiculosTitulo": {
+    "description": "Título do item Veículos nas configurações"
+  },
+
+  "configuracoesVeiculosSubtitulo": "Cadastrar, editar e arquivar",
+  "@configuracoesVeiculosSubtitulo": {
+    "description": "Subtítulo do item Veículos nas configurações"
+  },
+
+  "filtroTodos": "Todos",
+  "@filtroTodos": {
+    "description": "Chip de filtro Todos (combustível)"
+  }
+}

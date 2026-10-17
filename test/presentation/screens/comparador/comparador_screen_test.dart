@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../helpers/l10n_delegates.dart';
+
 Future<void> _advance(WidgetTester tester) async {
   for (var i = 0; i < 10; i++) {
     await tester.pump(const Duration(milliseconds: 50));
@@ -53,7 +55,12 @@ Future<void> _pumpScreen(WidgetTester tester, AppDatabase db) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(db)],
-      child: const MaterialApp(home: ComparadorScreen()),
+      child: const MaterialApp(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        home: ComparadorScreen(),
+      ),
     ),
   );
   await _advance(tester);
@@ -139,7 +146,8 @@ void main() {
     await _advance(tester);
 
     expect(find.text('Baseado no histórico do veículo'), findsOneWidget);
-    expect(find.text('Álcool compensa'), findsOneWidget);
+    // 'Álcool compensa' aparece no título do card e no label da _LinhaCusto.
+    expect(find.text('Álcool compensa'), findsWidgets);
     // Confere a linha de custo/km de cada combustível.
     expect(find.textContaining('/km'), findsNWidgets(2));
     await _teardownUi(tester);
