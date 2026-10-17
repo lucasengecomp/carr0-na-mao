@@ -329,6 +329,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filtroPeriodoTudo => 'All time';
 
   @override
+  String get manutencoesTitulo => 'Maintenance';
+
+  @override
+  String get manutencaoNovoTitulo => 'New maintenance';
+
+  @override
+  String get manutencaoEditarTitulo => 'Edit maintenance';
+
+  @override
+  String get manutencaoFab => 'New maintenance';
+
+  @override
+  String get manutencaoCampoTipo => 'Type';
+
+  @override
+  String get manutencaoCampoNomeLivre => 'Description';
+
+  @override
+  String get manutencaoCampoData => 'Date';
+
+  @override
+  String get manutencaoCampoKm => 'Odometer (km)';
+
+  @override
+  String get manutencaoCampoValor => 'Value (R\$) (optional)';
+
+  @override
+  String get manutencaoCampoOficina => 'Workshop (optional)';
+
+  @override
+  String get manutencaoCampoObservacoes => 'Notes (optional)';
+
+  @override
+  String get manutencaoProximoIntervalo => 'Next interval suggestion';
+
+  @override
+  String get manutencaoCampoProximoKm => 'Next km (suggestion)';
+
+  @override
+  String get manutencaoCampoProximoMeses => 'Months until next (suggestion)';
+
+  @override
+  String manutencaoNaoPossivel(String erro) {
+    return 'Could not save: $erro';
+  }
+
+  @override
   String get despesasTitulo => 'Expenses';
 
   @override
@@ -341,6 +388,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String despesaNaoPossivel(String erro) {
     return 'Could not save: $erro';
   }
+
+  @override
+  String get semVeiculoCadastrarManutencaoForm =>
+      'Register a vehicle before recording maintenance.';
+
+  @override
+  String get tipoManutencaoOleoMotor => 'Engine oil';
+
+  @override
+  String get tipoManutencaoFiltroOleo => 'Oil filter';
+
+  @override
+  String get tipoManutencaoFiltroAr => 'Air filter';
+
+  @override
+  String get tipoManutencaoFiltroCombustivel => 'Fuel filter';
+
+  @override
+  String get tipoManutencaoFiltroCabine => 'Cabin filter';
+
+  @override
+  String get tipoManutencaoVelas => 'Spark plugs';
+
+  @override
+  String get tipoManutencaoCorreiaDentada => 'Timing belt';
+
+  @override
+  String get tipoManutencaoCorreiaAcessorios => 'Accessory belt';
+
+  @override
+  String get tipoManutencaoPneus => 'Tires';
+
+  @override
+  String get tipoManutencaoAlinhamentoBalanceamento =>
+      'Wheel alignment and balancing';
+
+  @override
+  String get tipoManutencaoPastilhasFreio => 'Brake pads';
+
+  @override
+  String get tipoManutencaoDiscosFreio => 'Brake discs';
+
+  @override
+  String get tipoManutencaoOleoCambio => 'Transmission oil';
+
+  @override
+  String get tipoManutencaoFluidoFreio => 'Brake fluid';
+
+  @override
+  String get tipoManutencaoRevisaoGeral => 'General service';
+
+  @override
+  String get tipoManutencaoRodizioPneus => 'Tire rotation';
+
+  @override
+  String get tipoManutencaoOutros => 'Other';
 
   @override
   String get despesaCampoNome => 'Name';
