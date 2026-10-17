@@ -291,4 +291,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filtroTodos => 'All';
+
+  @override
+  String get tipoVeiculoCarro => 'Car';
+
+  @override
+  String get tipoVeiculoMoto => 'Motorcycle';
+
+  @override
+  String get tipoCombustivelGasolina => 'Gasoline';
+
+  @override
+  String get tipoCombustivelAlcool => 'Ethanol';
+
+  @override
+  String get tipoCombustivelFlex => 'Flex (gasoline + ethanol)';
+
+  @override
+  String get tipoCombustivelDiesel => 'Diesel';
+
+  @override
+  String get tipoCombustivelGnv => 'CNG';
+
+  @override
+  String get tipoCombustivelEletrico => 'Electric';
+
+  @override
+  String get filtroPeriodoUltimos30d => 'Last 30d';
+
+  @override
+  String get filtroPeriodoUltimos90d => 'Last 90d';
+
+  @override
+  String get filtroPeriodoUltimos12m => 'Last 12m';
+
+  @override
+  String get filtroPeriodoTudo => 'All time';
 }

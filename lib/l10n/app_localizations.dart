@@ -607,6 +607,78 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Todos'**
   String get filtroTodos;
+
+  /// Label do tipo de veículo Carro
+  ///
+  /// In pt, this message translates to:
+  /// **'Carro'**
+  String get tipoVeiculoCarro;
+
+  /// Label do tipo de veículo Moto
+  ///
+  /// In pt, this message translates to:
+  /// **'Moto'**
+  String get tipoVeiculoMoto;
+
+  /// Label do combustível Gasolina
+  ///
+  /// In pt, this message translates to:
+  /// **'Gasolina'**
+  String get tipoCombustivelGasolina;
+
+  /// Label do combustível Álcool
+  ///
+  /// In pt, this message translates to:
+  /// **'Álcool'**
+  String get tipoCombustivelAlcool;
+
+  /// Label do combustível Flex
+  ///
+  /// In pt, this message translates to:
+  /// **'Flex (gasolina + álcool)'**
+  String get tipoCombustivelFlex;
+
+  /// Label do combustível Diesel
+  ///
+  /// In pt, this message translates to:
+  /// **'Diesel'**
+  String get tipoCombustivelDiesel;
+
+  /// Label do combustível GNV
+  ///
+  /// In pt, this message translates to:
+  /// **'GNV'**
+  String get tipoCombustivelGnv;
+
+  /// Label do combustível Elétrico
+  ///
+  /// In pt, this message translates to:
+  /// **'Elétrico'**
+  String get tipoCombustivelEletrico;
+
+  /// Label do filtro de período Últimos 30 dias
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimos 30d'**
+  String get filtroPeriodoUltimos30d;
+
+  /// Label do filtro de período Últimos 90 dias
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimos 90d'**
+  String get filtroPeriodoUltimos90d;
+
+  /// Label do filtro de período Últimos 12 meses
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimos 12m'**
+  String get filtroPeriodoUltimos12m;
+
+  /// Label do filtro de período Tudo
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo'**
+  String get filtroPeriodoTudo;
 }
 
 class _AppLocalizationsDelegate

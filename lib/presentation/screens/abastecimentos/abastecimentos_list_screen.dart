@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
@@ -83,7 +84,7 @@ class _FiltrosBar extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    label: Text(p.label),
+                    label: Text(p.label(l10n)),
                     selected: filtros.periodo == p,
                     onSelected: (_) => notifier.setPeriodo(p),
                   ),
@@ -110,7 +111,7 @@ class _FiltrosBar extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    label: Text(t.label),
+                    label: Text(t.label(l10n)),
                     selected: filtros.tipoCombustivel == t,
                     onSelected: (_) => notifier.setTipoCombustivel(
                       filtros.tipoCombustivel == t ? null : t,
@@ -136,6 +137,7 @@ class _ListaAgrupada extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Agrupa por "ano-mes" mantendo a ordem desc (itens já chegam ordenados).
     final grupos = <_GrupoMes>[];
     _GrupoMes? atual;
@@ -143,7 +145,7 @@ class _ListaAgrupada extends StatelessWidget {
     for (final a in itens) {
       final chave = _chaveAnoMes(a.data);
       if (atual == null || atual.chave != chave) {
-        atual = _GrupoMes(chave: chave, cabecalho: _labelMes(a.data));
+        atual = _GrupoMes(chave: chave, cabecalho: _labelMes(a.data, l10n));
         grupos.add(atual);
       }
       atual.itens.add(a);
@@ -170,22 +172,10 @@ class _ListaAgrupada extends StatelessWidget {
   String _chaveAnoMes(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}';
 
-  String _labelMes(DateTime d) {
-    const meses = [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
-    ];
-    return '${meses[d.month - 1]} ${d.year}';
+  String _labelMes(DateTime d, AppLocalizations l10n) {
+    final raw = DateFormat('MMMM yyyy', l10n.localeName).format(d);
+    // Garante capitalização mesmo quando o locale retorna em minúsculo (ex: pt)
+    return raw[0].toUpperCase() + raw.substring(1);
   }
 }
 
@@ -222,10 +212,11 @@ class _AbastecimentoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final a = item;
     return Semantics(
       label:
-          '${a.tipoCombustivel.label}, ${_fmtData(a.data)}, ${_fmtKm(a.km)} quilômetros, '
+          '${a.tipoCombustivel.label(l10n)}, ${_fmtData(a.data)}, ${_fmtKm(a.km)} quilômetros, '
           '${_fmtLitros(a.litros)} litros, R\$ ${_fmtMoney(a.valorTotal)}'
           '${a.posto != null && a.posto!.isNotEmpty ? ", ${a.posto}" : ""}',
       child: ListTile(
@@ -235,7 +226,7 @@ class _AbastecimentoTile extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '${_fmtData(a.data)} · ${a.tipoCombustivel.label}',
+                '${_fmtData(a.data)} · ${a.tipoCombustivel.label(l10n)}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),

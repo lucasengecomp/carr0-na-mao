@@ -298,7 +298,7 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
                 onChanged: (v) => setState(() => _tipo = v!),
                 items: [
                   for (final t in TipoVeiculo.values)
-                    DropdownMenuItem(value: t, child: Text(t.label)),
+                    DropdownMenuItem(value: t, child: Text(t.label(l10n))),
                 ],
               ),
               const SizedBox(height: 12),
@@ -310,7 +310,7 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
                 onChanged: (v) => setState(() => _combustivel = v!),
                 items: [
                   for (final c in TipoCombustivelVeiculo.values)
-                    DropdownMenuItem(value: c, child: Text(c.label)),
+                    DropdownMenuItem(value: c, child: Text(c.label(l10n))),
                 ],
               ),
               const SizedBox(height: 12),

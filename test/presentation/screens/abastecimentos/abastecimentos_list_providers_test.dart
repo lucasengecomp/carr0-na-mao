@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:carro_na_mao/data/database/enums.dart';
+import 'package:carro_na_mao/l10n/app_localizations_pt.dart';
 import 'package:carro_na_mao/presentation/screens/abastecimentos/abastecimentos_list_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -75,17 +76,19 @@ void main() {
   // FiltroPeriodo.label
   // ---------------------------------------------------------------------------
   group('FiltroPeriodo.label', () {
+    final l10n = AppLocalizationsPt();
+
     test('todos os períodos têm labels não-vazios', () {
       for (final p in FiltroPeriodo.values) {
-        expect(p.label, isNotEmpty, reason: 'label de $p está vazio');
+        expect(p.label(l10n), isNotEmpty, reason: 'label de $p está vazio');
       }
     });
 
-    test('labels mapeiam corretamente', () {
-      expect(FiltroPeriodo.ultimos30dias.label, 'Últimos 30d');
-      expect(FiltroPeriodo.ultimos90dias.label, 'Últimos 90d');
-      expect(FiltroPeriodo.ultimos12meses.label, 'Últimos 12m');
-      expect(FiltroPeriodo.tudo.label, 'Tudo');
+    test('labels mapeiam corretamente em pt', () {
+      expect(FiltroPeriodo.ultimos30dias.label(l10n), 'Últimos 30d');
+      expect(FiltroPeriodo.ultimos90dias.label(l10n), 'Últimos 90d');
+      expect(FiltroPeriodo.ultimos12meses.label(l10n), 'Últimos 12m');
+      expect(FiltroPeriodo.tudo.label(l10n), 'Tudo');
     });
   });
 

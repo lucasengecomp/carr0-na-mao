@@ -454,5 +454,65 @@
   "filtroTodos": "Todos",
   "@filtroTodos": {
     "description": "Chip de filtro Todos (combustível)"
+  },
+
+  "tipoVeiculoCarro": "Carro",
+  "@tipoVeiculoCarro": {
+    "description": "Label do tipo de veículo Carro"
+  },
+
+  "tipoVeiculoMoto": "Moto",
+  "@tipoVeiculoMoto": {
+    "description": "Label do tipo de veículo Moto"
+  },
+
+  "tipoCombustivelGasolina": "Gasolina",
+  "@tipoCombustivelGasolina": {
+    "description": "Label do combustível Gasolina"
+  },
+
+  "tipoCombustivelAlcool": "Álcool",
+  "@tipoCombustivelAlcool": {
+    "description": "Label do combustível Álcool"
+  },
+
+  "tipoCombustivelFlex": "Flex (gasolina + álcool)",
+  "@tipoCombustivelFlex": {
+    "description": "Label do combustível Flex"
+  },
+
+  "tipoCombustivelDiesel": "Diesel",
+  "@tipoCombustivelDiesel": {
+    "description": "Label do combustível Diesel"
+  },
+
+  "tipoCombustivelGnv": "GNV",
+  "@tipoCombustivelGnv": {
+    "description": "Label do combustível GNV"
+  },
+
+  "tipoCombustivelEletrico": "Elétrico",
+  "@tipoCombustivelEletrico": {
+    "description": "Label do combustível Elétrico"
+  },
+
+  "filtroPeriodoUltimos30d": "Últimos 30d",
+  "@filtroPeriodoUltimos30d": {
+    "description": "Label do filtro de período Últimos 30 dias"
+  },
+
+  "filtroPeriodoUltimos90d": "Últimos 90d",
+  "@filtroPeriodoUltimos90d": {
+    "description": "Label do filtro de período Últimos 90 dias"
+  },
+
+  "filtroPeriodoUltimos12m": "Últimos 12m",
+  "@filtroPeriodoUltimos12m": {
+    "description": "Label do filtro de período Últimos 12 meses"
+  },
+
+  "filtroPeriodoTudo": "Tudo",
+  "@filtroPeriodoTudo": {
+    "description": "Label do filtro de período Tudo"
   }
 }

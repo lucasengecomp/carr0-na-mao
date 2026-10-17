@@ -96,6 +96,7 @@ class _Lista extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView.separated(
       padding: const EdgeInsets.only(bottom: 96),
       itemCount: itens.length,
@@ -104,7 +105,7 @@ class _Lista extends StatelessWidget {
         final a = itens[i];
         return ListTile(
           leading: const Icon(Icons.local_gas_station_outlined),
-          title: Text('${a.tipoCombustivel.label} · ${_fmtKm(a.km)} km'),
+          title: Text('${a.tipoCombustivel.label(l10n)} · ${_fmtKm(a.km)} km'),
           subtitle: Text(
             '${_fmtData(a.data)}'
             '${a.posto != null && a.posto!.isNotEmpty ? ' · ${a.posto}' : ''}',

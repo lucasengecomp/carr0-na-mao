@@ -317,7 +317,7 @@ class _AbastecimentoFormScreenState
               onChanged: (v) => setState(() => _combustivel = v),
               items: [
                 for (final c in combustiveis)
-                  DropdownMenuItem(value: c, child: Text(c.label)),
+                  DropdownMenuItem(value: c, child: Text(c.label(l10n))),
               ],
             ),
             const SizedBox(height: 12),

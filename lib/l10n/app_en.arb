@@ -85,5 +85,17 @@
   "configuracoesTitulo": "Settings",
   "configuracoesVeiculosTitulo": "Vehicles",
   "configuracoesVeiculosSubtitulo": "Register, edit and archive",
-  "filtroTodos": "All"
+  "filtroTodos": "All",
+  "tipoVeiculoCarro": "Car",
+  "tipoVeiculoMoto": "Motorcycle",
+  "tipoCombustivelGasolina": "Gasoline",
+  "tipoCombustivelAlcool": "Ethanol",
+  "tipoCombustivelFlex": "Flex (gasoline + ethanol)",
+  "tipoCombustivelDiesel": "Diesel",
+  "tipoCombustivelGnv": "CNG",
+  "tipoCombustivelEletrico": "Electric",
+  "filtroPeriodoUltimos30d": "Last 30d",
+  "filtroPeriodoUltimos90d": "Last 90d",
+  "filtroPeriodoUltimos12m": "Last 12m",
+  "filtroPeriodoTudo": "All time"
 }
