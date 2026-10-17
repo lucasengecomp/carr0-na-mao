@@ -44,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -62,6 +62,11 @@ class AppDatabase extends _$AppDatabase {
         // Bancos criados antes da v3 podem ter a tabela sem essas colunas.
         await m.addColumn(postosSugestao, postosSugestao.ultimoUso);
         await m.addColumn(postosSugestao, postosSugestao.usoCount);
+      }
+      if (from < 4) {
+        // Adiciona dia_do_mes e ativa às despesas_recorrentes.
+        await m.addColumn(despesasRecorrentes, despesasRecorrentes.diaDoMes);
+        await m.addColumn(despesasRecorrentes, despesasRecorrentes.ativa);
       }
     },
     beforeOpen: (details) async {

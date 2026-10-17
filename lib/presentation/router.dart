@@ -6,6 +6,7 @@ import 'screens/abastecimentos/abastecimentos_list_screen.dart';
 import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
 import 'screens/dashboard/dashboard_home_screen.dart';
+import 'screens/despesas/despesa_form_screen.dart';
 import 'screens/placeholder_screen.dart';
 import 'screens/veiculos/veiculo_form_screen.dart';
 import 'screens/veiculos/veiculos_list_screen.dart';
@@ -53,7 +54,7 @@ final GoRouter appRouter = GoRouter(
               path: '/despesas',
               builder: (context, state) => const PlaceholderScreen(
                 titulo: 'Despesas',
-                descricao: 'Despesas recorrentes e ocorrências (issue #21).',
+                descricao: 'Lista de despesas recorrentes (tela de listagem em issue futura).',
               ),
             ),
           ],
@@ -81,6 +82,17 @@ final GoRouter appRouter = GoRouter(
       path: '/abastecimentos/:id/editar',
       builder: (context, state) =>
           AbastecimentoFormScreen(id: int.parse(state.pathParameters['id']!)),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/despesas/novo',
+      builder: (context, state) => const DespesaFormScreen(),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/despesas/:id/editar',
+      builder: (context, state) =>
+          DespesaFormScreen(id: int.parse(state.pathParameters['id']!)),
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
