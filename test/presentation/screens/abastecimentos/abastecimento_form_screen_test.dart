@@ -527,4 +527,138 @@ void main() {
     expect(find.text('Gasolina'), findsNothing);
     await _teardownUI(tester);
   });
+
+  // ---------------------------------------------------------------------------
+  // Autocomplete de posto (issue #15)
+  // ---------------------------------------------------------------------------
+
+  testWidgets('autocomplete: campo posto aparece no form', (tester) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+    expect(_byKey('abast_posto'), findsOneWidget);
+    await _teardownUI(tester);
+  });
+
+  testWidgets('autocomplete: digitar no posto mostra sugestões do DAO', (
+    tester,
+  ) async {
+    // Pre-seed do histórico
+    await db.postoSugestaoDao.upsert('Shell Centro');
+    await db.postoSugestaoDao.upsert('Shell Norte');
+
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    await tester.tap(_byKey('abast_posto'));
+    await tester.pump();
+    await tester.enterText(_byKey('abast_posto'), 'Shell');
+    // O optionsBuilder retorna Future<Iterable<String>>.
+    // Bombeia frames para o Future completar e o overlay renderizar.
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Verifica se sugestões aparecem no overlay.
+    // NOTA: Se este teste falhar, o bug está no _PostoAutocomplete dentro do
+    // AbastecimentoFormScreen — o widget em isolamento funciona corretamente
+    // (confirmado em teste mínimo), mas no contexto do form completo as opções
+    // não são exibidas. Ver issue de bug correspondente.
+    expect(
+      find.text('Shell Centro'),
+      findsWidgets,
+      reason: '_PostoAutocomplete deve exibir sugestões do DAO no overlay',
+    );
+    expect(
+      find.text('Shell Norte'),
+      findsWidgets,
+      reason: '_PostoAutocomplete deve exibir sugestões do DAO no overlay',
+    );
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'autocomplete: tocar em sugestão preenche o campo com o valor selecionado',
+    (tester) async {
+      await db.postoSugestaoDao.upsert('Ipiranga Centro');
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(_byKey('abast_posto'));
+      await tester.pump();
+      await tester.enterText(_byKey('abast_posto'), 'Ipiranga');
+      // Aguarda o Future do optionsBuilder completar e o overlay renderizar.
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // Verifica que a sugestão está visível no overlay antes do tap.
+      expect(find.text('Ipiranga Centro'), findsWidgets);
+
+      // Toca na sugestão no overlay — o onSelected do RawAutocomplete é chamado.
+      await tester.tap(find.text('Ipiranga Centro').last);
+      await tester.pumpAndSettle();
+
+      // O campo posto deve conter o texto selecionado.
+      final postoField = tester.widget<TextFormField>(_byKey('abast_posto'));
+      expect(postoField.controller!.text, 'Ipiranga Centro');
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('autocomplete: query sem match não mostra sugestões estranhas', (
+    tester,
+  ) async {
+    await db.postoSugestaoDao.upsert('Ipiranga');
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    await tester.enterText(_byKey('abast_posto'), 'XYZ_NADA');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Ipiranga'), findsNothing);
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'autocomplete: salvar com posto preenchido grava sugestão no DAO',
+    (tester) async {
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_km'), '20000');
+      await tester.enterText(_byKey('abast_preco'), '6');
+      await tester.enterText(_byKey('abast_litros'), '50');
+      await tester.enterText(_byKey('abast_posto'), 'Petrobras Centro');
+
+      await tester.scrollUntilVisible(
+        find.byType(FilledButton),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byType(FilledButton));
+      await tester.pumpAndSettle();
+
+      final sugestoes = await db.postoSugestaoDao.search('Petrobras');
+      expect(sugestoes, contains('Petrobras Centro'));
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('autocomplete: salvar com posto vazio NÃO cria sugestão', (
+    tester,
+  ) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    await tester.enterText(_byKey('abast_km'), '20000');
+    await tester.enterText(_byKey('abast_preco'), '6');
+    await tester.enterText(_byKey('abast_litros'), '50');
+    // Campo posto deixado em branco (não digitamos nada)
+
+    await tester.scrollUntilVisible(
+      find.byType(FilledButton),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byType(FilledButton));
+    await tester.pumpAndSettle();
+
+    final sugestoes = await db.select(db.postosSugestao).get();
+    expect(sugestoes, isEmpty);
+    await _teardownUI(tester);
+  });
 }

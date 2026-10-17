@@ -3264,8 +3264,31 @@ class $PostosSugestaoTable extends PostosSugestao
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _ultimoUsoMeta = const VerificationMeta(
+    'ultimoUso',
+  );
   @override
-  List<GeneratedColumn> get $columns => [nome];
+  late final GeneratedColumn<DateTime> ultimoUso = GeneratedColumn<DateTime>(
+    'ultimo_uso',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _usoCountMeta = const VerificationMeta(
+    'usoCount',
+  );
+  @override
+  late final GeneratedColumn<int> usoCount = GeneratedColumn<int>(
+    'uso_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [nome, ultimoUso, usoCount];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3286,6 +3309,20 @@ class $PostosSugestaoTable extends PostosSugestao
     } else if (isInserting) {
       context.missing(_nomeMeta);
     }
+    if (data.containsKey('ultimo_uso')) {
+      context.handle(
+        _ultimoUsoMeta,
+        ultimoUso.isAcceptableOrUnknown(data['ultimo_uso']!, _ultimoUsoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ultimoUsoMeta);
+    }
+    if (data.containsKey('uso_count')) {
+      context.handle(
+        _usoCountMeta,
+        usoCount.isAcceptableOrUnknown(data['uso_count']!, _usoCountMeta),
+      );
+    }
     return context;
   }
 
@@ -3299,6 +3336,14 @@ class $PostosSugestaoTable extends PostosSugestao
         DriftSqlType.string,
         data['${effectivePrefix}nome'],
       )!,
+      ultimoUso: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}ultimo_uso'],
+      )!,
+      usoCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}uso_count'],
+      )!,
     );
   }
 
@@ -3310,16 +3355,28 @@ class $PostosSugestaoTable extends PostosSugestao
 
 class PostoSugestao extends DataClass implements Insertable<PostoSugestao> {
   final String nome;
-  const PostoSugestao({required this.nome});
+  final DateTime ultimoUso;
+  final int usoCount;
+  const PostoSugestao({
+    required this.nome,
+    required this.ultimoUso,
+    required this.usoCount,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['nome'] = Variable<String>(nome);
+    map['ultimo_uso'] = Variable<DateTime>(ultimoUso);
+    map['uso_count'] = Variable<int>(usoCount);
     return map;
   }
 
   PostosSugestaoCompanion toCompanion(bool nullToAbsent) {
-    return PostosSugestaoCompanion(nome: Value(nome));
+    return PostosSugestaoCompanion(
+      nome: Value(nome),
+      ultimoUso: Value(ultimoUso),
+      usoCount: Value(usoCount),
+    );
   }
 
   factory PostoSugestao.fromJson(
@@ -3327,60 +3384,99 @@ class PostoSugestao extends DataClass implements Insertable<PostoSugestao> {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return PostoSugestao(nome: serializer.fromJson<String>(json['nome']));
+    return PostoSugestao(
+      nome: serializer.fromJson<String>(json['nome']),
+      ultimoUso: serializer.fromJson<DateTime>(json['ultimoUso']),
+      usoCount: serializer.fromJson<int>(json['usoCount']),
+    );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{'nome': serializer.toJson<String>(nome)};
+    return <String, dynamic>{
+      'nome': serializer.toJson<String>(nome),
+      'ultimoUso': serializer.toJson<DateTime>(ultimoUso),
+      'usoCount': serializer.toJson<int>(usoCount),
+    };
   }
 
-  PostoSugestao copyWith({String? nome}) =>
-      PostoSugestao(nome: nome ?? this.nome);
+  PostoSugestao copyWith({String? nome, DateTime? ultimoUso, int? usoCount}) =>
+      PostoSugestao(
+        nome: nome ?? this.nome,
+        ultimoUso: ultimoUso ?? this.ultimoUso,
+        usoCount: usoCount ?? this.usoCount,
+      );
   PostoSugestao copyWithCompanion(PostosSugestaoCompanion data) {
-    return PostoSugestao(nome: data.nome.present ? data.nome.value : this.nome);
+    return PostoSugestao(
+      nome: data.nome.present ? data.nome.value : this.nome,
+      ultimoUso: data.ultimoUso.present ? data.ultimoUso.value : this.ultimoUso,
+      usoCount: data.usoCount.present ? data.usoCount.value : this.usoCount,
+    );
   }
 
   @override
   String toString() {
     return (StringBuffer('PostoSugestao(')
-          ..write('nome: $nome')
+          ..write('nome: $nome, ')
+          ..write('ultimoUso: $ultimoUso, ')
+          ..write('usoCount: $usoCount')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => nome.hashCode;
+  int get hashCode => Object.hash(nome, ultimoUso, usoCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is PostoSugestao && other.nome == this.nome);
+      (other is PostoSugestao &&
+          other.nome == this.nome &&
+          other.ultimoUso == this.ultimoUso &&
+          other.usoCount == this.usoCount);
 }
 
 class PostosSugestaoCompanion extends UpdateCompanion<PostoSugestao> {
   final Value<String> nome;
+  final Value<DateTime> ultimoUso;
+  final Value<int> usoCount;
   final Value<int> rowid;
   const PostosSugestaoCompanion({
     this.nome = const Value.absent(),
+    this.ultimoUso = const Value.absent(),
+    this.usoCount = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PostosSugestaoCompanion.insert({
     required String nome,
+    required DateTime ultimoUso,
+    this.usoCount = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : nome = Value(nome);
+  }) : nome = Value(nome),
+       ultimoUso = Value(ultimoUso);
   static Insertable<PostoSugestao> custom({
     Expression<String>? nome,
+    Expression<DateTime>? ultimoUso,
+    Expression<int>? usoCount,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (nome != null) 'nome': nome,
+      if (ultimoUso != null) 'ultimo_uso': ultimoUso,
+      if (usoCount != null) 'uso_count': usoCount,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  PostosSugestaoCompanion copyWith({Value<String>? nome, Value<int>? rowid}) {
+  PostosSugestaoCompanion copyWith({
+    Value<String>? nome,
+    Value<DateTime>? ultimoUso,
+    Value<int>? usoCount,
+    Value<int>? rowid,
+  }) {
     return PostosSugestaoCompanion(
       nome: nome ?? this.nome,
+      ultimoUso: ultimoUso ?? this.ultimoUso,
+      usoCount: usoCount ?? this.usoCount,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3390,6 +3486,12 @@ class PostosSugestaoCompanion extends UpdateCompanion<PostoSugestao> {
     final map = <String, Expression>{};
     if (nome.present) {
       map['nome'] = Variable<String>(nome.value);
+    }
+    if (ultimoUso.present) {
+      map['ultimo_uso'] = Variable<DateTime>(ultimoUso.value);
+    }
+    if (usoCount.present) {
+      map['uso_count'] = Variable<int>(usoCount.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3401,6 +3503,8 @@ class PostosSugestaoCompanion extends UpdateCompanion<PostoSugestao> {
   String toString() {
     return (StringBuffer('PostosSugestaoCompanion(')
           ..write('nome: $nome, ')
+          ..write('ultimoUso: $ultimoUso, ')
+          ..write('usoCount: $usoCount, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4126,6 +4230,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       OcorrenciasDespesaDao(this as AppDatabase);
   late final LembretesDao lembretesDao = LembretesDao(this as AppDatabase);
   late final MarcasModelosDao marcasModelosDao = MarcasModelosDao(
+    this as AppDatabase,
+  );
+  late final PostoSugestaoDao postoSugestaoDao = PostoSugestaoDao(
     this as AppDatabase,
   );
   @override
@@ -7080,9 +7187,19 @@ typedef $$LembretesTableProcessedTableManager =
       PrefetchHooks Function({bool veiculoPlaca, bool manutencaoId})
     >;
 typedef $$PostosSugestaoTableCreateCompanionBuilder =
-    PostosSugestaoCompanion Function({required String nome, Value<int> rowid});
+    PostosSugestaoCompanion Function({
+      required String nome,
+      required DateTime ultimoUso,
+      Value<int> usoCount,
+      Value<int> rowid,
+    });
 typedef $$PostosSugestaoTableUpdateCompanionBuilder =
-    PostosSugestaoCompanion Function({Value<String> nome, Value<int> rowid});
+    PostosSugestaoCompanion Function({
+      Value<String> nome,
+      Value<DateTime> ultimoUso,
+      Value<int> usoCount,
+      Value<int> rowid,
+    });
 
 class $$PostosSugestaoTableFilterComposer
     extends Composer<_$AppDatabase, $PostosSugestaoTable> {
@@ -7095,6 +7212,16 @@ class $$PostosSugestaoTableFilterComposer
   });
   ColumnFilters<String> get nome => $composableBuilder(
     column: $table.nome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get ultimoUso => $composableBuilder(
+    column: $table.ultimoUso,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get usoCount => $composableBuilder(
+    column: $table.usoCount,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -7112,6 +7239,16 @@ class $$PostosSugestaoTableOrderingComposer
     column: $table.nome,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get ultimoUso => $composableBuilder(
+    column: $table.ultimoUso,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get usoCount => $composableBuilder(
+    column: $table.usoCount,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PostosSugestaoTableAnnotationComposer
@@ -7125,6 +7262,12 @@ class $$PostosSugestaoTableAnnotationComposer
   });
   GeneratedColumn<String> get nome =>
       $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get ultimoUso =>
+      $composableBuilder(column: $table.ultimoUso, builder: (column) => column);
+
+  GeneratedColumn<int> get usoCount =>
+      $composableBuilder(column: $table.usoCount, builder: (column) => column);
 }
 
 class $$PostosSugestaoTableTableManager
@@ -7158,14 +7301,30 @@ class $$PostosSugestaoTableTableManager
               $$PostosSugestaoTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$PostosSugestaoTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> nome = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) => PostosSugestaoCompanion(nome: nome, rowid: rowid),
-          createCompanionCallback: ({
-            required String nome,
-            Value<int> rowid = const Value.absent(),
-          }) => PostosSugestaoCompanion.insert(nome: nome, rowid: rowid),
+          updateCompanionCallback:
+              ({
+                Value<String> nome = const Value.absent(),
+                Value<DateTime> ultimoUso = const Value.absent(),
+                Value<int> usoCount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PostosSugestaoCompanion(
+                nome: nome,
+                ultimoUso: ultimoUso,
+                usoCount: usoCount,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String nome,
+                required DateTime ultimoUso,
+                Value<int> usoCount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PostosSugestaoCompanion.insert(
+                nome: nome,
+                ultimoUso: ultimoUso,
+                usoCount: usoCount,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (

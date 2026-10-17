@@ -8,6 +8,7 @@ import 'database/daos/despesas_dao.dart';
 import 'database/daos/lembretes_dao.dart';
 import 'database/daos/manutencoes_dao.dart';
 import 'database/daos/marcas_modelos_dao.dart';
+import 'database/daos/posto_sugestao_dao.dart';
 import 'database/daos/veiculos_dao.dart';
 
 /// Instância singleton do banco. Fechada quando o container Riverpod é
@@ -48,6 +49,10 @@ final lembretesDaoProvider = Provider<LembretesDao>(
 
 final marcasModelosDaoProvider = Provider<MarcasModelosDao>(
   (ref) => ref.watch(appDatabaseProvider).marcasModelosDao,
+);
+
+final postoSugestaoDaoProvider = Provider<PostoSugestaoDao>(
+  (ref) => ref.watch(appDatabaseProvider).postoSugestaoDao,
 );
 
 /// Lista de marcas disponíveis para o form de veículo. Alimentado pelo seed
