@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'screens/abastecimentos/abastecimento_form_screen.dart';
-import 'screens/abastecimentos/abastecimentos_screen.dart';
+import 'screens/abastecimentos/abastecimentos_list_screen.dart';
 import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
 import 'screens/home_screen.dart';
@@ -29,7 +29,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/abastecimentos',
-              builder: (context, state) => const AbastecimentosScreen(),
+              builder: (context, state) => const AbastecimentosListScreen(),
             ),
           ],
         ),

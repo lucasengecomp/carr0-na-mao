@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../app_database.dart';
+import '../enums.dart';
 import '../tables.dart';
 
 part 'abastecimentos_dao.g.dart';
@@ -50,4 +51,29 @@ class AbastecimentosDao extends DatabaseAccessor<AppDatabase>
               (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc),
             ]))
           .watch();
+
+  /// Stream filtrado por veículo, com filtros opcionais de período e tipo de
+  /// combustível. Usado pela tela de lista com filtros (RF-08 / issue #14).
+  Stream<List<Abastecimento>> watchFiltered({
+    required String placa,
+    DateTime? desde,
+    TipoCombustivelAbastecimento? tipoCombustivel,
+  }) {
+    final query = select(abastecimentos)
+      ..where((t) {
+        Expression<bool> expr = t.veiculoPlaca.equals(placa);
+        if (desde != null) {
+          expr = expr & t.data.isBiggerOrEqualValue(desde);
+        }
+        if (tipoCombustivel != null) {
+          expr = expr & t.tipoCombustivel.equalsValue(tipoCombustivel);
+        }
+        return expr;
+      })
+      ..orderBy([
+        (t) => OrderingTerm(expression: t.data, mode: OrderingMode.desc),
+        (t) => OrderingTerm(expression: t.id, mode: OrderingMode.desc),
+      ]);
+    return query.watch();
+  }
 }
