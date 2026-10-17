@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../helpers/l10n_delegates.dart';
+
 Future<void> _pumpForm(
   WidgetTester tester, {
   required AppDatabase db,
@@ -21,7 +23,12 @@ Future<void> _pumpForm(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(db)],
-      child: MaterialApp(home: AbastecimentoFormScreen(id: id)),
+      child: MaterialApp(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        home: AbastecimentoFormScreen(id: id),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -156,7 +163,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(dbVazio)],
-        child: const MaterialApp(home: AbastecimentoFormScreen()),
+        child: const MaterialApp(
+          locale: localeDefault,
+          localizationsDelegates: l10nDelegates,
+          supportedLocales: supportedLocales,
+          home: AbastecimentoFormScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -324,6 +336,293 @@ void main() {
     },
   );
 
+  // ---------------------------------------------------------------------------
+  // RF-06: aviso não-bloqueante de km retroativo
+  // ---------------------------------------------------------------------------
+
+  testWidgets(
+    'RF-06 — sem histórico (primeiro abastecimento): banner NÃO aparece',
+    (tester) async {
+      // DB só tem o veículo, nenhum abastecimento ainda.
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_km'), '12000');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsNothing,
+      );
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('RF-06 — km maior que último: banner NÃO aparece', (
+    tester,
+  ) async {
+    // Insere um abastecimento com km = 10 000.
+    await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 1, 1),
+        km: 10000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 240,
+        litros: 40,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    // Digita km MAIOR que 10 000.
+    await tester.enterText(_byKey('abast_km'), '11000');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('menor que o último registrado'), findsNothing);
+    await _teardownUI(tester);
+  });
+
+  testWidgets('RF-06 — km menor que último: banner APARECE', (tester) async {
+    await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 1, 1),
+        km: 50000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 240,
+        litros: 40,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    // Digita km MENOR que 50 000.
+    await tester.enterText(_byKey('abast_km'), '45000');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('menor que o último registrado'),
+      findsOneWidget,
+    );
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'RF-06 — km menor que último: botão Salvar permanece habilitado (não-bloqueante)',
+    (tester) async {
+      await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 1, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 240,
+          litros: 40,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_km'), '45000');
+      await tester.pumpAndSettle();
+
+      // O botão Salvar deve existir e estar habilitado (onPressed != null).
+      final btn = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(btn.onPressed, isNotNull);
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('RF-06 — corrigir km para valor maior que último: banner SOME', (
+    tester,
+  ) async {
+    await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 1, 1),
+        km: 50000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 240,
+        litros: 40,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    // Acende o banner.
+    await tester.enterText(_byKey('abast_km'), '45000');
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('menor que o último registrado'),
+      findsOneWidget,
+    );
+
+    // Corrige para km válido (maior que 50 000).
+    await tester.enterText(_byKey('abast_km'), '55000');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('menor que o último registrado'), findsNothing);
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'RF-06 — km igual ao último: banner NÃO aparece (igual não é retroativo)',
+    (tester) async {
+      await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 1, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 240,
+          litros: 40,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_km'), '50000');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsNothing,
+      );
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets(
+    'RF-06 — km retroativo salva normalmente (abastecimento retroativo persistido)',
+    (tester) async {
+      await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 6, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 240,
+          litros: 40,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Preenche campos com km retroativo.
+      await tester.enterText(_byKey('abast_km'), '48000');
+      await tester.enterText(_byKey('abast_preco'), '5');
+      await tester.enterText(_byKey('abast_litros'), '30');
+      await tester.pumpAndSettle();
+
+      // Confirma banner visível mas não bloqueante.
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsOneWidget,
+      );
+
+      await tester.scrollUntilVisible(
+        find.byType(FilledButton),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byType(FilledButton));
+      await tester.pumpAndSettle();
+
+      // O abastecimento retroativo deve ter sido persistido.
+      final lista = await db.abastecimentosDao.listByVeiculo('ABC1D23');
+      expect(lista, hasLength(2));
+      expect(lista.map((a) => a.km), containsAll([50000, 48000]));
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets(
+    'RF-06 — campo km apagado: banner some (campo vazio não dispara aviso)',
+    (tester) async {
+      await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 1, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 240,
+          litros: 40,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Acende o banner.
+      await tester.enterText(_byKey('abast_km'), '45000');
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsOneWidget,
+      );
+
+      // Apaga o campo.
+      await tester.enterText(_byKey('abast_km'), '');
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('menor que o último registrado'),
+        findsNothing,
+      );
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('RF-06 — modo edição: alterar km para retroativo exibe banner', (
+    tester,
+  ) async {
+    // Insere um abastecimento existente com km = 50 000 e outro com 45 000
+    // (o maior é 50 000 — o do id será 50 000, que ao ser editado para
+    // 44 000 deve mostrar aviso, pois 44 000 < 50 000).
+    final id = await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 3, 1),
+        km: 50000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 300,
+        litros: 50,
+      ),
+    );
+    // Segundo abastecimento com km maior para servir de referência.
+    await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 6, 1),
+        km: 60000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 300,
+        litros: 50,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, id: id);
+
+    // Aguarda o carregamento do modo edição.
+    await tester.pumpAndSettle();
+
+    // Altera km para valor abaixo do maior registrado (60 000).
+    await tester.enterText(_byKey('abast_km'), '44000');
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('menor que o último registrado'),
+      findsOneWidget,
+    );
+    await _teardownUI(tester);
+  });
+
   testWidgets('veículo álcool-only filtra combustíveis do dropdown', (
     tester,
   ) async {
@@ -341,7 +640,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [appDatabaseProvider.overrideWithValue(dbAlcool)],
-        child: const MaterialApp(home: AbastecimentoFormScreen()),
+        child: const MaterialApp(
+          locale: localeDefault,
+          localizationsDelegates: l10nDelegates,
+          supportedLocales: supportedLocales,
+          home: AbastecimentoFormScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -360,6 +664,140 @@ void main() {
 
     expect(find.text('Álcool'), findsWidgets);
     expect(find.text('Gasolina'), findsNothing);
+    await _teardownUI(tester);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Autocomplete de posto (issue #15)
+  // ---------------------------------------------------------------------------
+
+  testWidgets('autocomplete: campo posto aparece no form', (tester) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+    expect(_byKey('abast_posto'), findsOneWidget);
+    await _teardownUI(tester);
+  });
+
+  testWidgets('autocomplete: digitar no posto mostra sugestões do DAO', (
+    tester,
+  ) async {
+    // Pre-seed do histórico
+    await db.postoSugestaoDao.upsert('Shell Centro');
+    await db.postoSugestaoDao.upsert('Shell Norte');
+
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    await tester.tap(_byKey('abast_posto'));
+    await tester.pump();
+    await tester.enterText(_byKey('abast_posto'), 'Shell');
+    // O optionsBuilder retorna Future<Iterable<String>>.
+    // Bombeia frames para o Future completar e o overlay renderizar.
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Verifica se sugestões aparecem no overlay.
+    // NOTA: Se este teste falhar, o bug está no _PostoAutocomplete dentro do
+    // AbastecimentoFormScreen — o widget em isolamento funciona corretamente
+    // (confirmado em teste mínimo), mas no contexto do form completo as opções
+    // não são exibidas. Ver issue de bug correspondente.
+    expect(
+      find.text('Shell Centro'),
+      findsWidgets,
+      reason: '_PostoAutocomplete deve exibir sugestões do DAO no overlay',
+    );
+    expect(
+      find.text('Shell Norte'),
+      findsWidgets,
+      reason: '_PostoAutocomplete deve exibir sugestões do DAO no overlay',
+    );
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'autocomplete: tocar em sugestão preenche o campo com o valor selecionado',
+    (tester) async {
+      await db.postoSugestaoDao.upsert('Ipiranga Centro');
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(_byKey('abast_posto'));
+      await tester.pump();
+      await tester.enterText(_byKey('abast_posto'), 'Ipiranga');
+      // Aguarda o Future do optionsBuilder completar e o overlay renderizar.
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // Verifica que a sugestão está visível no overlay antes do tap.
+      expect(find.text('Ipiranga Centro'), findsWidgets);
+
+      // Toca na sugestão no overlay — o onSelected do RawAutocomplete é chamado.
+      await tester.tap(find.text('Ipiranga Centro').last);
+      await tester.pumpAndSettle();
+
+      // O campo posto deve conter o texto selecionado.
+      final postoField = tester.widget<TextFormField>(_byKey('abast_posto'));
+      expect(postoField.controller!.text, 'Ipiranga Centro');
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('autocomplete: query sem match não mostra sugestões estranhas', (
+    tester,
+  ) async {
+    await db.postoSugestaoDao.upsert('Ipiranga');
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    await tester.enterText(_byKey('abast_posto'), 'XYZ_NADA');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Ipiranga'), findsNothing);
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'autocomplete: salvar com posto preenchido grava sugestão no DAO',
+    (tester) async {
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.enterText(_byKey('abast_km'), '20000');
+      await tester.enterText(_byKey('abast_preco'), '6');
+      await tester.enterText(_byKey('abast_litros'), '50');
+      await tester.enterText(_byKey('abast_posto'), 'Petrobras Centro');
+
+      await tester.scrollUntilVisible(
+        find.byType(FilledButton),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byType(FilledButton));
+      await tester.pumpAndSettle();
+
+      final sugestoes = await db.postoSugestaoDao.search('Petrobras');
+      expect(sugestoes, contains('Petrobras Centro'));
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('autocomplete: salvar com posto vazio NÃO cria sugestão', (
+    tester,
+  ) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    await tester.enterText(_byKey('abast_km'), '20000');
+    await tester.enterText(_byKey('abast_preco'), '6');
+    await tester.enterText(_byKey('abast_litros'), '50');
+    // Campo posto deixado em branco (não digitamos nada)
+
+    await tester.scrollUntilVisible(
+      find.byType(FilledButton),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byType(FilledButton));
+    await tester.pumpAndSettle();
+
+    final sugestoes = await db.select(db.postosSugestao).get();
+    expect(sugestoes, isEmpty);
     await _teardownUI(tester);
   });
 }

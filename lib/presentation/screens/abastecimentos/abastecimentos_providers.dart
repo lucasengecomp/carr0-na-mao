@@ -11,3 +11,15 @@ final abastecimentosDoVeiculoProvider =
       if (placa == null) return Stream.value(const <Abastecimento>[]);
       return ref.watch(abastecimentosDaoProvider).watchByVeiculo(placa);
     });
+
+/// Último km registrado para o veículo. `null` quando não há nenhum
+/// abastecimento ainda. Usado pela validação não-bloqueante de km (RF-06).
+final ultimoKmProvider = FutureProvider.family<int?, String>((
+  ref,
+  placa,
+) async {
+  final ultimo = await ref
+      .watch(abastecimentosDaoProvider)
+      .lastByVeiculo(placa);
+  return ultimo?.km;
+});

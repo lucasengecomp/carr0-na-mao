@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../helpers/l10n_delegates.dart';
+
 VeiculosCompanion _novo({
   required String placa,
   String? apelido,
@@ -69,7 +71,12 @@ Future<void> _pumpList(WidgetTester tester, AppDatabase db) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(db)],
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        routerConfig: router,
+      ),
     ),
   );
   await _advance(tester);

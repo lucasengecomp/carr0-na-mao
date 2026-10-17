@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../data/database/app_database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../veiculos/veiculos_providers.dart';
 import 'abastecimentos_providers.dart';
 import 'enum_labels.dart';
@@ -14,18 +15,20 @@ class AbastecimentosScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final veiculo = ref.watch(veiculoAtivoProvider);
     final abastecimentos = ref.watch(
       abastecimentosDoVeiculoProvider(veiculo?.placa),
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Abastecimentos')),
+      appBar: AppBar(title: Text(l10n.abastecimentosTitulo)),
       body: veiculo == null
           ? const _SemVeiculo()
           : abastecimentos.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Erro: $e')),
+              error: (e, _) =>
+                  Center(child: Text(l10n.erroGenerico(e.toString()))),
               data: (lista) =>
                   lista.isEmpty ? const _ListaVazia() : _Lista(itens: lista),
             ),
@@ -34,7 +37,7 @@ class AbastecimentosScreen extends ConsumerWidget {
           : FloatingActionButton.extended(
               onPressed: () => context.push('/abastecimentos/novo'),
               icon: const Icon(Icons.add),
-              label: const Text('Abastecer'),
+              label: Text(l10n.abastecimentoFab),
             ),
     );
   }
@@ -45,6 +48,7 @@ class _SemVeiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -53,15 +57,15 @@ class _SemVeiculo extends StatelessWidget {
           children: [
             const Icon(Icons.directions_car_outlined, size: 48),
             const SizedBox(height: 12),
-            const Text(
-              'Cadastre um veículo para começar a registrar abastecimentos.',
+            Text(
+              l10n.semVeiculoCadastrarAbastecimento,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: () => context.push('/veiculos/novo'),
               icon: const Icon(Icons.add),
-              label: const Text('Cadastrar veículo'),
+              label: Text(l10n.botaoCadastrarVeiculo),
             ),
           ],
         ),
@@ -75,13 +79,11 @@ class _ListaVazia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Text(
-          'Nenhum abastecimento registrado ainda.\nToque em "Abastecer" para começar.',
-          textAlign: TextAlign.center,
-        ),
+        padding: const EdgeInsets.all(24),
+        child: Text(l10n.abastecimentoListaVazia, textAlign: TextAlign.center),
       ),
     );
   }
@@ -94,6 +96,7 @@ class _Lista extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView.separated(
       padding: const EdgeInsets.only(bottom: 96),
       itemCount: itens.length,
@@ -102,7 +105,7 @@ class _Lista extends StatelessWidget {
         final a = itens[i];
         return ListTile(
           leading: const Icon(Icons.local_gas_station_outlined),
-          title: Text('${a.tipoCombustivel.label} · ${_fmtKm(a.km)} km'),
+          title: Text('${a.tipoCombustivel.label(l10n)} · ${_fmtKm(a.km)} km'),
           subtitle: Text(
             '${_fmtData(a.data)}'
             '${a.posto != null && a.posto!.isNotEmpty ? ' · ${a.posto}' : ''}',

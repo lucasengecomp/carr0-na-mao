@@ -1,0 +1,542 @@
+import 'package:carro_na_mao/data/database/app_database.dart';
+import 'package:carro_na_mao/data/database/enums.dart';
+import 'package:carro_na_mao/data/providers.dart';
+import 'package:carro_na_mao/presentation/screens/abastecimentos/abastecimentos_list_providers.dart';
+import 'package:carro_na_mao/presentation/screens/abastecimentos/abastecimentos_list_screen.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../helpers/l10n_delegates.dart';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+VeiculosCompanion _novoVeiculo({String placa = 'ABC1D23'}) =>
+    VeiculosCompanion.insert(
+      placa: placa,
+      marca: 'Fiat',
+      modelo: 'Uno',
+      ano: 2020,
+      tipo: TipoVeiculo.carro,
+      combustivel: TipoCombustivelVeiculo.flex,
+      kmInicial: 10000,
+    );
+
+AbastecimentosCompanion _novoAbast({
+  String placa = 'ABC1D23',
+  required DateTime data,
+  required int km,
+  double litros = 40,
+  double precoLitro = 6,
+  double valorTotal = 240,
+  String? posto,
+  TipoCombustivelAbastecimento combustivel =
+      TipoCombustivelAbastecimento.gasolina,
+}) => AbastecimentosCompanion.insert(
+  veiculoPlaca: placa,
+  data: data,
+  km: km,
+  tipoCombustivel: combustivel,
+  precoLitro: precoLitro,
+  valorTotal: valorTotal,
+  litros: litros,
+  posto: Value(posto),
+);
+
+/// Monta a tela com um GoRouter mínimo para suportar navegação.
+/// Registra também as rotas de edição para testar toque na linha.
+Future<void> _pumpScreen(
+  WidgetTester tester, {
+  required AppDatabase db,
+  String? placaAtiva,
+}) async {
+  SharedPreferences.setMockInitialValues(
+    placaAtiva == null ? {} : {'veiculo_selecionado_placa': placaAtiva},
+  );
+
+  final router = GoRouter(
+    initialLocation: '/abastecimentos',
+    routes: [
+      GoRoute(
+        path: '/abastecimentos',
+        builder: (c, s) => const AbastecimentosListScreen(),
+      ),
+      GoRoute(
+        path: '/abastecimentos/novo',
+        builder: (c, s) =>
+            const Scaffold(body: Text('TELA_NOVO_ABASTECIMENTO')),
+      ),
+      GoRoute(
+        path: '/abastecimentos/:id/editar',
+        builder: (c, s) =>
+            Scaffold(body: Text('TELA_EDITAR_${s.pathParameters["id"]}')),
+      ),
+      GoRoute(
+        path: '/veiculos/novo',
+        builder: (c, s) => const Scaffold(body: Text('TELA_NOVO_VEICULO')),
+      ),
+    ],
+  );
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
+      child: MaterialApp.router(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        routerConfig: router,
+      ),
+    ),
+  );
+  // Aguarda stream inicial resolver
+  await tester.pumpAndSettle();
+}
+
+/// Desmonta o widget tree e drena timers do Drift.
+Future<void> _teardownUI(WidgetTester tester) async {
+  await tester.pumpWidget(const SizedBox());
+  await tester.pump(const Duration(milliseconds: 10));
+}
+
+// ---------------------------------------------------------------------------
+// Testes
+// ---------------------------------------------------------------------------
+
+void main() {
+  late AppDatabase db;
+
+  setUp(() {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  // -------------------------------------------------------------------------
+  // Estado sem veículo selecionado
+  // -------------------------------------------------------------------------
+  group('sem veículo cadastrado', () {
+    testWidgets('exibe CTA de cadastro de veículo', (tester) async {
+      await _pumpScreen(tester, db: db);
+
+      expect(find.textContaining('Cadastre um veículo'), findsOneWidget);
+      expect(find.byType(FloatingActionButton), findsNothing);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('botão Cadastrar veículo navega para /veiculos/novo', (
+      tester,
+    ) async {
+      await _pumpScreen(tester, db: db);
+
+      await tester.tap(find.text('Cadastrar veículo'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('TELA_NOVO_VEICULO'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Lista vazia (veículo cadastrado, sem abastecimentos)
+  // -------------------------------------------------------------------------
+  group('veículo cadastrado, sem abastecimentos', () {
+    testWidgets('exibe mensagem de lista vazia e FAB', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.textContaining('Nenhum abastecimento'), findsOneWidget);
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('FAB navega para /abastecimentos/novo', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('TELA_NOVO_ABASTECIMENTO'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Lista com itens — cabeçalhos por mês e ordem desc
+  // -------------------------------------------------------------------------
+  group('lista com itens de meses diferentes', () {
+    testWidgets('exibe cabeçalhos de mês para meses distintos', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      // Abastecimentos em março e janeiro de 2026
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 15), km: 300),
+      );
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 1, 10), km: 100),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.text('Março 2026'), findsOneWidget);
+      expect(find.text('Janeiro 2026'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('itens do mesmo mês compartilham o mesmo cabeçalho', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 15), km: 300),
+      );
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 5), km: 200),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Apenas um cabeçalho de março
+      expect(find.text('Março 2026'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets(
+      'cabeçalhos aparecem em ordem descendente (mês mais recente primeiro)',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(data: DateTime(2026, 1, 10), km: 100),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(data: DateTime(2026, 3, 15), km: 300),
+        );
+
+        await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+        final marcoPos = tester.getTopLeft(find.text('Março 2026')).dy;
+        final janeiroPos = tester.getTopLeft(find.text('Janeiro 2026')).dy;
+
+        // Março (mais recente) deve aparecer acima de Janeiro
+        expect(marcoPos, lessThan(janeiroPos));
+        await _teardownUI(tester);
+      },
+    );
+
+    testWidgets('linha exibe data formatada dd/mm/aaaa', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 5), km: 200),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.textContaining('05/03/2026'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('linha exibe valor em R\$', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 5), km: 200, valorTotal: 300),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.textContaining('R\$'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('linha exibe posto quando informado', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 5), km: 200, posto: 'Shell Centro'),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.textContaining('Shell Centro'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Filtros de período (FilterChips)
+  // -------------------------------------------------------------------------
+  group('filtros de período', () {
+    testWidgets('chip "Tudo" está selecionado por padrão', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // O FilterChip "Tudo" deve estar selecionado inicialmente
+      final chips = tester.widgetList<FilterChip>(find.byType(FilterChip));
+      final todoChip = chips.firstWhere(
+        (c) => (c.label as Text).data == 'Tudo',
+      );
+      expect(todoChip.selected, isTrue);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('todos os quatro chips de período são exibidos', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.text('Últimos 30d'), findsOneWidget);
+      expect(find.text('Últimos 90d'), findsOneWidget);
+      expect(find.text('Últimos 12m'), findsOneWidget);
+      expect(find.text('Tudo'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('tocar chip de período atualiza seleção', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(find.text('Últimos 30d'));
+      await tester.pumpAndSettle();
+
+      final chips = tester.widgetList<FilterChip>(find.byType(FilterChip));
+      final chip30d = chips.firstWhere(
+        (c) => (c.label as Text).data == 'Últimos 30d',
+      );
+      final chipTudo = chips.firstWhere(
+        (c) => (c.label as Text).data == 'Tudo',
+      );
+
+      expect(chip30d.selected, isTrue);
+      expect(chipTudo.selected, isFalse);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('filtro 30d oculta abastecimento mais antigo que 30 dias', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      final dataAntiga = DateTime.now().subtract(const Duration(days: 60));
+      final dataRecente = DateTime.now().subtract(const Duration(days: 5));
+
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: dataAntiga, km: 100, posto: 'PostoAntigo'),
+      );
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: dataRecente, km: 200, posto: 'PostoRecente'),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Seleciona filtro de 30 dias
+      await tester.tap(find.text('Últimos 30d'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('PostoRecente'), findsOneWidget);
+      expect(find.textContaining('PostoAntigo'), findsNothing);
+      await _teardownUI(tester);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Filtros de combustível (FilterChips)
+  // -------------------------------------------------------------------------
+  group('filtros de combustível', () {
+    testWidgets('chip "Todos" de combustível está selecionado por padrão', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      final chips = tester.widgetList<FilterChip>(find.byType(FilterChip));
+      final todosChip = chips.firstWhere(
+        (c) => (c.label as Text).data == 'Todos',
+      );
+      expect(todosChip.selected, isTrue);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('filtro de combustível oculta combustível diferente', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(2026, 3, 1),
+          km: 100,
+          combustivel: TipoCombustivelAbastecimento.gasolina,
+          posto: 'PostoGas',
+        ),
+      );
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(2026, 3, 2),
+          km: 200,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+          posto: 'PostoAlc',
+        ),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Toca no chip de Gasolina para filtrar
+      await tester.tap(find.text('Gasolina'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('PostoGas'), findsOneWidget);
+      expect(find.textContaining('PostoAlc'), findsNothing);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('toque no mesmo chip de combustível desseleciona (toggle)', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(2026, 3, 1),
+          km: 100,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+          posto: 'PostoAlc',
+        ),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Seleciona Gasolina → PostoAlc some
+      await tester.tap(find.text('Gasolina'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('PostoAlc'), findsNothing);
+
+      // Toca novamente → desseleciona → PostoAlc reaparece
+      await tester.tap(find.text('Gasolina'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('PostoAlc'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Navegação por toque na linha
+  // -------------------------------------------------------------------------
+  group('navegação por toque na linha', () {
+    testWidgets('toque numa linha navega para /abastecimentos/:id/editar', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      final id = await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 1), km: 100, posto: 'Shell'),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(find.textContaining('Shell'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('TELA_EDITAR_$id'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Formatação de km e litros
+  // -------------------------------------------------------------------------
+  group('formatação', () {
+    testWidgets('km grande é formatado com separador de milhar (ponto)', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 5), km: 123456),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.textContaining('123.456'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('litros são formatados com vírgula decimal', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 5), km: 100, litros: 40.50),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.textContaining('40,50'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('valor monetário grande é formatado com separador de milhar', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 5), km: 100, valorTotal: 1234.56),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.textContaining('1.234,56'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Estado de erro
+  // -------------------------------------------------------------------------
+  group('estado de erro', () {
+    testWidgets('quando o stream emite erro, exibe mensagem de erro', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+
+      SharedPreferences.setMockInitialValues(const {
+        'veiculo_selecionado_placa': 'ABC1D23',
+      });
+
+      final router = GoRouter(
+        initialLocation: '/abastecimentos',
+        routes: [
+          GoRoute(
+            path: '/abastecimentos',
+            builder: (c, s) => const AbastecimentosListScreen(),
+          ),
+          GoRoute(
+            path: '/veiculos/novo',
+            builder: (c, s) => const Scaffold(body: Text('TELA_NOVO_VEICULO')),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appDatabaseProvider.overrideWithValue(db),
+            abastecimentosFiltradosProvider.overrideWith(
+              (ref, placa) =>
+                  Stream<List<Abastecimento>>.error('Erro simulado'),
+            ),
+          ],
+          child: MaterialApp.router(
+            locale: localeDefault,
+            localizationsDelegates: l10nDelegates,
+            supportedLocales: supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Erro'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+  });
+}

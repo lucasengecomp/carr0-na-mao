@@ -96,6 +96,8 @@ class Lembretes extends Table {
 @DataClassName('PostoSugestao')
 class PostosSugestao extends Table {
   TextColumn get nome => text()();
+  DateTimeColumn get ultimoUso => dateTime()();
+  IntColumn get usoCount => integer().withDefault(const Constant(1))();
 
   @override
   Set<Column<Object>> get primaryKey => {nome};

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/app_localizations.dart';
+
 /// Scaffold raiz com NavigationBar (M3) ligando as abas de nível 1.
 class ShellScaffold extends StatelessWidget {
   const ShellScaffold({required this.navigationShell, super.key});
@@ -9,6 +11,7 @@ class ShellScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
@@ -17,31 +20,31 @@ class ShellScaffold extends StatelessWidget {
           i,
           initialLocation: i == navigationShell.currentIndex,
         ),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Home',
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard),
+            label: l10n.navHome,
           ),
           NavigationDestination(
-            icon: Icon(Icons.local_gas_station_outlined),
-            selectedIcon: Icon(Icons.local_gas_station),
-            label: 'Abastecer',
+            icon: const Icon(Icons.local_gas_station_outlined),
+            selectedIcon: const Icon(Icons.local_gas_station),
+            label: l10n.navAbastecer,
           ),
           NavigationDestination(
-            icon: Icon(Icons.build_outlined),
-            selectedIcon: Icon(Icons.build),
-            label: 'Manutenção',
+            icon: const Icon(Icons.build_outlined),
+            selectedIcon: const Icon(Icons.build),
+            label: l10n.navManutencao,
           ),
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Despesas',
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long),
+            label: l10n.navDespesas,
           ),
           NavigationDestination(
-            icon: Icon(Icons.notifications_outlined),
-            selectedIcon: Icon(Icons.notifications),
-            label: 'Lembretes',
+            icon: const Icon(Icons.notifications_outlined),
+            selectedIcon: const Icon(Icons.notifications),
+            label: l10n.navLembretes,
           ),
         ],
       ),

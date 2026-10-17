@@ -8,7 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../data/providers.dart';
+import '../../../l10n/app_localizations.dart';
 import '../veiculos/veiculos_providers.dart';
+import 'abastecimentos_providers.dart' show ultimoKmProvider;
 import 'enum_labels.dart';
 
 /// Form de abastecimento. Em modo novo, usa o veículo ativo da Home; em modo
@@ -44,6 +46,15 @@ class _AbastecimentoFormScreenState
   /// Guard para evitar recursão: quando `_recalcular` escreve num controller,
   /// o `onChanged` dispara novamente. Esta flag descarta esse re-enter.
   bool _writingProgrammatically = false;
+
+  /// `true` quando o km informado é menor que o último registrado para o
+  /// veículo — exibe banner de aviso não-bloqueante (RF-06).
+  bool _avisoKmRetroativo = false;
+
+  /// Último km registrado para o veículo ativo, mantido sincronizado com o
+  /// [ultimoKmProvider] pelo `build`. Permite que `_verificarKm` opere
+  /// sincronamente sem `unawaited`, evitando race conditions em testes.
+  int? _ultimoKmCache;
 
   /// Veículo em modo edição (carregado pelo id). Em modo novo, o veículo
   /// vem reativamente do [veiculoAtivoProvider] no build.
@@ -213,6 +224,7 @@ class _AbastecimentoFormScreenState
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     try {
       final preco = _parseDecimal(_precoCtrl.text)!;
       final litros = _parseDecimal(_litrosCtrl.text)!;
@@ -249,36 +261,62 @@ class _AbastecimentoFormScreenState
           ),
         );
       }
+      // Salva o posto no histórico de sugestões (se preenchido)
+      if (postoTxt.isNotEmpty) {
+        await ref.read(postoSugestaoDaoProvider).upsert(postoTxt);
+      }
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } on Object catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Não foi possível salvar: $e')),
+        SnackBar(content: Text(l10n.abastecimentoNaoPossivel(e.toString()))),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
+  /// Verifica se o km digitado é retroativo em relação ao último abastecimento
+  /// e atualiza [_avisoKmRetroativo]. Usa [_ultimoKmCache], que é mantido
+  /// sincronizado pelo `build` via `ref.watch(ultimoKmProvider)`, para operar
+  /// de forma síncrona e evitar race conditions (RF-06).
+  void _verificarKm() {
+    final kmDigitado = int.tryParse(_kmCtrl.text);
+    final retroativo =
+        kmDigitado != null &&
+        _ultimoKmCache != null &&
+        kmDigitado < _ultimoKmCache!;
+    if (retroativo != _avisoKmRetroativo) {
+      setState(() => _avisoKmRetroativo = retroativo);
+    }
+  }
+
   String? _validateKm(String? v) {
-    if (v == null || v.isEmpty) return 'Obrigatório';
+    final l10n = AppLocalizations.of(context)!;
+    if (v == null || v.isEmpty) return l10n.validacaoObrigatorio;
     final km = int.tryParse(v);
-    if (km == null || km < 0) return 'Km inválido';
+    if (km == null || km < 0) return l10n.validacaoKmInvalido;
     return null;
   }
 
   String? _validateDecimal(String? v) {
-    if (v == null || v.isEmpty) return 'Preencha 2 dos 3 campos';
+    final l10n = AppLocalizations.of(context)!;
+    if (v == null || v.isEmpty) return l10n.validacaoDecimalObrigatorio;
     final n = _parseDecimal(v);
-    if (n == null || n <= 0) return 'Valor inválido';
+    if (n == null || n <= 0) return l10n.validacaoValorInvalido;
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEdit ? 'Editar abastecimento' : 'Novo abastecimento'),
+        title: Text(
+          _isEdit
+              ? l10n.abastecimentoEditarTitulo
+              : l10n.abastecimentoNovoTitulo,
+        ),
       ),
       body: _isEdit ? _buildEditBody() : _buildNewBody(),
     );
@@ -293,12 +331,13 @@ class _AbastecimentoFormScreenState
   }
 
   Widget _buildNewBody() {
+    final l10n = AppLocalizations.of(context)!;
     // Aguarda o stream do Drift resolver para distinguir "ainda carregando"
     // de "não há veículo cadastrado".
     final ativos = ref.watch(veiculosAtivosProvider);
     return ativos.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Erro: $e')),
+      error: (e, _) => Center(child: Text(l10n.erroGenerico(e.toString()))),
       data: (_) {
         final veiculo = ref.watch(veiculoAtivoProvider);
         if (veiculo == null) return const _AvisoSemVeiculo();
@@ -309,11 +348,19 @@ class _AbastecimentoFormScreenState
   }
 
   Widget _buildForm(Veiculo veiculo) {
+    final l10n = AppLocalizations.of(context)!;
     final combustiveis = combustiveisParaVeiculo(veiculo.combustivel);
     final combustivelSelecionado =
         _combustivel != null && combustiveis.contains(_combustivel)
         ? _combustivel
         : combustiveis.first;
+
+    // Sincroniza _ultimoKmCache com o FutureProvider para que _verificarKm
+    // opere de forma síncrona (sem unawaited) — evita race condition em testes.
+    // Atribuição direta durante build é segura pois _ultimoKmCache é apenas um
+    // cache auxiliar e não dispara setState.
+    final ultimoKmAsync = ref.watch(ultimoKmProvider(veiculo.placa));
+    _ultimoKmCache = ultimoKmAsync.asData?.value;
 
     return Form(
       key: _formKey,
@@ -327,7 +374,9 @@ class _AbastecimentoFormScreenState
             InkWell(
               onTap: () => unawaited(_escolherData()),
               child: InputDecorator(
-                decoration: const InputDecoration(labelText: 'Data'),
+                decoration: InputDecoration(
+                  labelText: l10n.abastecimentoCampoData,
+                ),
                 child: Text(_fmtData(_data)),
               ),
             ),
@@ -335,28 +384,37 @@ class _AbastecimentoFormScreenState
             TextFormField(
               key: const Key('abast_km'),
               controller: _kmCtrl,
-              decoration: const InputDecoration(labelText: 'Hodômetro (km)'),
+              decoration: InputDecoration(
+                labelText: l10n.abastecimentoCampoHodometro,
+              ),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               validator: _validateKm,
+              onChanged: (_) => _verificarKm(),
             ),
+            if (_avisoKmRetroativo) ...[
+              const SizedBox(height: 8),
+              _AvisoKmRetroativo(mensagem: l10n.abastecimentoAvisoKmRetroativo),
+            ],
             const SizedBox(height: 12),
             DropdownButtonFormField<TipoCombustivelAbastecimento>(
               initialValue: combustivelSelecionado,
-              decoration: const InputDecoration(labelText: 'Combustível'),
+              decoration: InputDecoration(
+                labelText: l10n.abastecimentoCampoCombustivel,
+              ),
               onChanged: (v) => setState(() => _combustivel = v),
               items: [
                 for (final c in combustiveis)
-                  DropdownMenuItem(value: c, child: Text(c.label)),
+                  DropdownMenuItem(value: c, child: Text(c.label(l10n))),
               ],
             ),
             const SizedBox(height: 12),
             TextFormField(
               key: const Key('abast_preco'),
               controller: _precoCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Preço por litro (R\$)',
-                helperText: 'Preencha 2 dos 3 e o terceiro é calculado.',
+              decoration: InputDecoration(
+                labelText: l10n.abastecimentoCampoPreco,
+                helperText: l10n.abastecimentoCampoPrecoHelper,
               ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -369,7 +427,9 @@ class _AbastecimentoFormScreenState
             TextFormField(
               key: const Key('abast_litros'),
               controller: _litrosCtrl,
-              decoration: const InputDecoration(labelText: 'Litros'),
+              decoration: InputDecoration(
+                labelText: l10n.abastecimentoCampoLitros,
+              ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
@@ -381,7 +441,9 @@ class _AbastecimentoFormScreenState
             TextFormField(
               key: const Key('abast_valor'),
               controller: _valorCtrl,
-              decoration: const InputDecoration(labelText: 'Valor total (R\$)'),
+              decoration: InputDecoration(
+                labelText: l10n.abastecimentoCampoValorTotal,
+              ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
@@ -390,19 +452,12 @@ class _AbastecimentoFormScreenState
               onChanged: (_) => _recalcular(_CampoCalculo.valor),
             ),
             const SizedBox(height: 12),
-            TextFormField(
-              key: const Key('abast_posto'),
-              controller: _postoCtrl,
-              decoration: const InputDecoration(labelText: 'Posto (opcional)'),
-              textCapitalization: TextCapitalization.words,
-            ),
+            _PostoAutocomplete(controller: _postoCtrl),
             const SizedBox(height: 12),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Tanque cheio'),
-              subtitle: const Text(
-                'Importante para cálculo de consumo (km/L).',
-              ),
+              title: Text(l10n.abastecimentoTanqueCheio),
+              subtitle: Text(l10n.abastecimentoTanqueCheioSubtitulo),
               value: _tanqueCheio,
               onChanged: (v) => setState(() => _tanqueCheio = v),
             ),
@@ -415,7 +470,7 @@ class _AbastecimentoFormScreenState
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Salvar'),
+                  : Text(l10n.botaoSalvar),
             ),
           ],
         ),
@@ -429,17 +484,59 @@ class _AvisoSemVeiculo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.directions_car_outlined, size: 48),
-            SizedBox(height: 12),
+            const Icon(Icons.directions_car_outlined, size: 48),
+            const SizedBox(height: 12),
             Text(
-              'Cadastre um veículo antes de registrar abastecimentos.',
+              l10n.semVeiculoCadastrarAbastecimentoForm,
               textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Banner inline exibido quando o km informado é menor que o último
+/// registrado para o veículo. Não bloqueia o salvamento (RF-06).
+class _AvisoKmRetroativo extends StatelessWidget {
+  const _AvisoKmRetroativo({required this.mensagem});
+
+  final String mensagem;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: colorScheme.tertiaryContainer,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              size: 20,
+              color: colorScheme.onTertiaryContainer,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                mensagem,
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: colorScheme.onTertiaryContainer),
+              ),
             ),
           ],
         ),
@@ -474,6 +571,113 @@ class _VeiculoChip extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Widget de autocomplete para o campo Posto.
+/// Busca sugestões no [PostoSugestaoDao] ordenadas por frequência de uso.
+class _PostoAutocomplete extends ConsumerStatefulWidget {
+  const _PostoAutocomplete({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  ConsumerState<_PostoAutocomplete> createState() => _PostoAutocompleteState();
+}
+
+class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
+  /// Controller e FocusNode próprios, criados uma única vez no initState.
+  /// Evita que o fieldViewBuilder execute atribuição em todo build().
+  late final TextEditingController _fieldController;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializa com o valor atual do controller externo (caso de edição).
+    _fieldController = TextEditingController(text: widget.controller.text);
+    _focusNode = FocusNode();
+    // Sincroniza field → controller externo (digitação normal).
+    // Não há listener no sentido inverso para evitar loop de notificações
+    // que dispara _onChangedField múltiplas vezes e descarta os resultados.
+    _fieldController.addListener(_syncToExternal);
+  }
+
+  void _syncToExternal() {
+    if (widget.controller.text != _fieldController.text) {
+      widget.controller.text = _fieldController.text;
+    }
+  }
+
+  @override
+  void dispose() {
+    _fieldController.removeListener(_syncToExternal);
+    _fieldController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<Iterable<String>> _fetchSugestoes(String query) async {
+    final dao = ref.read(postoSugestaoDaoProvider);
+    return dao.search(query);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return RawAutocomplete<String>(
+      textEditingController: _fieldController,
+      focusNode: _focusNode,
+      optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
+      optionsBuilder: (textEditingValue) {
+        final query = textEditingValue.text.trim();
+        if (query.isEmpty) return const Iterable<String>.empty();
+        return _fetchSugestoes(query);
+      },
+      displayStringForOption: (s) => s,
+      fieldViewBuilder:
+          (context, fieldController, focusNode, onFieldSubmitted) {
+            return TextFormField(
+              key: const Key('abast_posto'),
+              controller: fieldController,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                labelText: l10n.abastecimentoCampoPosto,
+              ),
+              textCapitalization: TextCapitalization.words,
+              onFieldSubmitted: (_) => onFieldSubmitted(),
+            );
+          },
+      onSelected: (option) {
+        // onSelected é chamado pelo RawAutocomplete que já atualiza
+        // _fieldController; atualizamos o controller externo também.
+        widget.controller.text = option;
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (context, index) {
+                  final option = options.elementAt(index);
+                  return ListTile(
+                    dense: true,
+                    title: Text(option),
+                    onTap: () => onSelected(option),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

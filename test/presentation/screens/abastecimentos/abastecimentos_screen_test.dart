@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../helpers/l10n_delegates.dart';
+
 Future<void> _pumpScreen(
   WidgetTester tester, {
   required AppDatabase db,
@@ -20,7 +22,12 @@ Future<void> _pumpScreen(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [appDatabaseProvider.overrideWithValue(db)],
-      child: const MaterialApp(home: AbastecimentosScreen()),
+      child: const MaterialApp(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        home: AbastecimentosScreen(),
+      ),
     ),
   );
   await tester.pumpAndSettle();
