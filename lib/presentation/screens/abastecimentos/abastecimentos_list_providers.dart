@@ -61,8 +61,7 @@ class FiltrosAbastecimento {
 const Object _sentinel = Object();
 
 /// Notifier que guarda e expõe os filtros ativos da tela de lista.
-class FiltrosAbastecimentoNotifier
-    extends Notifier<FiltrosAbastecimento> {
+class FiltrosAbastecimentoNotifier extends Notifier<FiltrosAbastecimento> {
   @override
   FiltrosAbastecimento build() => const FiltrosAbastecimento();
 
@@ -90,9 +89,11 @@ final abastecimentosFiltradosProvider =
     StreamProvider.family<List<Abastecimento>, String?>((ref, placa) {
       if (placa == null) return Stream.value(const <Abastecimento>[]);
       final filtros = ref.watch(filtrosAbastecimentoProvider);
-      return ref.watch(abastecimentosDaoProvider).watchFiltered(
-        placa: placa,
-        desde: filtros.periodo.desde,
-        tipoCombustivel: filtros.tipoCombustivel,
-      );
+      return ref
+          .watch(abastecimentosDaoProvider)
+          .watchFiltered(
+            placa: placa,
+            desde: filtros.periodo.desde,
+            tipoCombustivel: filtros.tipoCombustivel,
+          );
     });

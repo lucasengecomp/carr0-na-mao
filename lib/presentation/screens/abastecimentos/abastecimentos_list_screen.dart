@@ -36,8 +36,7 @@ class AbastecimentosListScreen extends ConsumerWidget {
       body: veiculo == null
           ? const _SemVeiculo()
           : abastecimentos.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Erro: $e')),
               data: (lista) => lista.isEmpty
                   ? const _ListaVazia()
@@ -164,7 +163,8 @@ class _ListaAgrupada extends StatelessWidget {
     );
   }
 
-  String _chaveAnoMes(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}';
+  String _chaveAnoMes(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}';
 
   String _labelMes(DateTime d) {
     const meses = [
@@ -204,9 +204,8 @@ class _CabecalhoMes extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+        style: Theme.of(context).textTheme.labelLarge
+            ?.copyWith(color: Theme.of(context).colorScheme.primary),
       ),
     );
   }
