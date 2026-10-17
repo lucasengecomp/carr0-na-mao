@@ -1838,6 +1838,17 @@ class $DespesasRecorrentesTable extends DespesasRecorrentes
       ).withConverter<FrequenciaDespesa>(
         $DespesasRecorrentesTable.$converterfrequencia,
       );
+  static const VerificationMeta _diaDoMesMeta = const VerificationMeta(
+    'diaDoMes',
+  );
+  @override
+  late final GeneratedColumn<int> diaDoMes = GeneratedColumn<int>(
+    'dia_do_mes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _dataInicioMeta = const VerificationMeta(
     'dataInicio',
   );
@@ -1860,6 +1871,19 @@ class $DespesasRecorrentesTable extends DespesasRecorrentes
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _ativaMeta = const VerificationMeta('ativa');
+  @override
+  late final GeneratedColumn<bool> ativa = GeneratedColumn<bool>(
+    'ativa',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("ativa" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1868,8 +1892,10 @@ class $DespesasRecorrentesTable extends DespesasRecorrentes
     categoria,
     valor,
     frequencia,
+    diaDoMes,
     dataInicio,
     dataFim,
+    ativa,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1913,6 +1939,12 @@ class $DespesasRecorrentesTable extends DespesasRecorrentes
     } else if (isInserting) {
       context.missing(_valorMeta);
     }
+    if (data.containsKey('dia_do_mes')) {
+      context.handle(
+        _diaDoMesMeta,
+        diaDoMes.isAcceptableOrUnknown(data['dia_do_mes']!, _diaDoMesMeta),
+      );
+    }
     if (data.containsKey('data_inicio')) {
       context.handle(
         _dataInicioMeta,
@@ -1925,6 +1957,12 @@ class $DespesasRecorrentesTable extends DespesasRecorrentes
       context.handle(
         _dataFimMeta,
         dataFim.isAcceptableOrUnknown(data['data_fim']!, _dataFimMeta),
+      );
+    }
+    if (data.containsKey('ativa')) {
+      context.handle(
+        _ativaMeta,
+        ativa.isAcceptableOrUnknown(data['ativa']!, _ativaMeta),
       );
     }
     return context;
@@ -1964,6 +2002,10 @@ class $DespesasRecorrentesTable extends DespesasRecorrentes
           data['${effectivePrefix}frequencia'],
         )!,
       ),
+      diaDoMes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}dia_do_mes'],
+      ),
       dataInicio: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}data_inicio'],
@@ -1972,6 +2014,10 @@ class $DespesasRecorrentesTable extends DespesasRecorrentes
         DriftSqlType.dateTime,
         data['${effectivePrefix}data_fim'],
       ),
+      ativa: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}ativa'],
+      )!,
     );
   }
 
@@ -1998,8 +2044,13 @@ class DespesaRecorrente extends DataClass
   final CategoriaDespesa categoria;
   final double valor;
   final FrequenciaDespesa frequencia;
+
+  /// Dia do mês (1-28) usado para despesas mensais e anuais.
+  /// Nulo para despesas únicas.
+  final int? diaDoMes;
   final DateTime dataInicio;
   final DateTime? dataFim;
+  final bool ativa;
   const DespesaRecorrente({
     required this.id,
     required this.veiculoPlaca,
@@ -2007,8 +2058,10 @@ class DespesaRecorrente extends DataClass
     required this.categoria,
     required this.valor,
     required this.frequencia,
+    this.diaDoMes,
     required this.dataInicio,
     this.dataFim,
+    required this.ativa,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2027,10 +2080,14 @@ class DespesaRecorrente extends DataClass
         $DespesasRecorrentesTable.$converterfrequencia.toSql(frequencia),
       );
     }
+    if (!nullToAbsent || diaDoMes != null) {
+      map['dia_do_mes'] = Variable<int>(diaDoMes);
+    }
     map['data_inicio'] = Variable<DateTime>(dataInicio);
     if (!nullToAbsent || dataFim != null) {
       map['data_fim'] = Variable<DateTime>(dataFim);
     }
+    map['ativa'] = Variable<bool>(ativa);
     return map;
   }
 
@@ -2042,10 +2099,14 @@ class DespesaRecorrente extends DataClass
       categoria: Value(categoria),
       valor: Value(valor),
       frequencia: Value(frequencia),
+      diaDoMes: diaDoMes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(diaDoMes),
       dataInicio: Value(dataInicio),
       dataFim: dataFim == null && nullToAbsent
           ? const Value.absent()
           : Value(dataFim),
+      ativa: Value(ativa),
     );
   }
 
@@ -2065,8 +2126,10 @@ class DespesaRecorrente extends DataClass
       frequencia: $DespesasRecorrentesTable.$converterfrequencia.fromJson(
         serializer.fromJson<String>(json['frequencia']),
       ),
+      diaDoMes: serializer.fromJson<int?>(json['diaDoMes']),
       dataInicio: serializer.fromJson<DateTime>(json['dataInicio']),
       dataFim: serializer.fromJson<DateTime?>(json['dataFim']),
+      ativa: serializer.fromJson<bool>(json['ativa']),
     );
   }
   @override
@@ -2083,8 +2146,10 @@ class DespesaRecorrente extends DataClass
       'frequencia': serializer.toJson<String>(
         $DespesasRecorrentesTable.$converterfrequencia.toJson(frequencia),
       ),
+      'diaDoMes': serializer.toJson<int?>(diaDoMes),
       'dataInicio': serializer.toJson<DateTime>(dataInicio),
       'dataFim': serializer.toJson<DateTime?>(dataFim),
+      'ativa': serializer.toJson<bool>(ativa),
     };
   }
 
@@ -2095,8 +2160,10 @@ class DespesaRecorrente extends DataClass
     CategoriaDespesa? categoria,
     double? valor,
     FrequenciaDespesa? frequencia,
+    Value<int?> diaDoMes = const Value.absent(),
     DateTime? dataInicio,
     Value<DateTime?> dataFim = const Value.absent(),
+    bool? ativa,
   }) => DespesaRecorrente(
     id: id ?? this.id,
     veiculoPlaca: veiculoPlaca ?? this.veiculoPlaca,
@@ -2104,8 +2171,10 @@ class DespesaRecorrente extends DataClass
     categoria: categoria ?? this.categoria,
     valor: valor ?? this.valor,
     frequencia: frequencia ?? this.frequencia,
+    diaDoMes: diaDoMes.present ? diaDoMes.value : this.diaDoMes,
     dataInicio: dataInicio ?? this.dataInicio,
     dataFim: dataFim.present ? dataFim.value : this.dataFim,
+    ativa: ativa ?? this.ativa,
   );
   DespesaRecorrente copyWithCompanion(DespesasRecorrentesCompanion data) {
     return DespesaRecorrente(
@@ -2119,10 +2188,12 @@ class DespesaRecorrente extends DataClass
       frequencia: data.frequencia.present
           ? data.frequencia.value
           : this.frequencia,
+      diaDoMes: data.diaDoMes.present ? data.diaDoMes.value : this.diaDoMes,
       dataInicio: data.dataInicio.present
           ? data.dataInicio.value
           : this.dataInicio,
       dataFim: data.dataFim.present ? data.dataFim.value : this.dataFim,
+      ativa: data.ativa.present ? data.ativa.value : this.ativa,
     );
   }
 
@@ -2135,8 +2206,10 @@ class DespesaRecorrente extends DataClass
           ..write('categoria: $categoria, ')
           ..write('valor: $valor, ')
           ..write('frequencia: $frequencia, ')
+          ..write('diaDoMes: $diaDoMes, ')
           ..write('dataInicio: $dataInicio, ')
-          ..write('dataFim: $dataFim')
+          ..write('dataFim: $dataFim, ')
+          ..write('ativa: $ativa')
           ..write(')'))
         .toString();
   }
@@ -2149,8 +2222,10 @@ class DespesaRecorrente extends DataClass
     categoria,
     valor,
     frequencia,
+    diaDoMes,
     dataInicio,
     dataFim,
+    ativa,
   );
   @override
   bool operator ==(Object other) =>
@@ -2162,8 +2237,10 @@ class DespesaRecorrente extends DataClass
           other.categoria == this.categoria &&
           other.valor == this.valor &&
           other.frequencia == this.frequencia &&
+          other.diaDoMes == this.diaDoMes &&
           other.dataInicio == this.dataInicio &&
-          other.dataFim == this.dataFim);
+          other.dataFim == this.dataFim &&
+          other.ativa == this.ativa);
 }
 
 class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
@@ -2173,8 +2250,10 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
   final Value<CategoriaDespesa> categoria;
   final Value<double> valor;
   final Value<FrequenciaDespesa> frequencia;
+  final Value<int?> diaDoMes;
   final Value<DateTime> dataInicio;
   final Value<DateTime?> dataFim;
+  final Value<bool> ativa;
   const DespesasRecorrentesCompanion({
     this.id = const Value.absent(),
     this.veiculoPlaca = const Value.absent(),
@@ -2182,8 +2261,10 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
     this.categoria = const Value.absent(),
     this.valor = const Value.absent(),
     this.frequencia = const Value.absent(),
+    this.diaDoMes = const Value.absent(),
     this.dataInicio = const Value.absent(),
     this.dataFim = const Value.absent(),
+    this.ativa = const Value.absent(),
   });
   DespesasRecorrentesCompanion.insert({
     this.id = const Value.absent(),
@@ -2192,8 +2273,10 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
     required CategoriaDespesa categoria,
     required double valor,
     required FrequenciaDespesa frequencia,
+    this.diaDoMes = const Value.absent(),
     required DateTime dataInicio,
     this.dataFim = const Value.absent(),
+    this.ativa = const Value.absent(),
   }) : veiculoPlaca = Value(veiculoPlaca),
        nome = Value(nome),
        categoria = Value(categoria),
@@ -2207,8 +2290,10 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
     Expression<String>? categoria,
     Expression<double>? valor,
     Expression<String>? frequencia,
+    Expression<int>? diaDoMes,
     Expression<DateTime>? dataInicio,
     Expression<DateTime>? dataFim,
+    Expression<bool>? ativa,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2217,8 +2302,10 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
       if (categoria != null) 'categoria': categoria,
       if (valor != null) 'valor': valor,
       if (frequencia != null) 'frequencia': frequencia,
+      if (diaDoMes != null) 'dia_do_mes': diaDoMes,
       if (dataInicio != null) 'data_inicio': dataInicio,
       if (dataFim != null) 'data_fim': dataFim,
+      if (ativa != null) 'ativa': ativa,
     });
   }
 
@@ -2229,8 +2316,10 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
     Value<CategoriaDespesa>? categoria,
     Value<double>? valor,
     Value<FrequenciaDespesa>? frequencia,
+    Value<int?>? diaDoMes,
     Value<DateTime>? dataInicio,
     Value<DateTime?>? dataFim,
+    Value<bool>? ativa,
   }) {
     return DespesasRecorrentesCompanion(
       id: id ?? this.id,
@@ -2239,8 +2328,10 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
       categoria: categoria ?? this.categoria,
       valor: valor ?? this.valor,
       frequencia: frequencia ?? this.frequencia,
+      diaDoMes: diaDoMes ?? this.diaDoMes,
       dataInicio: dataInicio ?? this.dataInicio,
       dataFim: dataFim ?? this.dataFim,
+      ativa: ativa ?? this.ativa,
     );
   }
 
@@ -2269,11 +2360,17 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
         $DespesasRecorrentesTable.$converterfrequencia.toSql(frequencia.value),
       );
     }
+    if (diaDoMes.present) {
+      map['dia_do_mes'] = Variable<int>(diaDoMes.value);
+    }
     if (dataInicio.present) {
       map['data_inicio'] = Variable<DateTime>(dataInicio.value);
     }
     if (dataFim.present) {
       map['data_fim'] = Variable<DateTime>(dataFim.value);
+    }
+    if (ativa.present) {
+      map['ativa'] = Variable<bool>(ativa.value);
     }
     return map;
   }
@@ -2287,8 +2384,10 @@ class DespesasRecorrentesCompanion extends UpdateCompanion<DespesaRecorrente> {
           ..write('categoria: $categoria, ')
           ..write('valor: $valor, ')
           ..write('frequencia: $frequencia, ')
+          ..write('diaDoMes: $diaDoMes, ')
           ..write('dataInicio: $dataInicio, ')
-          ..write('dataFim: $dataFim')
+          ..write('dataFim: $dataFim, ')
+          ..write('ativa: $ativa')
           ..write(')'))
         .toString();
   }
@@ -5898,8 +5997,10 @@ typedef $$DespesasRecorrentesTableCreateCompanionBuilder =
       required CategoriaDespesa categoria,
       required double valor,
       required FrequenciaDespesa frequencia,
+      Value<int?> diaDoMes,
       required DateTime dataInicio,
       Value<DateTime?> dataFim,
+      Value<bool> ativa,
     });
 typedef $$DespesasRecorrentesTableUpdateCompanionBuilder =
     DespesasRecorrentesCompanion Function({
@@ -5909,8 +6010,10 @@ typedef $$DespesasRecorrentesTableUpdateCompanionBuilder =
       Value<CategoriaDespesa> categoria,
       Value<double> valor,
       Value<FrequenciaDespesa> frequencia,
+      Value<int?> diaDoMes,
       Value<DateTime> dataInicio,
       Value<DateTime?> dataFim,
+      Value<bool> ativa,
     });
 
 final class $$DespesasRecorrentesTableReferences
@@ -6001,6 +6104,11 @@ class $$DespesasRecorrentesTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
+  ColumnFilters<int> get diaDoMes => $composableBuilder(
+    column: $table.diaDoMes,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get dataInicio => $composableBuilder(
     column: $table.dataInicio,
     builder: (column) => ColumnFilters(column),
@@ -6008,6 +6116,11 @@ class $$DespesasRecorrentesTableFilterComposer
 
   ColumnFilters<DateTime> get dataFim => $composableBuilder(
     column: $table.dataFim,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ativa => $composableBuilder(
+    column: $table.ativa,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6094,6 +6207,11 @@ class $$DespesasRecorrentesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get diaDoMes => $composableBuilder(
+    column: $table.diaDoMes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get dataInicio => $composableBuilder(
     column: $table.dataInicio,
     builder: (column) => ColumnOrderings(column),
@@ -6101,6 +6219,11 @@ class $$DespesasRecorrentesTableOrderingComposer
 
   ColumnOrderings<DateTime> get dataFim => $composableBuilder(
     column: $table.dataFim,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ativa => $composableBuilder(
+    column: $table.ativa,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6155,6 +6278,9 @@ class $$DespesasRecorrentesTableAnnotationComposer
         builder: (column) => column,
       );
 
+  GeneratedColumn<int> get diaDoMes =>
+      $composableBuilder(column: $table.diaDoMes, builder: (column) => column);
+
   GeneratedColumn<DateTime> get dataInicio => $composableBuilder(
     column: $table.dataInicio,
     builder: (column) => column,
@@ -6162,6 +6288,9 @@ class $$DespesasRecorrentesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get dataFim =>
       $composableBuilder(column: $table.dataFim, builder: (column) => column);
+
+  GeneratedColumn<bool> get ativa =>
+      $composableBuilder(column: $table.ativa, builder: (column) => column);
 
   $$VeiculosTableAnnotationComposer get veiculoPlaca {
     final $$VeiculosTableAnnotationComposer composer = $composerBuilder(
@@ -6258,8 +6387,10 @@ class $$DespesasRecorrentesTableTableManager
                 Value<CategoriaDespesa> categoria = const Value.absent(),
                 Value<double> valor = const Value.absent(),
                 Value<FrequenciaDespesa> frequencia = const Value.absent(),
+                Value<int?> diaDoMes = const Value.absent(),
                 Value<DateTime> dataInicio = const Value.absent(),
                 Value<DateTime?> dataFim = const Value.absent(),
+                Value<bool> ativa = const Value.absent(),
               }) => DespesasRecorrentesCompanion(
                 id: id,
                 veiculoPlaca: veiculoPlaca,
@@ -6267,8 +6398,10 @@ class $$DespesasRecorrentesTableTableManager
                 categoria: categoria,
                 valor: valor,
                 frequencia: frequencia,
+                diaDoMes: diaDoMes,
                 dataInicio: dataInicio,
                 dataFim: dataFim,
+                ativa: ativa,
               ),
           createCompanionCallback:
               ({
@@ -6278,8 +6411,10 @@ class $$DespesasRecorrentesTableTableManager
                 required CategoriaDespesa categoria,
                 required double valor,
                 required FrequenciaDespesa frequencia,
+                Value<int?> diaDoMes = const Value.absent(),
                 required DateTime dataInicio,
                 Value<DateTime?> dataFim = const Value.absent(),
+                Value<bool> ativa = const Value.absent(),
               }) => DespesasRecorrentesCompanion.insert(
                 id: id,
                 veiculoPlaca: veiculoPlaca,
@@ -6287,8 +6422,10 @@ class $$DespesasRecorrentesTableTableManager
                 categoria: categoria,
                 valor: valor,
                 frequencia: frequencia,
+                diaDoMes: diaDoMes,
                 dataInicio: dataInicio,
                 dataFim: dataFim,
+                ativa: ativa,
               ),
           withReferenceMapper: (p0) => p0
               .map(

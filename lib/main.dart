@@ -11,10 +11,25 @@ Future<void> main() async {
   final json = await rootBundle.loadString('assets/data/marcas_modelos.json');
   await container.read(marcasModelosDaoProvider).seedFromJson(json);
 
+  // Rotina de startup: materializa ocorrências até o fim do mês corrente
+  // para todas as despesas ativas (idempotente — não duplica).
+  await _materializarDespesasAtivas(container);
+
   runApp(
     UncontrolledProviderScope(
       container: container,
       child: const CarroNaMaoApp(),
     ),
   );
+}
+
+/// Itera todas as despesas recorrentes ativas e gera as ocorrências até o
+/// fim do mês corrente. Chamado a cada abertura do app (idempotente).
+Future<void> _materializarDespesasAtivas(ProviderContainer container) async {
+  final despesasDao = container.read(despesasRecorrentesDaoProvider);
+  final ocorrenciasDao = container.read(ocorrenciasDespesaDaoProvider);
+  final ativas = await despesasDao.listAtivas();
+  for (final despesa in ativas) {
+    await ocorrenciasDao.materializar(despesa);
+  }
 }

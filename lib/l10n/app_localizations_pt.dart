@@ -325,4 +325,90 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get filtroPeriodoTudo => 'Tudo';
+
+  @override
+  String get despesasTitulo => 'Despesas';
+
+  @override
+  String get despesaNovoTitulo => 'Nova despesa';
+
+  @override
+  String get despesaEditarTitulo => 'Editar despesa';
+
+  @override
+  String despesaNaoPossivel(String erro) {
+    return 'Não foi possível salvar: $erro';
+  }
+
+  @override
+  String get despesaCampoNome => 'Nome';
+
+  @override
+  String get despesaCampoCategoria => 'Categoria';
+
+  @override
+  String get despesaCampoValor => 'Valor (R\$)';
+
+  @override
+  String get despesaCampoFrequencia => 'Frequência';
+
+  @override
+  String get despesaCampoDiaDoMes => 'Dia do mês (1-28)';
+
+  @override
+  String get despesaCampoDiaDoMesHelper =>
+      'Dia de vencimento mensal/anual (máx. 28).';
+
+  @override
+  String get despesaCampoDataInicio => 'Data de início';
+
+  @override
+  String get despesaCampoDataFim => 'Data de fim (opcional)';
+
+  @override
+  String get despesaDataFimVazia => 'Sem data de fim';
+
+  @override
+  String get despesaLimparDataFim => 'Limpar data de fim';
+
+  @override
+  String get despesaCampoAtiva => 'Ativa';
+
+  @override
+  String get despesaCampoAtivaSubtitulo =>
+      'Desative para suspender as ocorrências futuras.';
+
+  @override
+  String get semVeiculoCadastrarDespesaForm =>
+      'Cadastre um veículo antes de registrar despesas.';
+
+  @override
+  String get validacaoDiaDoMesInvalido => 'Dia inválido (1-28)';
+
+  @override
+  String get categoriaDespesaLavagem => 'Lavagem';
+
+  @override
+  String get categoriaDespesaEstacionamento => 'Estacionamento';
+
+  @override
+  String get categoriaDespesaPedagio => 'Pedágio';
+
+  @override
+  String get categoriaDespesaFinanciamento => 'Financiamento';
+
+  @override
+  String get categoriaDespesaOutra => 'Outra';
+
+  @override
+  String get frequenciaDespesaUnica => 'Única';
+
+  @override
+  String get frequenciaDespesaSemanal => 'Semanal';
+
+  @override
+  String get frequenciaDespesaMensal => 'Mensal';
+
+  @override
+  String get frequenciaDespesaAnual => 'Anual';
 }

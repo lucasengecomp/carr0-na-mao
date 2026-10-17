@@ -514,5 +514,145 @@
   "filtroPeriodoTudo": "Tudo",
   "@filtroPeriodoTudo": {
     "description": "Label do filtro de período Tudo"
+  },
+
+  "despesasTitulo": "Despesas",
+  "@despesasTitulo": {
+    "description": "Título da tela de lista de despesas"
+  },
+
+  "despesaNovoTitulo": "Nova despesa",
+  "@despesaNovoTitulo": {
+    "description": "Título da tela de nova despesa recorrente"
+  },
+
+  "despesaEditarTitulo": "Editar despesa",
+  "@despesaEditarTitulo": {
+    "description": "Título da tela de editar despesa recorrente"
+  },
+
+  "despesaNaoPossivel": "Não foi possível salvar: {erro}",
+  "@despesaNaoPossivel": {
+    "description": "Snackbar de erro ao salvar despesa",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
+  "despesaCampoNome": "Nome",
+  "@despesaCampoNome": {
+    "description": "Label do campo Nome no form de despesa"
+  },
+
+  "despesaCampoCategoria": "Categoria",
+  "@despesaCampoCategoria": {
+    "description": "Label do campo Categoria no form de despesa"
+  },
+
+  "despesaCampoValor": "Valor (R$)",
+  "@despesaCampoValor": {
+    "description": "Label do campo Valor no form de despesa"
+  },
+
+  "despesaCampoFrequencia": "Frequência",
+  "@despesaCampoFrequencia": {
+    "description": "Label do campo Frequência no form de despesa"
+  },
+
+  "despesaCampoDiaDoMes": "Dia do mês (1-28)",
+  "@despesaCampoDiaDoMes": {
+    "description": "Label do campo Dia do mês no form de despesa"
+  },
+
+  "despesaCampoDiaDoMesHelper": "Dia de vencimento mensal/anual (máx. 28).",
+  "@despesaCampoDiaDoMesHelper": {
+    "description": "Helper text do campo Dia do mês"
+  },
+
+  "despesaCampoDataInicio": "Data de início",
+  "@despesaCampoDataInicio": {
+    "description": "Label do campo Data de início no form de despesa"
+  },
+
+  "despesaCampoDataFim": "Data de fim (opcional)",
+  "@despesaCampoDataFim": {
+    "description": "Label do campo Data de fim no form de despesa"
+  },
+
+  "despesaDataFimVazia": "Sem data de fim",
+  "@despesaDataFimVazia": {
+    "description": "Texto quando nenhuma data de fim foi selecionada"
+  },
+
+  "despesaLimparDataFim": "Limpar data de fim",
+  "@despesaLimparDataFim": {
+    "description": "Tooltip do botão de limpar data de fim"
+  },
+
+  "despesaCampoAtiva": "Ativa",
+  "@despesaCampoAtiva": {
+    "description": "Label do switch Ativa no form de despesa"
+  },
+
+  "despesaCampoAtivaSubtitulo": "Desative para suspender as ocorrências futuras.",
+  "@despesaCampoAtivaSubtitulo": {
+    "description": "Subtítulo do switch Ativa no form de despesa"
+  },
+
+  "semVeiculoCadastrarDespesaForm": "Cadastre um veículo antes de registrar despesas.",
+  "@semVeiculoCadastrarDespesaForm": {
+    "description": "Aviso no form de despesa quando não há veículo"
+  },
+
+  "validacaoDiaDoMesInvalido": "Dia inválido (1-28)",
+  "@validacaoDiaDoMesInvalido": {
+    "description": "Mensagem de validação de dia do mês inválido"
+  },
+
+  "categoriaDespesaLavagem": "Lavagem",
+  "@categoriaDespesaLavagem": {
+    "description": "Label da categoria de despesa Lavagem"
+  },
+
+  "categoriaDespesaEstacionamento": "Estacionamento",
+  "@categoriaDespesaEstacionamento": {
+    "description": "Label da categoria de despesa Estacionamento"
+  },
+
+  "categoriaDespesaPedagio": "Pedágio",
+  "@categoriaDespesaPedagio": {
+    "description": "Label da categoria de despesa Pedágio"
+  },
+
+  "categoriaDespesaFinanciamento": "Financiamento",
+  "@categoriaDespesaFinanciamento": {
+    "description": "Label da categoria de despesa Financiamento"
+  },
+
+  "categoriaDespesaOutra": "Outra",
+  "@categoriaDespesaOutra": {
+    "description": "Label da categoria de despesa Outra"
+  },
+
+  "frequenciaDespesaUnica": "Única",
+  "@frequenciaDespesaUnica": {
+    "description": "Label da frequência de despesa Única"
+  },
+
+  "frequenciaDespesaSemanal": "Semanal",
+  "@frequenciaDespesaSemanal": {
+    "description": "Label da frequência de despesa Semanal"
+  },
+
+  "frequenciaDespesaMensal": "Mensal",
+  "@frequenciaDespesaMensal": {
+    "description": "Label da frequência de despesa Mensal"
+  },
+
+  "frequenciaDespesaAnual": "Anual",
+  "@frequenciaDespesaAnual": {
+    "description": "Label da frequência de despesa Anual"
   }
 }
