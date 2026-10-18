@@ -21,8 +21,15 @@ class CarroNaMaoApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('pt'), Locale('en')],
-      locale: const Locale('pt'),
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+        Locale('pt'),
+        Locale('en'),
+      ],
+      localeResolutionCallback: (deviceLocale, supportedLocales) {
+        if (deviceLocale?.languageCode == 'pt') return const Locale('pt', 'BR');
+        return const Locale('en');
+      },
       routerConfig: appRouter,
     );
   }

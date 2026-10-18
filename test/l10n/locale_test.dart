@@ -21,7 +21,7 @@ Widget _app({
 }) {
   return MaterialApp(
     locale: locale,
-    supportedLocales: const [Locale('pt'), Locale('en')],
+    supportedLocales: const [Locale('pt', 'BR'), Locale('pt'), Locale('en')],
     localizationsDelegates: const [
       AppLocalizations.delegate,
       GlobalMaterialLocalizations.delegate,
@@ -34,6 +34,26 @@ Widget _app({
         return Scaffold(body: Text(getText(l10n)));
       },
     ),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Helper: monta um MaterialApp mínimo para inspecionar MaterialLocalizations.
+// ---------------------------------------------------------------------------
+Widget _appMaterial({
+  required Locale locale,
+  required Widget Function(BuildContext) builder,
+}) {
+  return MaterialApp(
+    locale: locale,
+    supportedLocales: const [Locale('pt', 'BR'), Locale('pt'), Locale('en')],
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    home: Builder(builder: builder),
   );
 }
 
@@ -259,5 +279,102 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Error: network failure'), findsOneWidget);
     });
+  });
+
+  // -------------------------------------------------------------------------
+  // 5. Regressão #73 — GlobalMaterialLocalizations traduz widgets nativos
+  //    (DatePicker, dialogs) para pt-BR.
+  //    Verifica que MaterialLocalizations.of(context) retorna strings em pt
+  //    quando o locale é pt_BR.
+  // -------------------------------------------------------------------------
+  group('regressão #73 — MaterialLocalizations em pt-BR', () {
+    testWidgets('cancelButtonLabel retorna "Cancelar" em pt_BR', (
+      tester,
+    ) async {
+      String? cancelLabel;
+      await tester.pumpWidget(
+        _appMaterial(
+          locale: const Locale('pt', 'BR'),
+          builder: (context) {
+            cancelLabel = MaterialLocalizations.of(context).cancelButtonLabel;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(cancelLabel, 'Cancelar');
+    });
+
+    testWidgets('okButtonLabel retorna "OK" em pt_BR', (tester) async {
+      String? okLabel;
+      await tester.pumpWidget(
+        _appMaterial(
+          locale: const Locale('pt', 'BR'),
+          builder: (context) {
+            okLabel = MaterialLocalizations.of(context).okButtonLabel;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(okLabel, 'OK');
+    });
+
+    testWidgets('cancelButtonLabel retorna "Cancel" em en (controle)', (
+      tester,
+    ) async {
+      String? cancelLabel;
+      await tester.pumpWidget(
+        _appMaterial(
+          locale: const Locale('en'),
+          builder: (context) {
+            cancelLabel = MaterialLocalizations.of(context).cancelButtonLabel;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(cancelLabel, 'Cancel');
+    });
+
+    testWidgets(
+      'localeResolutionCallback: device em pt mapeia para pt_BR',
+      (tester) async {
+        // Simula o comportamento do localeResolutionCallback de app.dart:
+        // se o deviceLocale tem languageCode "pt", deve resolver para pt_BR.
+        Locale? resolvedLocale;
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('pt', 'BR'),
+              Locale('pt'),
+              Locale('en'),
+            ],
+            localeResolutionCallback: (deviceLocale, supportedLocales) {
+              if (deviceLocale?.languageCode == 'pt') {
+                return const Locale('pt', 'BR');
+              }
+              return const Locale('en');
+            },
+            locale: const Locale('pt'),
+            home: Builder(
+              builder: (context) {
+                resolvedLocale = Localizations.localeOf(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(resolvedLocale?.languageCode, 'pt');
+        expect(resolvedLocale?.countryCode, 'BR');
+      },
+    );
   });
 }

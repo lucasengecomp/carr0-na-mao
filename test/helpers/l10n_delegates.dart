@@ -13,7 +13,13 @@ const List<LocalizationsDelegate<dynamic>> l10nDelegates = [
 
 /// Locales suportados — deve ser incluído junto com [l10nDelegates] para que
 /// o MaterialApp não caia no locale do sistema (inglês).
-const List<Locale> supportedLocales = [Locale('pt'), Locale('en')];
+/// Inclui pt_BR explicitamente para que dispositivos com locale pt_BR
+/// recebam as traduções do Material (DatePicker, dialogs) em português (#73).
+const List<Locale> supportedLocales = [
+  Locale('pt', 'BR'),
+  Locale('pt'),
+  Locale('en'),
+];
 
 /// Locale padrão pt para testes.
 const Locale localeDefault = Locale('pt');
