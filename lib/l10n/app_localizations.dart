@@ -1040,6 +1040,102 @@ abstract class AppLocalizations {
   /// **'Anual'**
   String get frequenciaDespesaAnual;
 
+  /// Título da tela de lista de ocorrências de despesas
+  ///
+  /// In pt, this message translates to:
+  /// **'Despesas'**
+  String get despesasListTitulo;
+
+  /// Label do FAB da tela de lista de ocorrências de despesas
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova despesa'**
+  String get despesasListFab;
+
+  /// Mensagem de empty state na lista de ocorrências de despesas
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma ocorrência encontrada.\nCrie uma despesa recorrente para começar.'**
+  String get despesasListVazia;
+
+  /// Aviso exibido quando não há veículo cadastrado na tela de despesas
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre um veículo para começar a registrar despesas.'**
+  String get semVeiculoCadastrarDespesa;
+
+  /// Label do status de ocorrência Pendente
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get ocorrenciaStatusPendente;
+
+  /// Label do status de ocorrência Paga
+  ///
+  /// In pt, this message translates to:
+  /// **'Paga'**
+  String get ocorrenciaStatusPaga;
+
+  /// Label do status de ocorrência Pulada
+  ///
+  /// In pt, this message translates to:
+  /// **'Pulada'**
+  String get ocorrenciaStatusPulada;
+
+  /// Ação para marcar ocorrência como paga
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar paga'**
+  String get ocorrenciaAcaoMarcarPaga;
+
+  /// Ação para pular ocorrência
+  ///
+  /// In pt, this message translates to:
+  /// **'Pular'**
+  String get ocorrenciaAcaoPular;
+
+  /// Ação para editar o valor pago de uma ocorrência
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar valor pago'**
+  String get ocorrenciaAcaoEditarValor;
+
+  /// Título do dialog de marcar ocorrência como paga
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como paga'**
+  String get ocorrenciaDialogMarcarPagaTitulo;
+
+  /// Título do dialog de editar valor pago
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar valor pago'**
+  String get ocorrenciaDialogEditarValorTitulo;
+
+  /// Label do campo valor no dialog de marcar paga/editar valor
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor pago (R\$)'**
+  String get ocorrenciaDialogCampoValor;
+
+  /// Label do campo data de pagamento no dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de pagamento'**
+  String get ocorrenciaDialogCampoData;
+
+  /// Botão de confirmação nos dialogs de ocorrência
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar'**
+  String get ocorrenciaDialogConfirmar;
+
+  /// Botão de cancelamento nos dialogs de ocorrência
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get ocorrenciaDialogCancelar;
+
   /// Corpo da notificação agendada 7 dias antes da data alvo do lembrete
   ///
   /// In pt, this message translates to:

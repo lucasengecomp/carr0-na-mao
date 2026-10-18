@@ -826,6 +826,86 @@
     "description": "Label da frequência de despesa Anual"
   },
 
+  "despesasListTitulo": "Despesas",
+  "@despesasListTitulo": {
+    "description": "Título da tela de lista de ocorrências de despesas"
+  },
+
+  "despesasListFab": "Nova despesa",
+  "@despesasListFab": {
+    "description": "Label do FAB da tela de lista de ocorrências de despesas"
+  },
+
+  "despesasListVazia": "Nenhuma ocorrência encontrada.\nCrie uma despesa recorrente para começar.",
+  "@despesasListVazia": {
+    "description": "Mensagem de empty state na lista de ocorrências de despesas"
+  },
+
+  "semVeiculoCadastrarDespesa": "Cadastre um veículo para começar a registrar despesas.",
+  "@semVeiculoCadastrarDespesa": {
+    "description": "Aviso exibido quando não há veículo cadastrado na tela de despesas"
+  },
+
+  "ocorrenciaStatusPendente": "Pendente",
+  "@ocorrenciaStatusPendente": {
+    "description": "Label do status de ocorrência Pendente"
+  },
+
+  "ocorrenciaStatusPaga": "Paga",
+  "@ocorrenciaStatusPaga": {
+    "description": "Label do status de ocorrência Paga"
+  },
+
+  "ocorrenciaStatusPulada": "Pulada",
+  "@ocorrenciaStatusPulada": {
+    "description": "Label do status de ocorrência Pulada"
+  },
+
+  "ocorrenciaAcaoMarcarPaga": "Marcar paga",
+  "@ocorrenciaAcaoMarcarPaga": {
+    "description": "Ação para marcar ocorrência como paga"
+  },
+
+  "ocorrenciaAcaoPular": "Pular",
+  "@ocorrenciaAcaoPular": {
+    "description": "Ação para pular ocorrência"
+  },
+
+  "ocorrenciaAcaoEditarValor": "Editar valor pago",
+  "@ocorrenciaAcaoEditarValor": {
+    "description": "Ação para editar o valor pago de uma ocorrência"
+  },
+
+  "ocorrenciaDialogMarcarPagaTitulo": "Marcar como paga",
+  "@ocorrenciaDialogMarcarPagaTitulo": {
+    "description": "Título do dialog de marcar ocorrência como paga"
+  },
+
+  "ocorrenciaDialogEditarValorTitulo": "Editar valor pago",
+  "@ocorrenciaDialogEditarValorTitulo": {
+    "description": "Título do dialog de editar valor pago"
+  },
+
+  "ocorrenciaDialogCampoValor": "Valor pago (R$)",
+  "@ocorrenciaDialogCampoValor": {
+    "description": "Label do campo valor no dialog de marcar paga/editar valor"
+  },
+
+  "ocorrenciaDialogCampoData": "Data de pagamento",
+  "@ocorrenciaDialogCampoData": {
+    "description": "Label do campo data de pagamento no dialog"
+  },
+
+  "ocorrenciaDialogConfirmar": "Confirmar",
+  "@ocorrenciaDialogConfirmar": {
+    "description": "Botão de confirmação nos dialogs de ocorrência"
+  },
+
+  "ocorrenciaDialogCancelar": "Cancelar",
+  "@ocorrenciaDialogCancelar": {
+    "description": "Botão de cancelamento nos dialogs de ocorrência"
+  },
+
   "notifLembreteDataCorpo": "Vence em {data}",
   "@notifLembreteDataCorpo": {
     "description": "Corpo da notificação agendada 7 dias antes da data alvo do lembrete",

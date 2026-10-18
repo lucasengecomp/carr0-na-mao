@@ -7,6 +7,7 @@ import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
 import 'screens/dashboard/dashboard_home_screen.dart';
 import 'screens/despesas/despesa_form_screen.dart';
+import 'screens/despesas/despesas_list_screen.dart';
 import 'screens/manutencoes/manutencao_form_screen.dart';
 import 'screens/placeholder_screen.dart';
 import 'screens/veiculos/veiculo_form_screen.dart';
@@ -53,10 +54,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/despesas',
-              builder: (context, state) => const PlaceholderScreen(
-                titulo: 'Despesas',
-                descricao: 'Lista de despesas recorrentes (tela de listagem em issue futura).',
-              ),
+              builder: (context, state) => const DespesasListScreen(),
             ),
           ],
         ),
