@@ -1244,47 +1244,47 @@ abstract class AppLocalizations {
   /// **'Em breve'**
   String get lembretesEmBreve;
 
-  /// Título da seção Exportar dados nas configurações
+  /// Título da seção de exportação em Configurações
   ///
   /// In pt, this message translates to:
   /// **'Exportar dados'**
   String get exportarDadosTitulo;
 
-  /// Subtítulo da seção Exportar dados nas configurações
+  /// Subtítulo da seção de exportação
   ///
   /// In pt, this message translates to:
   /// **'Gera arquivos CSV com todos os registros do veículo'**
   String get exportarDadosSubtitulo;
 
-  /// Label do botão Exportar CSV
+  /// Rótulo do botão de exportar
   ///
   /// In pt, this message translates to:
   /// **'Exportar CSV'**
   String get exportarBotao;
 
-  /// Subject do share sheet ao exportar dados de um veículo
+  /// Mensagem quando nenhum veículo está selecionado
   ///
   /// In pt, this message translates to:
-  /// **'Carro na Mão — {placa}'**
-  String exportarShareSubject(String placa);
+  /// **'Selecione um veículo para exportar.'**
+  String get exportarSemVeiculo;
 
-  /// Snackbar de sucesso ao exportar dados
+  /// Snackbar de sucesso após exportação
   ///
   /// In pt, this message translates to:
   /// **'Arquivos exportados com sucesso!'**
   String get exportarSucesso;
 
-  /// Snackbar de erro ao exportar dados
+  /// Snackbar de erro na exportação
   ///
   /// In pt, this message translates to:
   /// **'Erro ao exportar: {erro}'**
   String exportarErro(String erro);
 
-  /// Mensagem exibida quando não há veículo para exportar
+  /// Subject do share sheet com a placa do veículo
   ///
   /// In pt, this message translates to:
-  /// **'Selecione um veículo para exportar.'**
-  String get exportarSemVeiculo;
+  /// **'Carro na Mão — {placa}'**
+  String exportarShareSubject(String placa);
 }
 
 class _AppLocalizationsDelegate

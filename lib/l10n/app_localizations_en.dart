@@ -646,14 +646,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportarBotao => 'Export CSV';
 
   @override
-  String exportarShareSubject(String placa) => 'Carro na Mão — $placa';
+  String get exportarSemVeiculo => 'Select a vehicle to export.';
 
   @override
   String get exportarSucesso => 'Files exported successfully!';
 
   @override
-  String exportarErro(String erro) => 'Export error: $erro';
+  String exportarErro(String erro) {
+    return 'Export error: $erro';
+  }
 
   @override
-  String get exportarSemVeiculo => 'Select a vehicle to export.';
+  String exportarShareSubject(String placa) {
+    return 'Carro na Mão — $placa';
+  }
 }
