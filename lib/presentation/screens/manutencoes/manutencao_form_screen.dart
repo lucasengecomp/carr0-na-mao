@@ -9,6 +9,7 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../data/providers.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/lembretes_service.dart';
 import '../veiculos/veiculos_providers.dart';
 import 'manutencao_enum_labels.dart';
 
@@ -146,6 +147,7 @@ class _ManutencaoFormScreenState extends ConsumerState<ManutencaoFormScreen> {
       final observacoesTxt = _observacoesCtrl.text.trim();
       final nomeLivreTxt = _nomeLivreCtrl.text.trim();
       final dao = ref.read(manutencoesDaoProvider);
+      int manutencaoId;
       if (_isEdit) {
         final atual = await dao.byId(widget.id!);
         if (atual == null) return;
@@ -164,8 +166,9 @@ class _ManutencaoFormScreenState extends ConsumerState<ManutencaoFormScreen> {
             ),
           ),
         );
+        manutencaoId = widget.id!;
       } else {
-        await dao.insertManutencao(
+        manutencaoId = await dao.insertManutencao(
           ManutencoesCompanion.insert(
             veiculoPlaca: veiculo.placa,
             tipo: _tipo,
@@ -182,6 +185,40 @@ class _ManutencaoFormScreenState extends ConsumerState<ManutencaoFormScreen> {
           ),
         );
       }
+
+      // RF-14: criar/atualizar lembrete da próxima ocorrência (apenas para
+      // tipos diferentes de "outros", que têm campos de próximo intervalo).
+      if (!_isOutros) {
+        final proximoKmTxt = _proximoKmCtrl.text.trim();
+        final proximoMesesTxt = _proximoMesesCtrl.text.trim();
+        final proximoKm = proximoKmTxt.isNotEmpty
+            ? int.tryParse(proximoKmTxt)
+            : null;
+        final proximoMeses = proximoMesesTxt.isNotEmpty
+            ? int.tryParse(proximoMesesTxt)
+            : null;
+
+        final kmAlvo = (proximoKm != null && proximoKm > 0)
+            ? km + proximoKm
+            : null;
+        final dataAlvo = (proximoMeses != null && proximoMeses > 0)
+            ? DateTime(_data.year, _data.month + proximoMeses, _data.day)
+            : null;
+
+        if (kmAlvo != null || dataAlvo != null) {
+          await ref
+              .read(lembretesServiceProvider)
+              .upsertByManutencao(
+                placa: veiculo.placa,
+                manutencaoId: manutencaoId,
+                tipo: _tipo.name,
+                descricao: _tipo.label(l10n),
+                dataAlvo: dataAlvo,
+                kmAlvo: kmAlvo,
+              );
+        }
+      }
+
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } on Object catch (e) {

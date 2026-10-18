@@ -2,12 +2,16 @@ import 'package:carro_na_mao/data/database/app_database.dart';
 import 'package:carro_na_mao/data/database/enums.dart';
 import 'package:carro_na_mao/data/providers.dart';
 import 'package:carro_na_mao/presentation/screens/manutencoes/manutencao_form_screen.dart';
+import 'package:carro_na_mao/services/lembretes_service.dart';
+import 'package:carro_na_mao/services/notifications_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../../helpers/l10n_delegates.dart';
 
@@ -116,6 +120,134 @@ Future<void> _seedVeiculo(AppDatabase db, {String placa = 'ABC1D23'}) {
 }
 
 Finder _byKey(String key) => find.byKey(Key(key));
+
+// ---------------------------------------------------------------------------
+// Spy / Fake para LembretesService (RF-14)
+// ---------------------------------------------------------------------------
+
+/// Fake do NotificationsPluginInterface para não acionar o plugin real em testes.
+class _FakeNotifPlugin implements NotificationsPluginInterface {
+  @override
+  Future<void> initialize(InitializationSettings s) async {}
+  @override
+  Future<void> createAndroidChannel(AndroidNotificationChannel c) async {}
+  @override
+  Future<bool?> requestAndroidPermission() async => true;
+  @override
+  Future<bool?> requestIosPermission({
+    bool alert = true,
+    bool badge = true,
+    bool sound = true,
+  }) async => null;
+  @override
+  Future<void> zonedSchedule({
+    required int id,
+    required String? title,
+    required String? body,
+    required tz.TZDateTime scheduledDate,
+    required NotificationDetails details,
+    required AndroidScheduleMode androidScheduleMode,
+  }) async {}
+  @override
+  Future<void> show({
+    required int id,
+    required String? title,
+    required String? body,
+    required NotificationDetails details,
+  }) async {}
+  @override
+  Future<void> cancel(int id) async {}
+}
+
+/// Registro de uma chamada a [upsertByManutencao].
+class _UpsertCall {
+  _UpsertCall({
+    required this.placa,
+    required this.manutencaoId,
+    required this.tipo,
+    required this.descricao,
+    this.dataAlvo,
+    this.kmAlvo,
+  });
+
+  final String placa;
+  final int manutencaoId;
+  final String tipo;
+  final String descricao;
+  final DateTime? dataAlvo;
+  final int? kmAlvo;
+}
+
+/// Subclasse de LembretesService que registra chamadas a [upsertByManutencao]
+/// sem efetuar escrita no banco real (DAO real ainda acessível via super).
+class _SpyLembretesService extends LembretesService {
+  _SpyLembretesService(AppDatabase db)
+    : super(
+        dao: db.lembretesDao,
+        notifications: NotificationsService(plugin: _FakeNotifPlugin()),
+      );
+
+  final List<_UpsertCall> upsertCalls = [];
+
+  @override
+  Future<void> upsertByManutencao({
+    required String placa,
+    required int manutencaoId,
+    required String tipo,
+    required String descricao,
+    DateTime? dataAlvo,
+    int? kmAlvo,
+  }) async {
+    upsertCalls.add(
+      _UpsertCall(
+        placa: placa,
+        manutencaoId: manutencaoId,
+        tipo: tipo,
+        descricao: descricao,
+        dataAlvo: dataAlvo,
+        kmAlvo: kmAlvo,
+      ),
+    );
+    // Também chama o super para manter persistência (verifica manutencaoId real).
+    await super.upsertByManutencao(
+      placa: placa,
+      manutencaoId: manutencaoId,
+      tipo: tipo,
+      descricao: descricao,
+      dataAlvo: dataAlvo,
+      kmAlvo: kmAlvo,
+    );
+  }
+}
+
+/// Abre o formulário com o spy de lembretes injetado.
+Future<_SpyLembretesService> _pumpFormWithSpy(
+  WidgetTester tester, {
+  required AppDatabase db,
+  String? placaAtiva,
+  int? id,
+}) async {
+  final spy = _SpyLembretesService(db);
+  SharedPreferences.setMockInitialValues(
+    placaAtiva == null ? {} : {'veiculo_selecionado_placa': placaAtiva},
+  );
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        lembretesServiceProvider.overrideWithValue(spy),
+      ],
+      child: MaterialApp(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        home: ManutencaoFormScreen(id: id),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return spy;
+}
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -631,5 +763,224 @@ void main() {
 
       await _teardown(tester);
     });
+  });
+
+  // -------------------------------------------------------------------------
+  // RF-14: criar lembrete ao salvar manutenção
+  // -------------------------------------------------------------------------
+  group('lembrete ao salvar (RF-14)', () {
+    testWidgets(
+      'tipo oleoMotor com proximoKm e proximoMeses chama upsertByManutencao '
+      'com kmAlvo=km+proximoKm e dataAlvo=data+meses',
+      (tester) async {
+        final spy = await _pumpFormWithSpy(
+          tester,
+          db: db,
+          placaAtiva: 'ABC1D23',
+        );
+        // Aguarda carga do padrão (km=10000, meses=12).
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+        await tester.enterText(_byKey('manut_km'), '15000');
+        // Deixa próximo km e meses com os valores padrão (10000 e 12).
+
+        await tester.scrollUntilVisible(
+          find.byType(FilledButton),
+          100,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.byType(FilledButton));
+        await tester.pumpAndSettle();
+
+        expect(spy.upsertCalls, hasLength(1));
+        final call = spy.upsertCalls.single;
+        expect(call.kmAlvo, 15000 + 10000); // km + proximoKm
+        expect(call.dataAlvo, isNotNull);
+        // dataAlvo deve ser hoje + 12 meses
+        final hoje = DateTime.now();
+        expect(call.dataAlvo!.year, hoje.year + (hoje.month + 12 > 12 ? 1 : 0));
+        expect(call.tipo, TipoManutencao.oleoMotor.name);
+        // manutencaoId deve ser um ID válido (> 0)
+        expect(call.manutencaoId, greaterThan(0));
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets(
+      'proximoKm vazio e proximoMeses=6 chama upsert com kmAlvo=null e '
+      'dataAlvo preenchida',
+      (tester) async {
+        final spy = await _pumpFormWithSpy(
+          tester,
+          db: db,
+          placaAtiva: 'ABC1D23',
+        );
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+        await tester.enterText(_byKey('manut_km'), '20000');
+        // Limpa o campo de próximo km.
+        await tester.enterText(_byKey('manut_proximo_km'), '');
+        await tester.enterText(_byKey('manut_proximo_meses'), '6');
+
+        await tester.scrollUntilVisible(
+          find.byType(FilledButton),
+          100,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.byType(FilledButton));
+        await tester.pumpAndSettle();
+
+        expect(spy.upsertCalls, hasLength(1));
+        final call = spy.upsertCalls.single;
+        expect(call.kmAlvo, isNull);
+        expect(call.dataAlvo, isNotNull);
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets(
+      'proximoKm e proximoMeses ambos vazios → upsertByManutencao NÃO chamado',
+      (tester) async {
+        final spy = await _pumpFormWithSpy(
+          tester,
+          db: db,
+          placaAtiva: 'ABC1D23',
+        );
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+        await tester.enterText(_byKey('manut_km'), '18000');
+        // Zera os dois campos de próximo intervalo.
+        await tester.enterText(_byKey('manut_proximo_km'), '');
+        await tester.enterText(_byKey('manut_proximo_meses'), '');
+
+        await tester.scrollUntilVisible(
+          find.byType(FilledButton),
+          100,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.byType(FilledButton));
+        await tester.pumpAndSettle();
+
+        expect(spy.upsertCalls, isEmpty);
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets(
+      'tipo=outros (campos ocultos) → upsertByManutencao NÃO chamado',
+      (tester) async {
+        final spy = await _pumpFormWithSpy(
+          tester,
+          db: db,
+          placaAtiva: 'ABC1D23',
+        );
+
+        await _selectTipo(tester, TipoManutencao.outros);
+        await tester.enterText(_byKey('manut_nome_livre'), 'Limpeza de bicos');
+        await tester.enterText(_byKey('manut_km'), '22000');
+
+        await tester.scrollUntilVisible(
+          find.byType(FilledButton),
+          100,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.byType(FilledButton));
+        await tester.pumpAndSettle();
+
+        expect(spy.upsertCalls, isEmpty);
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets('modo edição: alterar proximoKm chama upsert novamente (substitui '
+        'lembrete anterior)', (tester) async {
+      // Insere a manutenção inicial.
+      final id = await db.manutencoesDao.insertManutencao(
+        ManutencoesCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          tipo: TipoManutencao.filtroAr,
+          data: DateTime(2026, 5, 1),
+          km: 30000,
+        ),
+      );
+
+      final spy = await _pumpFormWithSpy(tester, db: db, id: id);
+      // Aguarda carregamento assíncrono do registro e do padrão do tipo.
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      // Altera o km do hodômetro.
+      await tester.enterText(_byKey('manut_km'), '31000');
+
+      // Garante que os campos de próximo intervalo estão visíveis e
+      // preenche próximo km. Em modo edição os campos não são auto-preenchidos,
+      // então digitamos explicitamente.
+      await tester.scrollUntilVisible(
+        _byKey('manut_proximo_km'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(_byKey('manut_proximo_km'), '15000');
+      await tester.enterText(_byKey('manut_proximo_meses'), '');
+
+      // Rola até o botão e submete.
+      final btnFinder = find.byType(FilledButton);
+      await tester.scrollUntilVisible(
+        btnFinder,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(btnFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(btnFinder, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(spy.upsertCalls, hasLength(1));
+      final call = spy.upsertCalls.single;
+      expect(call.manutencaoId, id); // ID da manutenção editada
+      expect(call.kmAlvo, 31000 + 15000);
+      expect(call.kmAlvo, isNotNull);
+
+      await _teardown(tester);
+    });
+
+    testWidgets(
+      'upsertByManutencao é chamado APÓS inserção — manutencaoId referencia '
+      'registro existente no banco',
+      (tester) async {
+        final spy = await _pumpFormWithSpy(
+          tester,
+          db: db,
+          placaAtiva: 'ABC1D23',
+        );
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+        await tester.enterText(_byKey('manut_km'), '25000');
+        // Mantém defaults (km=10000, meses=12).
+
+        await tester.scrollUntilVisible(
+          find.byType(FilledButton),
+          100,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.byType(FilledButton));
+        await tester.pumpAndSettle();
+
+        expect(spy.upsertCalls, hasLength(1));
+        final call = spy.upsertCalls.single;
+
+        // O manutencaoId deve corresponder a um registro real no banco.
+        final manut = await db.manutencoesDao.byId(call.manutencaoId);
+        expect(manut, isNotNull);
+        expect(manut!.km, 25000);
+
+        await _teardown(tester);
+      },
+    );
   });
 }
