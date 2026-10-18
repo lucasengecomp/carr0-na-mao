@@ -8,6 +8,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../helpers/l10n_delegates.dart';
 
@@ -346,17 +347,59 @@ void main() {
       await _teardown(tester);
     });
 
-    testWidgets('toque na linha abre SnackBar "Em breve"', (tester) async {
-      await _pumpScreenWithProviders(
-        tester,
-        db: db,
-        pendentes: [_fakeLembrete(kmAlvo: 50000, descricao: 'Trocar velas')],
+    testWidgets('toque na linha navega para /lembretes/:id', (tester) async {
+      // Usa GoRouter para que context.push funcione corretamente.
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => ProviderScope(
+              overrides: [
+                appDatabaseProvider.overrideWithValue(db),
+                lembretesPendentesProvider.overrideWith(
+                  (_) => Stream.value([
+                    _fakeLembrete(
+                      id: 42,
+                      kmAlvo: 50000,
+                      descricao: 'Trocar velas',
+                    ),
+                  ]),
+                ),
+                lembretesAtrasadosProvider.overrideWith(
+                  (_) => Stream.value(const []),
+                ),
+                lembretesConcluidosProvider.overrideWith(
+                  (_) => Stream.value(const []),
+                ),
+              ],
+              child: const LembretesListScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/lembretes/:id',
+            builder: (context, state) =>
+                Scaffold(body: Text('detalhe-${state.pathParameters['id']}')),
+          ),
+        ],
       );
 
-      await tester.tap(find.text('Trocar velas'));
-      await tester.pump();
+      await tester.pumpWidget(
+        MaterialApp.router(
+          locale: localeDefault,
+          localizationsDelegates: l10nDelegates,
+          supportedLocales: supportedLocales,
+          routerConfig: router,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-      expect(find.text('Em breve'), findsOneWidget);
+      await tester.tap(find.text('Trocar velas'));
+      await tester.pumpAndSettle();
+
+      // Após tap, o GoRouter navegou para /lembretes/42 e o snackbar "Em breve"
+      // nunca foi exibido.
+      expect(find.text('detalhe-42'), findsOneWidget);
+      expect(find.text('Em breve'), findsNothing);
       await _teardown(tester);
     });
   });

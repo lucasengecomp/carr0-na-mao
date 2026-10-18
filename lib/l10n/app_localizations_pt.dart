@@ -635,6 +635,110 @@ class AppLocalizationsPt extends AppLocalizations {
   String get lembretesEmBreve => 'Em breve';
 
   @override
+  String get lembreteDetalheTitulo => 'Detalhe do lembrete';
+
+  @override
+  String get lembreteDetalheNaoEncontrado => 'Lembrete não encontrado.';
+
+  @override
+  String get lembreteDetalheCampoVeiculo => 'Veículo';
+
+  @override
+  String get lembreteDetalheCampoTipo => 'Tipo';
+
+  @override
+  String get lembreteDetalheCampoDescricao => 'Descrição';
+
+  @override
+  String get lembreteDetalheCampoDataAlvo => 'Data alvo';
+
+  @override
+  String get lembreteDetalheCampoKmAlvo => 'Km alvo';
+
+  @override
+  String get lembreteDetalheCampoStatus => 'Status';
+
+  @override
+  String get lembreteDetalheCampoManutencao => 'Manutenção associada';
+
+  @override
+  String get lembreteDetalheAcaoConcluir => 'Concluir';
+
+  @override
+  String get lembreteDetalheAcaoAdiar => 'Adiar';
+
+  @override
+  String get lembreteDetalheAcaoExcluir => 'Excluir';
+
+  @override
+  String get lembreteDetalheConcluirTitulo => 'Concluir lembrete';
+
+  @override
+  String get lembreteDetalheConcluirMensagem =>
+      'Marcar este lembrete como concluído?';
+
+  @override
+  String get lembreteDetalheConcluirRegistrarManutencao =>
+      'Registrar manutenção';
+
+  @override
+  String get lembreteDetalheExcluirTitulo => 'Excluir lembrete';
+
+  @override
+  String get lembreteDetalheExcluirMensagem =>
+      'Tem certeza que deseja excluir este lembrete? Esta ação não pode ser desfeita.';
+
+  @override
+  String get lembreteDetalheAdiarTitulo => 'Adiar lembrete';
+
+  @override
+  String get lembreteDetalheAdiarDataAlvo => 'Nova data alvo (opcional)';
+
+  @override
+  String get lembreteDetalheAdiarKmAlvo => 'Novo km alvo (opcional)';
+
+  @override
+  String get lembreteDetalheAdiarSemCampos =>
+      'Informe ao menos uma data ou km.';
+
+  @override
+  String get lembreteDetalheConcluido => 'Lembrete concluído.';
+
+  @override
+  String get lembreteDetalheAdiado => 'Lembrete adiado.';
+
+  @override
+  String get lembreteDetalheExcluido => 'Lembrete excluído.';
+
+  @override
+  String lembreteDetalheErroAcao(String erro) {
+    return 'Erro ao executar ação: $erro';
+  }
+
+  @override
+  String get botaoCancelar => 'Cancelar';
+
+  @override
+  String get botaoConfirmar => 'Confirmar';
+
+  @override
+  String get botaoSelecionar => 'Selecionar';
+
+  @override
+  String get lembreteDetalheSemData => 'Não definida';
+
+  @override
+  String get lembreteDetalheSemKm => 'Não definido';
+
+  @override
+  String get lembreteDetalheSemManutencao => 'Nenhuma';
+
+  @override
+  String lembreteDetalheManutencaoId(int id) {
+    return 'ID $id';
+  }
+
+  @override
   String get exportarDadosTitulo => 'Exportar dados';
 
   @override

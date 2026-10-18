@@ -636,6 +636,109 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lembretesEmBreve => 'Coming soon';
 
   @override
+  String get lembreteDetalheTitulo => 'Reminder detail';
+
+  @override
+  String get lembreteDetalheNaoEncontrado => 'Reminder not found.';
+
+  @override
+  String get lembreteDetalheCampoVeiculo => 'Vehicle';
+
+  @override
+  String get lembreteDetalheCampoTipo => 'Type';
+
+  @override
+  String get lembreteDetalheCampoDescricao => 'Description';
+
+  @override
+  String get lembreteDetalheCampoDataAlvo => 'Target date';
+
+  @override
+  String get lembreteDetalheCampoKmAlvo => 'Target odometer';
+
+  @override
+  String get lembreteDetalheCampoStatus => 'Status';
+
+  @override
+  String get lembreteDetalheCampoManutencao => 'Associated maintenance';
+
+  @override
+  String get lembreteDetalheAcaoConcluir => 'Complete';
+
+  @override
+  String get lembreteDetalheAcaoAdiar => 'Snooze';
+
+  @override
+  String get lembreteDetalheAcaoExcluir => 'Delete';
+
+  @override
+  String get lembreteDetalheConcluirTitulo => 'Complete reminder';
+
+  @override
+  String get lembreteDetalheConcluirMensagem =>
+      'Mark this reminder as completed?';
+
+  @override
+  String get lembreteDetalheConcluirRegistrarManutencao => 'Record maintenance';
+
+  @override
+  String get lembreteDetalheExcluirTitulo => 'Delete reminder';
+
+  @override
+  String get lembreteDetalheExcluirMensagem =>
+      'Are you sure you want to delete this reminder? This action cannot be undone.';
+
+  @override
+  String get lembreteDetalheAdiarTitulo => 'Snooze reminder';
+
+  @override
+  String get lembreteDetalheAdiarDataAlvo => 'New target date (optional)';
+
+  @override
+  String get lembreteDetalheAdiarKmAlvo => 'New target odometer (optional)';
+
+  @override
+  String get lembreteDetalheAdiarSemCampos =>
+      'Enter at least a date or odometer reading.';
+
+  @override
+  String get lembreteDetalheConcluido => 'Reminder completed.';
+
+  @override
+  String get lembreteDetalheAdiado => 'Reminder snoozed.';
+
+  @override
+  String get lembreteDetalheExcluido => 'Reminder deleted.';
+
+  @override
+  String lembreteDetalheErroAcao(String erro) {
+    return 'Error executing action: $erro';
+  }
+
+  @override
+  String get botaoCancelar => 'Cancel';
+
+  @override
+  String get botaoConfirmar => 'Confirm';
+
+  @override
+  String get botaoSelecionar => 'Select';
+
+  @override
+  String get lembreteDetalheSemData => 'Not defined';
+
+  @override
+  String get lembreteDetalheSemKm => 'Not defined';
+
+  @override
+  String get lembreteDetalheSemManutencao => 'None';
+
+  @override
+  String lembreteDetalheManutencaoId(int id) {
+    return 'ID $id';
+  }
+
+  @override
   String get exportarDadosTitulo => 'Export data';
 
   @override

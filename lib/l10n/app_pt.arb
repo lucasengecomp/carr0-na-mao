@@ -1012,6 +1012,176 @@
     "description": "SnackBar exibido quando a funcionalidade ainda não está implementada"
   },
 
+  "lembreteDetalheTitulo": "Detalhe do lembrete",
+  "@lembreteDetalheTitulo": {
+    "description": "Título da tela de detalhe de lembrete"
+  },
+
+  "lembreteDetalheNaoEncontrado": "Lembrete não encontrado.",
+  "@lembreteDetalheNaoEncontrado": {
+    "description": "Mensagem exibida quando o lembrete não existe"
+  },
+
+  "lembreteDetalheCampoVeiculo": "Veículo",
+  "@lembreteDetalheCampoVeiculo": {
+    "description": "Label do campo Veículo no detalhe do lembrete"
+  },
+
+  "lembreteDetalheCampoTipo": "Tipo",
+  "@lembreteDetalheCampoTipo": {
+    "description": "Label do campo Tipo no detalhe do lembrete"
+  },
+
+  "lembreteDetalheCampoDescricao": "Descrição",
+  "@lembreteDetalheCampoDescricao": {
+    "description": "Label do campo Descrição no detalhe do lembrete"
+  },
+
+  "lembreteDetalheCampoDataAlvo": "Data alvo",
+  "@lembreteDetalheCampoDataAlvo": {
+    "description": "Label do campo Data alvo no detalhe do lembrete"
+  },
+
+  "lembreteDetalheCampoKmAlvo": "Km alvo",
+  "@lembreteDetalheCampoKmAlvo": {
+    "description": "Label do campo Km alvo no detalhe do lembrete"
+  },
+
+  "lembreteDetalheCampoStatus": "Status",
+  "@lembreteDetalheCampoStatus": {
+    "description": "Label do campo Status no detalhe do lembrete"
+  },
+
+  "lembreteDetalheCampoManutencao": "Manutenção associada",
+  "@lembreteDetalheCampoManutencao": {
+    "description": "Label do campo manutenção associada no detalhe do lembrete"
+  },
+
+  "lembreteDetalheAcaoConcluir": "Concluir",
+  "@lembreteDetalheAcaoConcluir": {
+    "description": "Botão de concluir lembrete"
+  },
+
+  "lembreteDetalheAcaoAdiar": "Adiar",
+  "@lembreteDetalheAcaoAdiar": {
+    "description": "Botão de adiar lembrete"
+  },
+
+  "lembreteDetalheAcaoExcluir": "Excluir",
+  "@lembreteDetalheAcaoExcluir": {
+    "description": "Botão de excluir lembrete"
+  },
+
+  "lembreteDetalheConcluirTitulo": "Concluir lembrete",
+  "@lembreteDetalheConcluirTitulo": {
+    "description": "Título do dialog de confirmação de conclusão"
+  },
+
+  "lembreteDetalheConcluirMensagem": "Marcar este lembrete como concluído?",
+  "@lembreteDetalheConcluirMensagem": {
+    "description": "Mensagem do dialog de confirmação de conclusão"
+  },
+
+  "lembreteDetalheConcluirRegistrarManutencao": "Registrar manutenção",
+  "@lembreteDetalheConcluirRegistrarManutencao": {
+    "description": "Botão secundário para registrar manutenção ao concluir"
+  },
+
+  "lembreteDetalheExcluirTitulo": "Excluir lembrete",
+  "@lembreteDetalheExcluirTitulo": {
+    "description": "Título do dialog de confirmação de exclusão"
+  },
+
+  "lembreteDetalheExcluirMensagem": "Tem certeza que deseja excluir este lembrete? Esta ação não pode ser desfeita.",
+  "@lembreteDetalheExcluirMensagem": {
+    "description": "Mensagem do dialog de confirmação de exclusão"
+  },
+
+  "lembreteDetalheAdiarTitulo": "Adiar lembrete",
+  "@lembreteDetalheAdiarTitulo": {
+    "description": "Título do dialog de adiamento de lembrete"
+  },
+
+  "lembreteDetalheAdiarDataAlvo": "Nova data alvo (opcional)",
+  "@lembreteDetalheAdiarDataAlvo": {
+    "description": "Label do campo nova data alvo no dialog de adiamento"
+  },
+
+  "lembreteDetalheAdiarKmAlvo": "Novo km alvo (opcional)",
+  "@lembreteDetalheAdiarKmAlvo": {
+    "description": "Label do campo novo km alvo no dialog de adiamento"
+  },
+
+  "lembreteDetalheAdiarSemCampos": "Informe ao menos uma data ou km.",
+  "@lembreteDetalheAdiarSemCampos": {
+    "description": "Erro no dialog de adiamento quando nenhum campo foi preenchido"
+  },
+
+  "lembreteDetalheConcluido": "Lembrete concluído.",
+  "@lembreteDetalheConcluido": {
+    "description": "SnackBar de confirmação após concluir lembrete"
+  },
+
+  "lembreteDetalheAdiado": "Lembrete adiado.",
+  "@lembreteDetalheAdiado": {
+    "description": "SnackBar de confirmação após adiar lembrete"
+  },
+
+  "lembreteDetalheExcluido": "Lembrete excluído.",
+  "@lembreteDetalheExcluido": {
+    "description": "SnackBar de confirmação após excluir lembrete"
+  },
+
+  "lembreteDetalheErroAcao": "Erro ao executar ação: {erro}",
+  "@lembreteDetalheErroAcao": {
+    "description": "SnackBar de erro ao executar ação no detalhe do lembrete",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
+  "botaoCancelar": "Cancelar",
+  "@botaoCancelar": {
+    "description": "Label do botão Cancelar"
+  },
+
+  "botaoConfirmar": "Confirmar",
+  "@botaoConfirmar": {
+    "description": "Label do botão Confirmar"
+  },
+
+  "botaoSelecionar": "Selecionar",
+  "@botaoSelecionar": {
+    "description": "Label do botão Selecionar (para pickers)"
+  },
+
+  "lembreteDetalheSemData": "Não definida",
+  "@lembreteDetalheSemData": {
+    "description": "Texto quando data alvo não está definida no lembrete"
+  },
+
+  "lembreteDetalheSemKm": "Não definido",
+  "@lembreteDetalheSemKm": {
+    "description": "Texto quando km alvo não está definido no lembrete"
+  },
+
+  "lembreteDetalheSemManutencao": "Nenhuma",
+  "@lembreteDetalheSemManutencao": {
+    "description": "Texto quando não há manutenção associada ao lembrete"
+  },
+
+  "lembreteDetalheManutencaoId": "ID {id}",
+  "@lembreteDetalheManutencaoId": {
+    "description": "Exibição do ID da manutenção associada",
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+
   "exportarDadosTitulo": "Exportar dados",
   "@exportarDadosTitulo": {
     "description": "Título da seção de exportação em Configurações"

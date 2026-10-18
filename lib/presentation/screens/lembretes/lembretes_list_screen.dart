@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
@@ -191,9 +194,7 @@ class _LembreteTile extends StatelessWidget {
   }
 
   void _onTap(BuildContext context, AppLocalizations l10n) {
-    // Issue #26 implementará /lembretes/:id (detalhe/ações).
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(l10n.lembretesEmBreve)));
+    unawaited(context.push('/lembretes/${item.id}'));
   }
 
   Color _badgeColor(BuildContext context, StatusLembrete status) {
