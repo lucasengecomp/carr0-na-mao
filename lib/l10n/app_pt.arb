@@ -596,6 +596,31 @@
     }
   },
 
+  "manutencoesListaVazia": "Nenhuma manutenção registrada ainda.\nToque em \"Nova manutenção\" para começar.",
+  "@manutencoesListaVazia": {
+    "description": "Mensagem de lista vazia na tela de manutenções"
+  },
+
+  "semVeiculoCadastrarManutencao": "Cadastre um veículo para começar a registrar manutenções.",
+  "@semVeiculoCadastrarManutencao": {
+    "description": "Aviso exibido quando não há veículo cadastrado na tela de manutenções"
+  },
+
+  "manutencoesAgruparPorTipo": "Agrupar por tipo",
+  "@manutencoesAgruparPorTipo": {
+    "description": "Label do switch de agrupamento por tipo na tela de manutenções"
+  },
+
+  "manutencoesOutrosComDescricao": "{descricao}",
+  "@manutencoesOutrosComDescricao": {
+    "description": "Exibição do nome livre quando tipo é 'outros'",
+    "placeholders": {
+      "descricao": {
+        "type": "String"
+      }
+    }
+  },
+
   "despesasTitulo": "Despesas",
   "@despesasTitulo": {
     "description": "Título da tela de lista de despesas"
