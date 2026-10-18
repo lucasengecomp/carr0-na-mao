@@ -393,6 +393,66 @@
     }
   },
 
+  "lembreteFormNovoTitulo": "New reminder",
+  "@lembreteFormNovoTitulo": {
+    "description": "Title of the new standalone reminder screen"
+  },
+
+  "lembreteFormEditarTitulo": "Edit reminder",
+  "@lembreteFormEditarTitulo": {
+    "description": "Title of the edit reminder screen"
+  },
+
+  "lembreteFormCampoDescricao": "Description",
+  "@lembreteFormCampoDescricao": {
+    "description": "Label of the Description field on the reminder form"
+  },
+
+  "lembreteFormCampoVeiculo": "Vehicle",
+  "@lembreteFormCampoVeiculo": {
+    "description": "Label of the vehicle dropdown on the reminder form"
+  },
+
+  "lembreteFormCampoDataAlvo": "Target date (optional)",
+  "@lembreteFormCampoDataAlvo": {
+    "description": "Label of the Target date field on the reminder form"
+  },
+
+  "lembreteFormSemDataAlvo": "Not set",
+  "@lembreteFormSemDataAlvo": {
+    "description": "Text shown when no target date has been selected"
+  },
+
+  "lembreteFormLimparDataAlvo": "Clear target date",
+  "@lembreteFormLimparDataAlvo": {
+    "description": "Tooltip for the clear target date button"
+  },
+
+  "lembreteFormCampoKmAlvo": "Target km (optional)",
+  "@lembreteFormCampoKmAlvo": {
+    "description": "Label of the Target km field on the reminder form"
+  },
+
+  "lembreteFormValidacaoDataOuKm": "Provide at least a target date or a target km",
+  "@lembreteFormValidacaoDataOuKm": {
+    "description": "Error shown when neither target date nor target km is filled"
+  },
+
+  "lembreteFormValidacaoDescricaoMin": "Minimum 2 characters",
+  "@lembreteFormValidacaoDescricaoMin": {
+    "description": "Validation error for description that is too short"
+  },
+
+  "lembreteFormNaoPossivel": "Could not save: {erro}",
+  "@lembreteFormNaoPossivel": {
+    "description": "Snackbar error when saving a standalone reminder fails",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
   "botaoCancelar": "Cancel",
   "@botaoCancelar": {
     "description": "Cancel button label"
@@ -431,6 +491,11 @@
         "type": "int"
       }
     }
+  },
+
+  "semVeiculoCadastrarLembreteForm": "Register a vehicle before creating reminders.",
+  "@semVeiculoCadastrarLembreteForm": {
+    "description": "Warning on the reminder form when no vehicle is registered"
   },
 
   "exportarDadosTitulo": "Export data",

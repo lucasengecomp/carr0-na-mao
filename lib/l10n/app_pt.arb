@@ -1142,6 +1142,66 @@
     }
   },
 
+  "lembreteFormNovoTitulo": "Novo lembrete",
+  "@lembreteFormNovoTitulo": {
+    "description": "Título da tela de criação de lembrete avulso"
+  },
+
+  "lembreteFormEditarTitulo": "Editar lembrete",
+  "@lembreteFormEditarTitulo": {
+    "description": "Título da tela de edição de lembrete"
+  },
+
+  "lembreteFormCampoDescricao": "Descrição",
+  "@lembreteFormCampoDescricao": {
+    "description": "Label do campo Descrição no form de lembrete"
+  },
+
+  "lembreteFormCampoVeiculo": "Veículo",
+  "@lembreteFormCampoVeiculo": {
+    "description": "Label do dropdown de veículo no form de lembrete"
+  },
+
+  "lembreteFormCampoDataAlvo": "Data alvo (opcional)",
+  "@lembreteFormCampoDataAlvo": {
+    "description": "Label do campo Data alvo no form de lembrete"
+  },
+
+  "lembreteFormSemDataAlvo": "Não definida",
+  "@lembreteFormSemDataAlvo": {
+    "description": "Texto exibido quando nenhuma data alvo foi selecionada"
+  },
+
+  "lembreteFormLimparDataAlvo": "Limpar data alvo",
+  "@lembreteFormLimparDataAlvo": {
+    "description": "Tooltip do botão de limpar data alvo"
+  },
+
+  "lembreteFormCampoKmAlvo": "Km alvo (opcional)",
+  "@lembreteFormCampoKmAlvo": {
+    "description": "Label do campo Km alvo no form de lembrete"
+  },
+
+  "lembreteFormValidacaoDataOuKm": "Informe ao menos uma data alvo ou um km alvo",
+  "@lembreteFormValidacaoDataOuKm": {
+    "description": "Erro exibido quando nem data alvo nem km alvo foram preenchidos"
+  },
+
+  "lembreteFormValidacaoDescricaoMin": "Mínimo de 2 caracteres",
+  "@lembreteFormValidacaoDescricaoMin": {
+    "description": "Erro de validação de descrição muito curta"
+  },
+
+  "lembreteFormNaoPossivel": "Não foi possível salvar: {erro}",
+  "@lembreteFormNaoPossivel": {
+    "description": "Snackbar de erro ao salvar lembrete avulso",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
   "botaoCancelar": "Cancelar",
   "@botaoCancelar": {
     "description": "Label do botão Cancelar"
@@ -1180,6 +1240,11 @@
         "type": "int"
       }
     }
+  },
+
+  "semVeiculoCadastrarLembreteForm": "Cadastre um veículo antes de criar lembretes.",
+  "@semVeiculoCadastrarLembreteForm": {
+    "description": "Aviso no form de lembrete quando não há veículo"
   },
 
   "exportarDadosTitulo": "Exportar dados",

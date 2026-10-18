@@ -1394,6 +1394,72 @@ abstract class AppLocalizations {
   /// **'Erro ao executar ação: {erro}'**
   String lembreteDetalheErroAcao(String erro);
 
+  /// Título da tela de criação de lembrete avulso
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo lembrete'**
+  String get lembreteFormNovoTitulo;
+
+  /// Título da tela de edição de lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar lembrete'**
+  String get lembreteFormEditarTitulo;
+
+  /// Label do campo Descrição no form de lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição'**
+  String get lembreteFormCampoDescricao;
+
+  /// Label do dropdown de veículo no form de lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Veículo'**
+  String get lembreteFormCampoVeiculo;
+
+  /// Label do campo Data alvo no form de lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Data alvo (opcional)'**
+  String get lembreteFormCampoDataAlvo;
+
+  /// Texto exibido quando nenhuma data alvo foi selecionada
+  ///
+  /// In pt, this message translates to:
+  /// **'Não definida'**
+  String get lembreteFormSemDataAlvo;
+
+  /// Tooltip do botão de limpar data alvo
+  ///
+  /// In pt, this message translates to:
+  /// **'Limpar data alvo'**
+  String get lembreteFormLimparDataAlvo;
+
+  /// Label do campo Km alvo no form de lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Km alvo (opcional)'**
+  String get lembreteFormCampoKmAlvo;
+
+  /// Erro exibido quando nem data alvo nem km alvo foram preenchidos
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe ao menos uma data alvo ou um km alvo'**
+  String get lembreteFormValidacaoDataOuKm;
+
+  /// Erro de validação de descrição muito curta
+  ///
+  /// In pt, this message translates to:
+  /// **'Mínimo de 2 caracteres'**
+  String get lembreteFormValidacaoDescricaoMin;
+
+  /// Snackbar de erro ao salvar lembrete avulso
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar: {erro}'**
+  String lembreteFormNaoPossivel(String erro);
+
   /// Label do botão Cancelar
   ///
   /// In pt, this message translates to:
@@ -1435,6 +1501,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'ID {id}'**
   String lembreteDetalheManutencaoId(int id);
+
+  /// Aviso no form de lembrete quando não há veículo
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre um veículo antes de criar lembretes.'**
+  String get semVeiculoCadastrarLembreteForm;
 
   /// Título da seção de exportação em Configurações
   ///
