@@ -337,44 +337,43 @@ void main() {
       expect(cancelLabel, 'Cancel');
     });
 
-    testWidgets(
-      'localeResolutionCallback: device em pt mapeia para pt_BR',
-      (tester) async {
-        // Simula o comportamento do localeResolutionCallback de app.dart:
-        // se o deviceLocale tem languageCode "pt", deve resolver para pt_BR.
-        Locale? resolvedLocale;
-        await tester.pumpWidget(
-          MaterialApp(
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('pt', 'BR'),
-              Locale('pt'),
-              Locale('en'),
-            ],
-            localeResolutionCallback: (deviceLocale, supportedLocales) {
-              if (deviceLocale?.languageCode == 'pt') {
-                return const Locale('pt', 'BR');
-              }
-              return const Locale('en');
+    testWidgets('localeResolutionCallback: device em pt mapeia para pt_BR', (
+      tester,
+    ) async {
+      // Simula o comportamento do localeResolutionCallback de app.dart:
+      // se o deviceLocale tem languageCode "pt", deve resolver para pt_BR.
+      Locale? resolvedLocale;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('pt', 'BR'),
+            Locale('pt'),
+            Locale('en'),
+          ],
+          localeResolutionCallback: (deviceLocale, supportedLocales) {
+            if (deviceLocale?.languageCode == 'pt') {
+              return const Locale('pt', 'BR');
+            }
+            return const Locale('en');
+          },
+          locale: const Locale('pt'),
+          home: Builder(
+            builder: (context) {
+              resolvedLocale = Localizations.localeOf(context);
+              return const SizedBox.shrink();
             },
-            locale: const Locale('pt'),
-            home: Builder(
-              builder: (context) {
-                resolvedLocale = Localizations.localeOf(context);
-                return const SizedBox.shrink();
-              },
-            ),
           ),
-        );
-        await tester.pumpAndSettle();
-        expect(resolvedLocale?.languageCode, 'pt');
-        expect(resolvedLocale?.countryCode, 'BR');
-      },
-    );
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(resolvedLocale?.languageCode, 'pt');
+      expect(resolvedLocale?.countryCode, 'BR');
+    });
   });
 }
