@@ -532,6 +532,56 @@ class AppLocalizationsPt extends AppLocalizations {
   String get frequenciaDespesaAnual => 'Anual';
 
   @override
+  String get despesasListTitulo => 'Despesas';
+
+  @override
+  String get despesasListFab => 'Nova despesa';
+
+  @override
+  String get despesasListVazia =>
+      'Nenhuma ocorrência encontrada.\nCrie uma despesa recorrente para começar.';
+
+  @override
+  String get semVeiculoCadastrarDespesa =>
+      'Cadastre um veículo para começar a registrar despesas.';
+
+  @override
+  String get ocorrenciaStatusPendente => 'Pendente';
+
+  @override
+  String get ocorrenciaStatusPaga => 'Paga';
+
+  @override
+  String get ocorrenciaStatusPulada => 'Pulada';
+
+  @override
+  String get ocorrenciaAcaoMarcarPaga => 'Marcar paga';
+
+  @override
+  String get ocorrenciaAcaoPular => 'Pular';
+
+  @override
+  String get ocorrenciaAcaoEditarValor => 'Editar valor pago';
+
+  @override
+  String get ocorrenciaDialogMarcarPagaTitulo => 'Marcar como paga';
+
+  @override
+  String get ocorrenciaDialogEditarValorTitulo => 'Editar valor pago';
+
+  @override
+  String get ocorrenciaDialogCampoValor => 'Valor pago (R\$)';
+
+  @override
+  String get ocorrenciaDialogCampoData => 'Data de pagamento';
+
+  @override
+  String get ocorrenciaDialogConfirmar => 'Confirmar';
+
+  @override
+  String get ocorrenciaDialogCancelar => 'Cancelar';
+
+  @override
   String notifLembreteDataCorpo(String data) {
     return 'Vence em $data';
   }

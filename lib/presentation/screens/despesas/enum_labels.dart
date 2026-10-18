@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../../data/database/enums.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -18,4 +20,30 @@ extension FrequenciaDespesaLabel on FrequenciaDespesa {
     FrequenciaDespesa.mensal => l10n.frequenciaDespesaMensal,
     FrequenciaDespesa.anual => l10n.frequenciaDespesaAnual,
   };
+}
+
+extension StatusOcorrenciaLabel on StatusOcorrencia {
+  String label(AppLocalizations l10n) => switch (this) {
+    StatusOcorrencia.pendente => l10n.ocorrenciaStatusPendente,
+    StatusOcorrencia.paga => l10n.ocorrenciaStatusPaga,
+    StatusOcorrencia.pulada => l10n.ocorrenciaStatusPulada,
+  };
+
+  Color chipColor(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return switch (this) {
+      StatusOcorrencia.pendente => cs.surfaceContainerHighest,
+      StatusOcorrencia.paga => cs.primaryContainer,
+      StatusOcorrencia.pulada => cs.secondaryContainer,
+    };
+  }
+
+  Color chipTextColor(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return switch (this) {
+      StatusOcorrencia.pendente => cs.onSurfaceVariant,
+      StatusOcorrencia.paga => cs.onPrimaryContainer,
+      StatusOcorrencia.pulada => cs.onSecondaryContainer,
+    };
+  }
 }

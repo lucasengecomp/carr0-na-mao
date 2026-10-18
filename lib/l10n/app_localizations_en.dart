@@ -533,6 +533,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get frequenciaDespesaAnual => 'Annual';
 
   @override
+  String get despesasListTitulo => 'Expenses';
+
+  @override
+  String get despesasListFab => 'New expense';
+
+  @override
+  String get despesasListVazia =>
+      'No occurrences found.\nCreate a recurring expense to get started.';
+
+  @override
+  String get semVeiculoCadastrarDespesa =>
+      'Register a vehicle to start recording expenses.';
+
+  @override
+  String get ocorrenciaStatusPendente => 'Pending';
+
+  @override
+  String get ocorrenciaStatusPaga => 'Paid';
+
+  @override
+  String get ocorrenciaStatusPulada => 'Skipped';
+
+  @override
+  String get ocorrenciaAcaoMarcarPaga => 'Mark as paid';
+
+  @override
+  String get ocorrenciaAcaoPular => 'Skip';
+
+  @override
+  String get ocorrenciaAcaoEditarValor => 'Edit paid amount';
+
+  @override
+  String get ocorrenciaDialogMarcarPagaTitulo => 'Mark as paid';
+
+  @override
+  String get ocorrenciaDialogEditarValorTitulo => 'Edit paid amount';
+
+  @override
+  String get ocorrenciaDialogCampoValor => 'Paid amount (R\$)';
+
+  @override
+  String get ocorrenciaDialogCampoData => 'Payment date';
+
+  @override
+  String get ocorrenciaDialogConfirmar => 'Confirm';
+
+  @override
+  String get ocorrenciaDialogCancelar => 'Cancel';
+
+  @override
   String notifLembreteDataCorpo(String data) {
     return 'Due on $data';
   }

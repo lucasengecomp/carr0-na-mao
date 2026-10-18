@@ -165,6 +165,23 @@
   "frequenciaDespesaMensal": "Monthly",
   "frequenciaDespesaAnual": "Annual",
 
+  "despesasListTitulo": "Expenses",
+  "despesasListFab": "New expense",
+  "despesasListVazia": "No occurrences found.\nCreate a recurring expense to get started.",
+  "semVeiculoCadastrarDespesa": "Register a vehicle to start recording expenses.",
+  "ocorrenciaStatusPendente": "Pending",
+  "ocorrenciaStatusPaga": "Paid",
+  "ocorrenciaStatusPulada": "Skipped",
+  "ocorrenciaAcaoMarcarPaga": "Mark as paid",
+  "ocorrenciaAcaoPular": "Skip",
+  "ocorrenciaAcaoEditarValor": "Edit paid amount",
+  "ocorrenciaDialogMarcarPagaTitulo": "Mark as paid",
+  "ocorrenciaDialogEditarValorTitulo": "Edit paid amount",
+  "ocorrenciaDialogCampoValor": "Paid amount (R$)",
+  "ocorrenciaDialogCampoData": "Payment date",
+  "ocorrenciaDialogConfirmar": "Confirm",
+  "ocorrenciaDialogCancelar": "Cancel",
+
   "notifLembreteDataCorpo": "Due on {data}",
   "@notifLembreteDataCorpo": {
     "description": "Body of notification scheduled 7 days before the reminder target date",

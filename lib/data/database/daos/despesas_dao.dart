@@ -42,7 +42,7 @@ class DespesasRecorrentesDao extends DatabaseAccessor<AppDatabase>
       (select(despesasRecorrentes)..where((t) => t.ativa.equals(true))).get();
 }
 
-@DriftAccessor(tables: [OcorrenciasDespesa])
+@DriftAccessor(tables: [OcorrenciasDespesa, DespesasRecorrentes])
 class OcorrenciasDespesaDao extends DatabaseAccessor<AppDatabase>
     with _$OcorrenciasDespesaDaoMixin {
   OcorrenciasDespesaDao(super.db);
@@ -106,6 +106,52 @@ class OcorrenciasDespesaDao extends DatabaseAccessor<AppDatabase>
           status: Value(StatusOcorrencia.pulada),
         ),
       );
+
+  Future<int> atualizarValorPago(int id, double valorPago) =>
+      (update(ocorrenciasDespesa)..where((t) => t.id.equals(id))).write(
+        OcorrenciasDespesaCompanion(valorPago: Value(valorPago)),
+      );
+
+  /// Stream de ocorrências de um veículo para exibição na lista.
+  ///
+  /// Critério: pendentes + pagas dos últimos 90 dias + puladas do mês corrente,
+  /// ordenadas por dataVencimento ASC. Usa join com [DespesasRecorrentes] para
+  /// filtrar pelo veículo.
+  Stream<List<OcorrenciaDespesa>> watchProximasByVeiculo(String placa) {
+    final hoje = DateTime.now();
+    final corte = hoje.subtract(const Duration(days: 90));
+
+    final query =
+        select(ocorrenciasDespesa).join([
+            innerJoin(
+              attachedDatabase.despesasRecorrentes,
+              attachedDatabase.despesasRecorrentes.id.equalsExp(
+                ocorrenciasDespesa.despesaId,
+              ),
+            ),
+          ])
+          ..where(
+            attachedDatabase.despesasRecorrentes.veiculoPlaca.equals(placa),
+          )
+          ..where(
+            ocorrenciasDespesa.status.equalsValue(StatusOcorrencia.pendente) |
+                (ocorrenciasDespesa.status.equalsValue(StatusOcorrencia.paga) &
+                    ocorrenciasDespesa.dataVencimento.isBiggerThanValue(
+                      corte,
+                    )) |
+                (ocorrenciasDespesa.status.equalsValue(
+                      StatusOcorrencia.pulada,
+                    ) &
+                    ocorrenciasDespesa.dataVencimento.isBiggerThanValue(corte)),
+          )
+          ..orderBy([
+            OrderingTerm(expression: ocorrenciasDespesa.dataVencimento),
+          ]);
+
+    return query.watch().map(
+      (rows) => rows.map((r) => r.readTable(ocorrenciasDespesa)).toList(),
+    );
+  }
 
   /// Gera ocorrências para [despesa] até o último dia do mês corrente,
   /// de forma idempotente — não duplica datas já existentes.
