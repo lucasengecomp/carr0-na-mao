@@ -4,10 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/providers.dart';
 import 'presentation/app.dart';
+import 'services/notifications_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final container = ProviderContainer();
+
+  // Inicializa serviço de notificações locais antes do runApp.
+  await container.read(notificationsServiceProvider).init();
+
   final json = await rootBundle.loadString('assets/data/marcas_modelos.json');
   await container.read(marcasModelosDaoProvider).seedFromJson(json);
 

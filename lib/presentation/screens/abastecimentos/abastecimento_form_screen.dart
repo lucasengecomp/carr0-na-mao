@@ -9,6 +9,7 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../data/providers.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/abastecimentos_service.dart';
 import '../veiculos/veiculos_providers.dart';
 import 'abastecimentos_providers.dart' show ultimoKmProvider;
 import 'enum_labels.dart';
@@ -230,11 +231,11 @@ class _AbastecimentoFormScreenState
       final litros = _parseDecimal(_litrosCtrl.text)!;
       final valor = _parseDecimal(_valorCtrl.text)!;
       final postoTxt = _postoCtrl.text.trim();
-      final dao = ref.read(abastecimentosDaoProvider);
+      final service = ref.read(abastecimentosServiceProvider);
       if (_isEdit) {
-        final atual = await dao.byId(widget.id!);
+        final atual = await service.byId(widget.id!);
         if (atual == null) return;
-        await dao.updateAbastecimento(
+        await service.updateAbastecimento(
           atual.copyWith(
             data: _data,
             km: int.parse(_kmCtrl.text),
@@ -247,7 +248,7 @@ class _AbastecimentoFormScreenState
           ),
         );
       } else {
-        await dao.insertAbastecimento(
+        await service.insertAbastecimento(
           AbastecimentosCompanion.insert(
             veiculoPlaca: veiculo.placa,
             data: _data,

@@ -514,4 +514,19 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get frequenciaDespesaAnual => 'Anual';
+
+  @override
+  String notifLembreteDataCorpo(String data) {
+    return 'Vence em $data';
+  }
+
+  @override
+  String notifLembreteKmCorpo(int km) {
+    final intl.NumberFormat kmNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String kmString = kmNumberFormat.format(km);
+
+    return 'Km alvo de $kmString atingido!';
+  }
 }
