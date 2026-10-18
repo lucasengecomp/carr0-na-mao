@@ -633,4 +633,26 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get lembretesEmBreve => 'Em breve';
+
+  @override
+  String get exportarDadosTitulo => 'Exportar dados';
+
+  @override
+  String get exportarDadosSubtitulo =>
+      'Gera arquivos CSV com todos os registros do veículo';
+
+  @override
+  String get exportarBotao => 'Exportar CSV';
+
+  @override
+  String exportarShareSubject(String placa) => 'Carro na Mão — $placa';
+
+  @override
+  String get exportarSucesso => 'Arquivos exportados com sucesso!';
+
+  @override
+  String exportarErro(String erro) => 'Erro ao exportar: $erro';
+
+  @override
+  String get exportarSemVeiculo => 'Selecione um veículo para exportar.';
 }

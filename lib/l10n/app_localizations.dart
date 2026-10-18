@@ -1243,6 +1243,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Em breve'**
   String get lembretesEmBreve;
+
+  /// Título da seção Exportar dados nas configurações
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar dados'**
+  String get exportarDadosTitulo;
+
+  /// Subtítulo da seção Exportar dados nas configurações
+  ///
+  /// In pt, this message translates to:
+  /// **'Gera arquivos CSV com todos os registros do veículo'**
+  String get exportarDadosSubtitulo;
+
+  /// Label do botão Exportar CSV
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar CSV'**
+  String get exportarBotao;
+
+  /// Subject do share sheet ao exportar dados de um veículo
+  ///
+  /// In pt, this message translates to:
+  /// **'Carro na Mão — {placa}'**
+  String exportarShareSubject(String placa);
+
+  /// Snackbar de sucesso ao exportar dados
+  ///
+  /// In pt, this message translates to:
+  /// **'Arquivos exportados com sucesso!'**
+  String get exportarSucesso;
+
+  /// Snackbar de erro ao exportar dados
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao exportar: {erro}'**
+  String exportarErro(String erro);
+
+  /// Mensagem exibida quando não há veículo para exportar
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione um veículo para exportar.'**
+  String get exportarSemVeiculo;
 }
 
 class _AppLocalizationsDelegate
