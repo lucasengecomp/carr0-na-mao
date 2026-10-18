@@ -1012,6 +1012,51 @@
     "description": "SnackBar exibido quando a funcionalidade ainda não está implementada"
   },
 
+  "exportarDadosTitulo": "Exportar dados",
+  "@exportarDadosTitulo": {
+    "description": "Título da seção de exportação em Configurações"
+  },
+
+  "exportarDadosSubtitulo": "Gera arquivos CSV com todos os registros do veículo",
+  "@exportarDadosSubtitulo": {
+    "description": "Subtítulo da seção de exportação"
+  },
+
+  "exportarBotao": "Exportar CSV",
+  "@exportarBotao": {
+    "description": "Rótulo do botão de exportar"
+  },
+
+  "exportarSemVeiculo": "Selecione um veículo para exportar.",
+  "@exportarSemVeiculo": {
+    "description": "Mensagem quando nenhum veículo está selecionado"
+  },
+
+  "exportarSucesso": "Arquivos exportados com sucesso!",
+  "@exportarSucesso": {
+    "description": "Snackbar de sucesso após exportação"
+  },
+
+  "exportarErro": "Erro ao exportar: {erro}",
+  "@exportarErro": {
+    "description": "Snackbar de erro na exportação",
+    "placeholders": {
+      "erro": {
+        "type": "String"
+      }
+    }
+  },
+
+  "exportarShareSubject": "Carro na Mão — {placa}",
+  "@exportarShareSubject": {
+    "description": "Subject do share sheet com a placa do veículo",
+    "placeholders": {
+      "placa": {
+        "type": "String"
+      }
+    }
+  },
+
   "graficosTooltip": "Gráficos",
   "@graficosTooltip": {
     "description": "Tooltip do botão de gráficos na AppBar do dashboard"

@@ -263,6 +263,14 @@
     "description": "SnackBar shown when a feature is not yet implemented"
   },
 
+  "exportarDadosTitulo": "Export data",
+  "exportarDadosSubtitulo": "Generates CSV files with all vehicle records",
+  "exportarBotao": "Export CSV",
+  "exportarSemVeiculo": "Select a vehicle to export.",
+  "exportarSucesso": "Files exported successfully!",
+  "exportarErro": "Export error: {erro}",
+  "exportarShareSubject": "Carro na Mão — {placa}",
+
   "graficosTooltip": "Charts",
   "@graficosTooltip": {
     "description": "Tooltip for the charts button in the dashboard AppBar"

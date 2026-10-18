@@ -633,4 +633,67 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get lembretesEmBreve => 'Em breve';
+
+  @override
+  String get exportarDadosTitulo => 'Exportar dados';
+
+  @override
+  String get exportarDadosSubtitulo =>
+      'Gera arquivos CSV com todos os registros do veículo';
+
+  @override
+  String get exportarBotao => 'Exportar CSV';
+
+  @override
+  String get exportarSemVeiculo => 'Selecione um veículo para exportar.';
+
+  @override
+  String get exportarSucesso => 'Arquivos exportados com sucesso!';
+
+  @override
+  String exportarErro(String erro) {
+    return 'Erro ao exportar: $erro';
+  }
+
+  @override
+  String exportarShareSubject(String placa) {
+    return 'Carro na Mão — $placa';
+  }
+
+  @override
+  String get graficosTooltip => 'Gráficos';
+
+  @override
+  String get graficosTitulo => 'Gráficos';
+
+  @override
+  String get graficosGastosEvolucao => 'Evolução de gastos (últimos 12 meses)';
+
+  @override
+  String get graficosConsumoEvolucao => 'Consumo médio km/l (últimos 12 meses)';
+
+  @override
+  String get graficosDistribuicao =>
+      'Distribuição por categoria (últimos 12 meses)';
+
+  @override
+  String get graficosSemDadosGastos =>
+      'Nenhum gasto registrado nos últimos 12 meses.';
+
+  @override
+  String get graficosSemDadosConsumo =>
+      'Dados insuficientes.\nRegistre abastecimentos com tanque cheio para ver o consumo.';
+
+  @override
+  String get graficosSemDadosDistribuicao =>
+      'Nenhum gasto nos últimos 12 meses.';
+
+  @override
+  String get graficosLegendaAbastec => 'Abastec.';
+
+  @override
+  String get graficosLegendaManut => 'Manut.';
+
+  @override
+  String get graficosLegendaDespesas => 'Despesas';
 }

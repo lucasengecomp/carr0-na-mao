@@ -634,4 +634,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lembretesEmBreve => 'Coming soon';
+
+  @override
+  String get exportarDadosTitulo => 'Export data';
+
+  @override
+  String get exportarDadosSubtitulo =>
+      'Generates CSV files with all vehicle records';
+
+  @override
+  String get exportarBotao => 'Export CSV';
+
+  @override
+  String get exportarSemVeiculo => 'Select a vehicle to export.';
+
+  @override
+  String get exportarSucesso => 'Files exported successfully!';
+
+  @override
+  String exportarErro(String erro) {
+    return 'Export error: $erro';
+  }
+
+  @override
+  String exportarShareSubject(String placa) {
+    return 'Carro na Mão — $placa';
+  }
+
+  @override
+  String get graficosTooltip => 'Charts';
+
+  @override
+  String get graficosTitulo => 'Charts';
+
+  @override
+  String get graficosGastosEvolucao => 'Expense evolution (last 12 months)';
+
+  @override
+  String get graficosConsumoEvolucao =>
+      'Avg. consumption km/l (last 12 months)';
+
+  @override
+  String get graficosDistribuicao =>
+      'Distribution by category (last 12 months)';
+
+  @override
+  String get graficosSemDadosGastos =>
+      'No expenses recorded in the last 12 months.';
+
+  @override
+  String get graficosSemDadosConsumo =>
+      'Insufficient data.\nRecord full-tank fuel-ups to see consumption.';
+
+  @override
+  String get graficosSemDadosDistribuicao =>
+      'No expenses in the last 12 months.';
+
+  @override
+  String get graficosLegendaAbastec => 'Fuel';
+
+  @override
+  String get graficosLegendaManut => 'Maint.';
+
+  @override
+  String get graficosLegendaDespesas => 'Expenses';
 }
