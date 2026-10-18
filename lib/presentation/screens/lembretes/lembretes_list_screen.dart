@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
@@ -83,10 +86,9 @@ class _LembretesListScreenState extends ConsumerState<LembretesListScreen>
     );
   }
 
-  // Issue #27 implementará /lembretes/novo. Por ora exibe snackbar.
+  // Issue #27: navega para o formulário de criação de lembrete avulso.
   void _onFabTap(BuildContext context, AppLocalizations l10n) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(l10n.lembretesEmBreve)));
+    unawaited(context.push('/lembretes/novo'));
   }
 }
 

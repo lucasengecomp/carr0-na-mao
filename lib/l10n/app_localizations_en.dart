@@ -636,6 +636,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lembretesEmBreve => 'Coming soon';
 
   @override
+  String get lembreteFormNovoTitulo => 'New reminder';
+
+  @override
+  String get lembreteFormEditarTitulo => 'Edit reminder';
+
+  @override
+  String get lembreteFormCampoDescricao => 'Description';
+
+  @override
+  String get lembreteFormCampoVeiculo => 'Vehicle';
+
+  @override
+  String get lembreteFormCampoDataAlvo => 'Target date (optional)';
+
+  @override
+  String get lembreteFormSemDataAlvo => 'Not set';
+
+  @override
+  String get lembreteFormLimparDataAlvo => 'Clear target date';
+
+  @override
+  String get lembreteFormCampoKmAlvo => 'Target km (optional)';
+
+  @override
+  String get lembreteFormValidacaoDataOuKm =>
+      'Provide at least a target date or a target km';
+
+  @override
+  String get lembreteFormValidacaoDescricaoMin => 'Minimum 2 characters';
+
+  @override
+  String lembreteFormNaoPossivel(String erro) {
+    return 'Could not save: $erro';
+  }
+
+  @override
+  String get semVeiculoCadastrarLembreteForm =>
+      'Register a vehicle before creating reminders.';
+
+  @override
   String get exportarDadosTitulo => 'Export data';
 
   @override

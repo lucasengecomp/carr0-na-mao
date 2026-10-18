@@ -8,6 +8,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../helpers/l10n_delegates.dart';
 
@@ -69,6 +70,44 @@ Future<void> _pumpScreenWithProviders(
         localizationsDelegates: l10nDelegates,
         supportedLocales: supportedLocales,
         home: LembretesListScreen(),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// Monta a tela com GoRouter para testar navegação do FAB.
+Future<void> _pumpScreenWithRouter(
+  WidgetTester tester, {
+  required AppDatabase db,
+}) async {
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const LembretesListScreen(),
+      ),
+      GoRoute(
+        path: '/lembretes/novo',
+        builder: (context, state) =>
+            const Scaffold(body: Text('LembreteFormScreen')),
+      ),
+    ],
+  );
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        lembretesPendentesProvider.overrideWith((_) => Stream.value([])),
+        lembretesAtrasadosProvider.overrideWith((_) => Stream.value([])),
+        lembretesConcluidosProvider.overrideWith((_) => Stream.value([])),
+      ],
+      child: MaterialApp.router(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        routerConfig: router,
       ),
     ),
   );
@@ -215,15 +254,22 @@ void main() {
       await _teardown(tester);
     });
 
-    testWidgets('toque no FAB abre SnackBar "Em breve"', (tester) async {
-      await _pumpScreenWithProviders(tester, db: db);
+    testWidgets(
+      'toque no FAB navega para /lembretes/novo (não exibe "Em breve")',
+      (tester) async {
+        // Usa helper com GoRouter para verificar que a navegação ocorre.
+        await _pumpScreenWithRouter(tester, db: db);
 
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pump();
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Em breve'), findsOneWidget);
-      await _teardown(tester);
-    });
+        // Deve ter navegado para /lembretes/novo; "Em breve" não deve aparecer
+        expect(find.text('Em breve'), findsNothing);
+        // A tela de formulário (stub) deve estar visível
+        expect(find.text('LembreteFormScreen'), findsOneWidget);
+        await _teardown(tester);
+      },
+    );
   });
 
   // -------------------------------------------------------------------------
