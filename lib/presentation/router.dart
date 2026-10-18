@@ -5,6 +5,7 @@ import 'screens/abastecimentos/abastecimento_form_screen.dart';
 import 'screens/abastecimentos/abastecimentos_list_screen.dart';
 import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
+import 'screens/dashboard/dashboard_graficos_screen.dart';
 import 'screens/dashboard/dashboard_home_screen.dart';
 import 'screens/despesas/despesa_form_screen.dart';
 import 'screens/despesas/despesas_list_screen.dart';
@@ -103,6 +104,14 @@ final GoRouter appRouter = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/comparador',
       builder: (context, state) => const ComparadorScreen(),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/dashboard/graficos',
+      builder: (context, state) {
+        final placa = state.uri.queryParameters['placa'] ?? '';
+        return DashboardGraficosScreen(placa: placa);
+      },
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
