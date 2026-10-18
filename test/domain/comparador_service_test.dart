@@ -201,6 +201,99 @@ void main() {
       expect(r.kmPorLitroGasolina, closeTo(12.0, 0.001));
       expect(r.kmPorLitroAlcool, closeTo(8.0, 0.001));
     });
+
+    test('abastecimento exatamente na fronteira de 12 meses é incluído', () {
+      // hoje = 2026-10-01; fronteira = DateTime(2026, 10-12, 1) = 2025-10-01.
+      // !isBefore(2025-10-01) → data == 2025-10-01 deve ser INCLUÍDA.
+      final historico = [
+        _abast(id: 1, data: DateTime(2025, 10, 1), km: 10000, litros: 40),
+        _abast(id: 2, data: DateTime(2026, 6, 1), km: 10600, litros: 50),
+        _abast(
+          id: 3,
+          data: DateTime(2025, 10, 15),
+          km: 10100,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+        _abast(
+          id: 4,
+          data: DateTime(2026, 6, 15),
+          km: 10400,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+      ];
+      final r = service.comparar(
+        precoAlcool: 3.80,
+        precoGasolina: 6.00,
+        historico: historico,
+        agora: hoje,
+      );
+      // Ambos os combustíveis têm 2 pontos na janela → histórico.
+      expect(r.metodo, MetodoComparador.historico);
+    });
+
+    test('abastecimento 1 dia antes da fronteira de 12 meses é excluído', () {
+      // hoje = 2026-10-01; fronteira = 2025-10-01.
+      // 2025-09-30 está FORA → com apenas 1 ponto por combustível → fallback.
+      final historico = [
+        _abast(id: 1, data: DateTime(2025, 9, 30), km: 10000, litros: 40),
+        _abast(id: 2, data: DateTime(2026, 6, 1), km: 10600, litros: 50),
+        _abast(
+          id: 3,
+          data: DateTime(2025, 9, 30),
+          km: 10100,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+        _abast(
+          id: 4,
+          data: DateTime(2026, 6, 15),
+          km: 10400,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+      ];
+      final r = service.comparar(
+        precoAlcool: 3.80,
+        precoGasolina: 6.00,
+        historico: historico,
+        agora: hoje,
+      );
+      // id:1 excluído → gasolina tem só 1 ponto elegível → fallback.
+      expect(r.metodo, MetodoComparador.regraSetenta);
+    });
+
+    test('km duplicado (odômetro repetido) faz fallback sem crash', () {
+      // Dois abastecimentos com o mesmo valor de km: a diferença é 0,
+      // kmTotal fica 0 e _kmPorLitro retorna null → regraSetenta.
+      final historico = [
+        _abast(id: 1, data: DateTime(2026, 6, 1), km: 10000, litros: 40),
+        _abast(id: 2, data: DateTime(2026, 7, 1), km: 10000, litros: 50),
+        _abast(
+          id: 3,
+          data: DateTime(2026, 6, 15),
+          km: 10200,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+        _abast(
+          id: 4,
+          data: DateTime(2026, 7, 15),
+          km: 10400,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+      ];
+      final r = service.comparar(
+        precoAlcool: 3.80,
+        precoGasolina: 6.00,
+        historico: historico,
+        agora: hoje,
+      );
+      // kmTotal de gasolina == 0 → _kmPorLitro retorna null → fallback.
+      expect(r.metodo, MetodoComparador.regraSetenta);
+    });
   });
 
   group('caminho regra 70% (fallback)', () {
