@@ -595,4 +595,42 @@ class AppLocalizationsPt extends AppLocalizations {
 
     return 'Km alvo de $kmString atingido!';
   }
+
+  @override
+  String get lembretesTitle => 'Lembretes';
+
+  @override
+  String get lembretesTabPendentes => 'Pendentes';
+
+  @override
+  String get lembretesTabAtrasados => 'Atrasados';
+
+  @override
+  String get lembretesTabConcluidos => 'Concluídos';
+
+  @override
+  String get lembretesVazioPendentes =>
+      'Nenhum lembrete pendente.\nAdicione lembretes para ser notificado.';
+
+  @override
+  String get lembretesVazioAtrasados =>
+      'Nenhum lembrete atrasado.\nTudo em dia!';
+
+  @override
+  String get lembretesVazioConcluidos => 'Nenhum lembrete concluído ainda.';
+
+  @override
+  String get lembretesFab => 'Novo lembrete';
+
+  @override
+  String get lembretesStatusPendente => 'Pendente';
+
+  @override
+  String get lembretesStatusConcluido => 'Concluído';
+
+  @override
+  String get lembretesStatusAdiado => 'Adiado';
+
+  @override
+  String get lembretesEmBreve => 'Em breve';
 }

@@ -201,5 +201,65 @@
         "format": "decimalPattern"
       }
     }
+  },
+
+  "lembretesTitle": "Reminders",
+  "@lembretesTitle": {
+    "description": "Title of the reminders list screen"
+  },
+
+  "lembretesTabPendentes": "Pending",
+  "@lembretesTabPendentes": {
+    "description": "Label of the Pending tab in the reminders screen"
+  },
+
+  "lembretesTabAtrasados": "Overdue",
+  "@lembretesTabAtrasados": {
+    "description": "Label of the Overdue tab in the reminders screen"
+  },
+
+  "lembretesTabConcluidos": "Done",
+  "@lembretesTabConcluidos": {
+    "description": "Label of the Done tab in the reminders screen"
+  },
+
+  "lembretesVazioPendentes": "No pending reminders.\nAdd reminders to get notified.",
+  "@lembretesVazioPendentes": {
+    "description": "Empty state message for the Pending tab"
+  },
+
+  "lembretesVazioAtrasados": "No overdue reminders.\nAll up to date!",
+  "@lembretesVazioAtrasados": {
+    "description": "Empty state message for the Overdue tab"
+  },
+
+  "lembretesVazioConcluidos": "No completed reminders yet.",
+  "@lembretesVazioConcluidos": {
+    "description": "Empty state message for the Done tab"
+  },
+
+  "lembretesFab": "New reminder",
+  "@lembretesFab": {
+    "description": "Label of the FAB on the reminders screen"
+  },
+
+  "lembretesStatusPendente": "Pending",
+  "@lembretesStatusPendente": {
+    "description": "Status badge label for pending reminders"
+  },
+
+  "lembretesStatusConcluido": "Done",
+  "@lembretesStatusConcluido": {
+    "description": "Status badge label for completed reminders"
+  },
+
+  "lembretesStatusAdiado": "Snoozed",
+  "@lembretesStatusAdiado": {
+    "description": "Status badge label for snoozed reminders"
+  },
+
+  "lembretesEmBreve": "Coming soon",
+  "@lembretesEmBreve": {
+    "description": "SnackBar shown when a feature is not yet implemented"
   }
 }

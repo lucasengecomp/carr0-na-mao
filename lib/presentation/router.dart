@@ -8,9 +8,9 @@ import 'screens/config/config_screen.dart';
 import 'screens/dashboard/dashboard_home_screen.dart';
 import 'screens/despesas/despesa_form_screen.dart';
 import 'screens/despesas/despesas_list_screen.dart';
+import 'screens/lembretes/lembretes_list_screen.dart';
 import 'screens/manutencoes/manutencao_form_screen.dart';
 import 'screens/manutencoes/manutencoes_list_screen.dart';
-import 'screens/placeholder_screen.dart';
 import 'screens/veiculos/veiculo_form_screen.dart';
 import 'screens/veiculos/veiculos_list_screen.dart';
 import 'shell_scaffold.dart';
@@ -60,10 +60,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/lembretes',
-              builder: (context, state) => const PlaceholderScreen(
-                titulo: 'Lembretes',
-                descricao: 'Lembretes de manutenção e avulsos (issue #25).',
-              ),
+              builder: (context, state) => const LembretesListScreen(),
             ),
           ],
         ),

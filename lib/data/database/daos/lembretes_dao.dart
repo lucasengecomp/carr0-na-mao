@@ -68,6 +68,16 @@ class LembretesDao extends DatabaseAccessor<AppDatabase>
             ]))
           .watch();
 
+  /// Todos os lembretes de todos os veículos, sem filtro de status.
+  /// Usado pela tela de lista global (issue #25), que filtra por status no
+  /// Dart via providers.
+  Stream<List<Lembrete>> watchAll() =>
+      (select(lembretes)..orderBy([
+            (t) => OrderingTerm(expression: t.dataAlvo),
+            (t) => OrderingTerm(expression: t.kmAlvo),
+          ]))
+          .watch();
+
   Future<int> marcarConcluido(int id) =>
       (update(lembretes)..where((t) => t.id.equals(id))).write(
         const LembretesCompanion(status: Value(StatusLembrete.concluido)),
