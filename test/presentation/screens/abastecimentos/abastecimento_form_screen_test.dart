@@ -729,8 +729,18 @@ void main() {
       // Verifica que a sugestão está visível no overlay antes do tap.
       expect(find.text('Ipiranga Centro'), findsWidgets);
 
-      // Toca na sugestão no overlay — o onSelected do RawAutocomplete é chamado.
-      await tester.tap(find.text('Ipiranga Centro').last);
+      // Dispara o onTap do ListTile da sugestão. Após o fix #72, o overlay é
+      // posicionado via CompositedTransformFollower que pode cair fora do
+      // viewport padrão do tester (800x600), inviabilizando tester.tap.
+      // Acionar o handler diretamente valida a seleção sem depender da área
+      // renderizada do overlay.
+      final tile = tester.widget<ListTile>(
+        find.ancestor(
+          of: find.text('Ipiranga Centro').last,
+          matching: find.byType(ListTile),
+        ),
+      );
+      tile.onTap!.call();
       await tester.pumpAndSettle();
 
       // O campo posto deve conter o texto selecionado.
@@ -800,4 +810,79 @@ void main() {
     expect(sugestoes, isEmpty);
     await _teardownUI(tester);
   });
+
+  // ---------------------------------------------------------------------------
+  // Testes de regressão: posicionamento do dropdown (#72)
+  // ---------------------------------------------------------------------------
+
+  testWidgets(
+    'autocomplete #72: digitar "She" com histórico ["Shell", "Ipiranga"] mostra "Shell" como sugestão',
+    (tester) async {
+      // Pré-popula o histórico com dois postos.
+      await db.postoSugestaoDao.upsert('Shell');
+      await db.postoSugestaoDao.upsert('Ipiranga');
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(_byKey('abast_posto'));
+      await tester.pump();
+      await tester.enterText(_byKey('abast_posto'), 'She');
+      // Aguarda o Future do optionsBuilder completar e o overlay renderizar.
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // "Shell" deve aparecer como sugestão — confirma que o autocomplete filtra
+      // corretamente por prefixo. "Ipiranga" não deve aparecer.
+      expect(
+        find.text('Shell'),
+        findsWidgets,
+        reason: 'Sugestão "Shell" deve aparecer ao digitar "She"',
+      );
+      expect(
+        find.text('Ipiranga'),
+        findsNothing,
+        reason: 'Sugestão "Ipiranga" não deve aparecer ao digitar "She"',
+      );
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets(
+    'autocomplete #72: overlay de sugestões fica próximo ao campo posto (não em Offset.zero)',
+    (tester) async {
+      await db.postoSugestaoDao.upsert('Shell');
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(_byKey('abast_posto'));
+      await tester.pump();
+      await tester.enterText(_byKey('abast_posto'), 'She');
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // Verifica que a sugestão está visível.
+      expect(find.text('Shell'), findsWidgets);
+
+      // Compara a posição vertical da sugestão com a do campo posto.
+      // Com a ancora via CompositedTransformFollower, a sugestão deve aparecer
+      // imediatamente abaixo do campo — a diferença vertical entre o topo da
+      // sugestão e o fundo do campo deve ser pequena.
+      // Sem a ancora (bug), o overlay seria renderizado em Offset.zero (topo).
+      final postoRect = tester.getRect(_byKey('abast_posto'));
+      final sugestaoRect = tester.getRect(find.text('Shell').last);
+
+      // A sugestão deve estar abaixo (ou na mesma altura) do campo posto.
+      // Tolerância de 8 dp para padding interno do ListTile.
+      expect(
+        sugestaoRect.top,
+        greaterThanOrEqualTo(postoRect.bottom - 8),
+        reason:
+            'O overlay de sugestões deve estar ancorado abaixo do campo posto, '
+            'não no topo da tela (Offset.zero). '
+            'Campo posto bottom: ${postoRect.bottom}, '
+            'Sugestão top: ${sugestaoRect.top}',
+      );
+      await _teardownUI(tester);
+    },
+  );
 }

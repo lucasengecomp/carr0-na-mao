@@ -578,6 +578,10 @@ class _VeiculoChip extends StatelessWidget {
 
 /// Widget de autocomplete para o campo Posto.
 /// Busca sugestões no [PostoSugestaoDao] ordenadas por frequência de uso.
+///
+/// O overlay de sugestões é ancorado ao campo TextField via
+/// [CompositedTransformFollower] + [LayerLink], garantindo que a lista apareça
+/// imediatamente abaixo do campo em qualquer posição da tela (fix #72).
 class _PostoAutocomplete extends ConsumerStatefulWidget {
   const _PostoAutocomplete({required this.controller});
 
@@ -592,6 +596,11 @@ class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
   /// Evita que o fieldViewBuilder execute atribuição em todo build().
   late final TextEditingController _fieldController;
   late final FocusNode _focusNode;
+
+  /// LayerLink que conecta o [CompositedTransformTarget] no fieldViewBuilder
+  /// ao [CompositedTransformFollower] no optionsViewBuilder, ancorando o
+  /// overlay de sugestões ao TextField (fix #72).
+  final LayerLink _layerLink = LayerLink();
 
   @override
   void initState() {
@@ -639,15 +648,20 @@ class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
       displayStringForOption: (s) => s,
       fieldViewBuilder:
           (context, fieldController, focusNode, onFieldSubmitted) {
-            return TextFormField(
-              key: const Key('abast_posto'),
-              controller: fieldController,
-              focusNode: focusNode,
-              decoration: InputDecoration(
-                labelText: l10n.abastecimentoCampoPosto,
+            // CompositedTransformTarget marca a posição exata do campo para
+            // que o CompositedTransformFollower no overlay possa se ancorar.
+            return CompositedTransformTarget(
+              link: _layerLink,
+              child: TextFormField(
+                key: const Key('abast_posto'),
+                controller: fieldController,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  labelText: l10n.abastecimentoCampoPosto,
+                ),
+                textCapitalization: TextCapitalization.words,
+                onFieldSubmitted: (_) => onFieldSubmitted(),
               ),
-              textCapitalization: TextCapitalization.words,
-              onFieldSubmitted: (_) => onFieldSubmitted(),
             );
           },
       onSelected: (option) {
@@ -656,24 +670,38 @@ class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
         widget.controller.text = option;
       },
       optionsViewBuilder: (context, onSelected, options) {
+        // O optionsViewBuilder recebe um context dentro do Overlay, que ocupa
+        // a tela inteira. O Align(topLeft) dá coordenadas absolutas (0,0) a
+        // partir das quais o CompositedTransformFollower recalcula a posição
+        // usando o LayerLink — ancorando bottomLeft do campo ao topLeft da
+        // lista. showWhenUnlinked: false evita renderização em (0,0) durante
+        // o dispose.
         return Align(
           alignment: Alignment.topLeft,
-          child: Material(
-            elevation: 4,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 200),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (context, index) {
-                  final option = options.elementAt(index);
-                  return ListTile(
-                    dense: true,
-                    title: Text(option),
-                    onTap: () => onSelected(option),
-                  );
-                },
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            targetAnchor: Alignment.bottomLeft,
+            followerAnchor: Alignment.topLeft,
+            child: TextFieldTapRegion(
+              child: Material(
+                elevation: 4,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final option = options.elementAt(index);
+                      return ListTile(
+                        dense: true,
+                        title: Text(option),
+                        onTap: () => onSelected(option),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
