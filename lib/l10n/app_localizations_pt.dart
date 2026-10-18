@@ -659,4 +659,41 @@ class AppLocalizationsPt extends AppLocalizations {
   String exportarShareSubject(String placa) {
     return 'Carro na Mão — $placa';
   }
+
+  @override
+  String get graficosTooltip => 'Gráficos';
+
+  @override
+  String get graficosTitulo => 'Gráficos';
+
+  @override
+  String get graficosGastosEvolucao => 'Evolução de gastos (últimos 12 meses)';
+
+  @override
+  String get graficosConsumoEvolucao => 'Consumo médio km/l (últimos 12 meses)';
+
+  @override
+  String get graficosDistribuicao =>
+      'Distribuição por categoria (últimos 12 meses)';
+
+  @override
+  String get graficosSemDadosGastos =>
+      'Nenhum gasto registrado nos últimos 12 meses.';
+
+  @override
+  String get graficosSemDadosConsumo =>
+      'Dados insuficientes.\nRegistre abastecimentos com tanque cheio para ver o consumo.';
+
+  @override
+  String get graficosSemDadosDistribuicao =>
+      'Nenhum gasto nos últimos 12 meses.';
+
+  @override
+  String get graficosLegendaAbastec => 'Abastec.';
+
+  @override
+  String get graficosLegendaManut => 'Manut.';
+
+  @override
+  String get graficosLegendaDespesas => 'Despesas';
 }

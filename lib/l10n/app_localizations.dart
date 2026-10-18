@@ -1285,6 +1285,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Carro na Mão — {placa}'**
   String exportarShareSubject(String placa);
+
+  /// Tooltip do botão de gráficos na AppBar do dashboard
+  ///
+  /// In pt, this message translates to:
+  /// **'Gráficos'**
+  String get graficosTooltip;
+
+  /// Título da tela de gráficos do dashboard
+  ///
+  /// In pt, this message translates to:
+  /// **'Gráficos'**
+  String get graficosTitulo;
+
+  /// Título do gráfico de barras de evolução de gastos
+  ///
+  /// In pt, this message translates to:
+  /// **'Evolução de gastos (últimos 12 meses)'**
+  String get graficosGastosEvolucao;
+
+  /// Título do gráfico de linha de consumo mensal
+  ///
+  /// In pt, this message translates to:
+  /// **'Consumo médio km/l (últimos 12 meses)'**
+  String get graficosConsumoEvolucao;
+
+  /// Título do gráfico de pizza de distribuição por categoria
+  ///
+  /// In pt, this message translates to:
+  /// **'Distribuição por categoria (últimos 12 meses)'**
+  String get graficosDistribuicao;
+
+  /// Estado vazio do gráfico de gastos
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum gasto registrado nos últimos 12 meses.'**
+  String get graficosSemDadosGastos;
+
+  /// Estado vazio do gráfico de consumo
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados insuficientes.\nRegistre abastecimentos com tanque cheio para ver o consumo.'**
+  String get graficosSemDadosConsumo;
+
+  /// Estado vazio do gráfico de distribuição
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum gasto nos últimos 12 meses.'**
+  String get graficosSemDadosDistribuicao;
+
+  /// Legenda do segmento de abastecimento no gráfico de barras
+  ///
+  /// In pt, this message translates to:
+  /// **'Abastec.'**
+  String get graficosLegendaAbastec;
+
+  /// Legenda do segmento de manutenção no gráfico de barras
+  ///
+  /// In pt, this message translates to:
+  /// **'Manut.'**
+  String get graficosLegendaManut;
+
+  /// Legenda do segmento de despesas no gráfico de barras
+  ///
+  /// In pt, this message translates to:
+  /// **'Despesas'**
+  String get graficosLegendaDespesas;
 }
 
 class _AppLocalizationsDelegate

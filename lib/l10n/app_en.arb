@@ -269,5 +269,60 @@
   "exportarSemVeiculo": "Select a vehicle to export.",
   "exportarSucesso": "Files exported successfully!",
   "exportarErro": "Export error: {erro}",
-  "exportarShareSubject": "Carro na Mão — {placa}"
+  "exportarShareSubject": "Carro na Mão — {placa}",
+
+  "graficosTooltip": "Charts",
+  "@graficosTooltip": {
+    "description": "Tooltip for the charts button in the dashboard AppBar"
+  },
+
+  "graficosTitulo": "Charts",
+  "@graficosTitulo": {
+    "description": "Title of the dashboard charts screen"
+  },
+
+  "graficosGastosEvolucao": "Expense evolution (last 12 months)",
+  "@graficosGastosEvolucao": {
+    "description": "Title of the stacked bar chart for monthly expenses"
+  },
+
+  "graficosConsumoEvolucao": "Avg. consumption km/l (last 12 months)",
+  "@graficosConsumoEvolucao": {
+    "description": "Title of the line chart for monthly consumption"
+  },
+
+  "graficosDistribuicao": "Distribution by category (last 12 months)",
+  "@graficosDistribuicao": {
+    "description": "Title of the pie chart for category distribution"
+  },
+
+  "graficosSemDadosGastos": "No expenses recorded in the last 12 months.",
+  "@graficosSemDadosGastos": {
+    "description": "Empty state for the expenses chart"
+  },
+
+  "graficosSemDadosConsumo": "Insufficient data.\nRecord full-tank fuel-ups to see consumption.",
+  "@graficosSemDadosConsumo": {
+    "description": "Empty state for the consumption chart"
+  },
+
+  "graficosSemDadosDistribuicao": "No expenses in the last 12 months.",
+  "@graficosSemDadosDistribuicao": {
+    "description": "Empty state for the distribution chart"
+  },
+
+  "graficosLegendaAbastec": "Fuel",
+  "@graficosLegendaAbastec": {
+    "description": "Legend label for the fuel segment in the bar chart"
+  },
+
+  "graficosLegendaManut": "Maint.",
+  "@graficosLegendaManut": {
+    "description": "Legend label for the maintenance segment in the bar chart"
+  },
+
+  "graficosLegendaDespesas": "Expenses",
+  "@graficosLegendaDespesas": {
+    "description": "Legend label for the expenses segment in the bar chart"
+  }
 }
