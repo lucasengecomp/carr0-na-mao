@@ -175,10 +175,11 @@ void main() {
 
       expect(r.metodo, MetodoComparador.regraSetenta);
       expect(r.vencedor, CombustivelMaisVantajoso.alcool);
-      expect(r.custoPorKmAlcool, isNull);
-      expect(r.custoPorKmGasolina, isNull);
-      expect(r.kmPorLitroAlcool, isNull);
-      expect(r.kmPorLitroGasolina, isNull);
+      // Sem histórico: usa rendimentos padrão (7 km/L álcool, 10 km/L gasolina).
+      expect(r.kmPorLitroAlcool, closeTo(7.0, 0.001));
+      expect(r.kmPorLitroGasolina, closeTo(10.0, 0.001));
+      expect(r.custoPorKmAlcool, closeTo(3.80 / 7.0, 0.001));
+      expect(r.custoPorKmGasolina, closeTo(6.00 / 10.0, 0.001));
     });
 
     test('cai na regra 70% sem nenhum histórico', () {
@@ -252,5 +253,43 @@ void main() {
       agora: hoje,
     );
     expect(r.razaoPrecos, closeTo(0.7, 0.001));
+  });
+
+  group('custo/km com defaults 10/7 (regra 70%)', () {
+    // RF-20/RF-21: com gasolina=5,00 e defaults 10 km/L → custo 0,50/km;
+    //              com álcool=3,50 e defaults 7 km/L  → custo 0,50/km; empate.
+    test('gasolina a R\$5,00 → custo/km = 0,50 com default 10 km/L', () {
+      final r = service.comparar(
+        precoAlcool: 3.50,
+        precoGasolina: 5.00,
+        historico: const [],
+        agora: hoje,
+      );
+      expect(r.metodo, MetodoComparador.regraSetenta);
+      expect(r.kmPorLitroGasolina, closeTo(10.0, 0.001));
+      expect(r.custoPorKmGasolina, closeTo(0.50, 0.001));
+    });
+
+    test('álcool a R\$3,50 → custo/km = 0,50 com default 7 km/L', () {
+      final r = service.comparar(
+        precoAlcool: 3.50,
+        precoGasolina: 5.00,
+        historico: const [],
+        agora: hoje,
+      );
+      expect(r.kmPorLitroAlcool, closeTo(7.0, 0.001));
+      expect(r.custoPorKmAlcool, closeTo(0.50, 0.001));
+    });
+
+    test('R\$3,50 álcool + R\$5,00 gasolina → custo/km iguais → empate', () {
+      // 3,50 / 5,00 = 0,70 exato → empate pela regra 70%.
+      final r = service.comparar(
+        precoAlcool: 3.50,
+        precoGasolina: 5.00,
+        historico: const [],
+        agora: hoje,
+      );
+      expect(r.vencedor, CombustivelMaisVantajoso.empate);
+    });
   });
 }

@@ -241,23 +241,24 @@ class _ResultadoCard extends StatelessWidget {
             const SizedBox(height: 12),
             _MetodoBadge(metodo: resultado.metodo),
             const SizedBox(height: 16),
-            if (resultado.metodo == MetodoComparador.historico) ...[
-              _LinhaCusto(
-                label: l10n.comparadorAlcoolCompensa,
-                custoPorKm: resultado.custoPorKmAlcool!,
-                kmPorLitro: resultado.kmPorLitroAlcool!,
-              ),
-              const SizedBox(height: 6),
-              _LinhaCusto(
-                label: l10n.comparadorGasolinaCompensa,
-                custoPorKm: resultado.custoPorKmGasolina!,
-                kmPorLitro: resultado.kmPorLitroGasolina!,
-              ),
-            ] else
+            _LinhaCusto(
+              label: l10n.tipoCombustivelAlcool,
+              custoPorKm: resultado.custoPorKmAlcool,
+              kmPorLitro: resultado.kmPorLitroAlcool,
+            ),
+            const SizedBox(height: 6),
+            _LinhaCusto(
+              label: l10n.tipoCombustivelGasolina,
+              custoPorKm: resultado.custoPorKmGasolina,
+              kmPorLitro: resultado.kmPorLitroGasolina,
+            ),
+            if (resultado.metodo == MetodoComparador.regraSetenta) ...[
+              const SizedBox(height: 10),
               Text(
                 l10n.comparadorSemHistoricoTexto,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
+            ],
           ],
         ),
       ),
@@ -304,19 +305,24 @@ class _LinhaCusto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 88,
-          child: Text(label, style: Theme.of(context).textTheme.titleSmall),
-        ),
-        Expanded(
-          child: Text(
-            'R\$ ${custoPorKm.toStringAsFixed(3)}/km '
-            '· ${kmPorLitro.toStringAsFixed(1)} km/L',
+    return Semantics(
+      label:
+          '$label: R\$ ${custoPorKm.toStringAsFixed(3)} por km, '
+          '${kmPorLitro.toStringAsFixed(1)} km por litro',
+      child: Row(
+        children: [
+          SizedBox(
+            width: 88,
+            child: Text(label, style: Theme.of(context).textTheme.titleSmall),
           ),
-        ),
-      ],
+          Expanded(
+            child: Text(
+              'R\$ ${custoPorKm.toStringAsFixed(3)}/km '
+              '· ${kmPorLitro.toStringAsFixed(1)} km/L',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

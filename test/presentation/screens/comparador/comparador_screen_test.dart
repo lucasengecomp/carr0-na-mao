@@ -103,8 +103,8 @@ void main() {
 
     expect(find.text('Álcool compensa'), findsOneWidget);
     expect(find.text('Regra dos 70%'), findsOneWidget);
-    // Sem histórico, não aparecem as linhas de custo/km.
-    expect(find.textContaining('/km'), findsNothing);
+    // Sem histórico, exibe custo/km estimado com valores padrão (7 e 10 km/L).
+    expect(find.textContaining('/km'), findsNWidgets(2));
     await _teardownUi(tester);
   });
 
@@ -146,10 +146,180 @@ void main() {
     await _advance(tester);
 
     expect(find.text('Baseado no histórico do veículo'), findsOneWidget);
-    // 'Álcool compensa' aparece no título do card e no label da _LinhaCusto.
-    expect(find.text('Álcool compensa'), findsWidgets);
+    // 'Álcool compensa' aparece apenas no título do card.
+    expect(find.text('Álcool compensa'), findsOneWidget);
+    // Labels das linhas de custo/km são os nomes dos combustíveis.
+    expect(find.text('Álcool'), findsOneWidget);
+    expect(find.text('Gasolina'), findsOneWidget);
     // Confere a linha de custo/km de cada combustível.
     expect(find.textContaining('/km'), findsNWidgets(2));
     await _teardownUi(tester);
   });
+
+  // ─── Validação de formulário ───────────────────────────────────────────────
+
+  testWidgets('campo álcool vazio exibe mensagem Obrigatório', (tester) async {
+    await db.veiculosDao.insertVeiculo(_novoVeiculo());
+    await _pumpScreen(tester, db);
+
+    // Deixa campo álcool vazio; preenche gasolina.
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Preço da gasolina (R\$/L)'),
+      '6,00',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Comparar'));
+    await _advance(tester);
+
+    expect(find.text('Obrigatório'), findsOneWidget);
+    // Resultado não deve aparecer.
+    expect(find.textContaining('/km'), findsNothing);
+    await _teardownUi(tester);
+  });
+
+  testWidgets('campo gasolina vazio exibe mensagem Obrigatório', (
+    tester,
+  ) async {
+    await db.veiculosDao.insertVeiculo(_novoVeiculo());
+    await _pumpScreen(tester, db);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Preço do álcool (R\$/L)'),
+      '3,90',
+    );
+    // Deixa campo gasolina vazio.
+    await tester.tap(find.widgetWithText(FilledButton, 'Comparar'));
+    await _advance(tester);
+
+    expect(find.text('Obrigatório'), findsOneWidget);
+    expect(find.textContaining('/km'), findsNothing);
+    await _teardownUi(tester);
+  });
+
+  testWidgets(
+    'preço não-numérico (apenas pontuação) exibe mensagem Valor inválido',
+    (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await _pumpScreen(tester, db);
+
+      // "," passa pelo inputFormatter mas double.tryParse(',') == null → inválido.
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço do álcool (R\$/L)'),
+        ',',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço da gasolina (R\$/L)'),
+        '6,00',
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Comparar'));
+      await _advance(tester);
+
+      expect(find.text('Valor inválido'), findsOneWidget);
+      expect(find.textContaining('/km'), findsNothing);
+      await _teardownUi(tester);
+    },
+  );
+
+  testWidgets('preço zero exibe mensagem Valor inválido', (tester) async {
+    await db.veiculosDao.insertVeiculo(_novoVeiculo());
+    await _pumpScreen(tester, db);
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Preço do álcool (R\$/L)'),
+      '0',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Preço da gasolina (R\$/L)'),
+      '6,00',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Comparar'));
+    await _advance(tester);
+
+    expect(find.text('Valor inválido'), findsOneWidget);
+    expect(find.textContaining('/km'), findsNothing);
+    await _teardownUi(tester);
+  });
+
+  // ─── Resultados adicionais ─────────────────────────────────────────────────
+
+  testWidgets('exibe "Gasolina compensa" quando gasolina é mais barata', (
+    tester,
+  ) async {
+    await db.veiculosDao.insertVeiculo(_novoVeiculo());
+    await _pumpScreen(tester, db);
+
+    // 4,50 / 6,00 = 0,75 > 0,70 → gasolina vence.
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Preço do álcool (R\$/L)'),
+      '4,50',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Preço da gasolina (R\$/L)'),
+      '6,00',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Comparar'));
+    await _advance(tester);
+
+    expect(find.text('Gasolina compensa'), findsOneWidget);
+    expect(find.text('Regra dos 70%'), findsOneWidget);
+    expect(find.textContaining('/km'), findsNWidgets(2));
+    await _teardownUi(tester);
+  });
+
+  testWidgets('exibe "Empate técnico" quando razão é exatamente 0,70', (
+    tester,
+  ) async {
+    await db.veiculosDao.insertVeiculo(_novoVeiculo());
+    await _pumpScreen(tester, db);
+
+    // 7,00 / 10,00 = 0,70 exato → empate.
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Preço do álcool (R\$/L)'),
+      '7,00',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Preço da gasolina (R\$/L)'),
+      '10,00',
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Comparar'));
+    await _advance(tester);
+
+    expect(find.text('Empate técnico'), findsOneWidget);
+    expect(find.text('Regra dos 70%'), findsOneWidget);
+    expect(find.textContaining('/km'), findsNWidgets(2));
+    await _teardownUi(tester);
+  });
+
+  testWidgets('dropdown mostra múltiplos veículos ativos', (tester) async {
+    await db.veiculosDao.insertVeiculo(_novoVeiculo(placa: 'AAA0000'));
+    await db.veiculosDao.insertVeiculo(_novoVeiculo(placa: 'BBB1111'));
+
+    await _pumpScreen(tester, db);
+
+    // O DropdownButtonFormField deve exibir os dois veículos ao abrir.
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    await _teardownUi(tester);
+  });
+
+  testWidgets(
+    'nota de sem histórico aparece na rota regra 70% e some na rota histórico',
+    (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      await _pumpScreen(tester, db);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço do álcool (R\$/L)'),
+        '3,90',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço da gasolina (R\$/L)'),
+        '6,00',
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Comparar'));
+      await _advance(tester);
+
+      // Nota "Sem histórico suficiente..." deve aparecer.
+      expect(find.textContaining('Sem histórico suficiente'), findsOneWidget);
+      await _teardownUi(tester);
+    },
+  );
 }
