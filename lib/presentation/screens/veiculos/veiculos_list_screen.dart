@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
-import '../../../data/providers.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/veiculos_service.dart';
 import 'veiculos_providers.dart';
 
 class VeiculosListScreen extends ConsumerStatefulWidget {
@@ -22,15 +22,15 @@ class _VeiculosListScreenState extends ConsumerState<VeiculosListScreen> {
 
   Future<void> _toggleArquivado(Veiculo v) async {
     final l10n = AppLocalizations.of(context)!;
-    final dao = ref.read(veiculosDaoProvider);
+    final service = ref.read(veiculosServiceProvider);
     final messenger = ScaffoldMessenger.of(context);
     if (v.arquivado) {
-      await dao.restaurar(v.placa);
+      await service.restaurar(v.placa);
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.veiculoRestauradoSnack(v.placa))),
       );
     } else {
-      await dao.arquivar(v.placa);
+      await service.arquivar(v.placa);
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.veiculoArquivadoSnack(v.placa))),
       );

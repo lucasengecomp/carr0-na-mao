@@ -124,5 +124,26 @@
   "frequenciaDespesaUnica": "One-time",
   "frequenciaDespesaSemanal": "Weekly",
   "frequenciaDespesaMensal": "Monthly",
-  "frequenciaDespesaAnual": "Annual"
+  "frequenciaDespesaAnual": "Annual",
+
+  "notifLembreteDataCorpo": "Due on {data}",
+  "@notifLembreteDataCorpo": {
+    "description": "Body of notification scheduled 7 days before the reminder target date",
+    "placeholders": {
+      "data": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notifLembreteKmCorpo": "Target odometer of {km} km reached!",
+  "@notifLembreteKmCorpo": {
+    "description": "Body of immediate notification when reminder km target is reached",
+    "placeholders": {
+      "km": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  }
 }

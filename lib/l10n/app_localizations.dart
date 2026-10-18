@@ -841,6 +841,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Anual'**
   String get frequenciaDespesaAnual;
+
+  /// Corpo da notificação agendada 7 dias antes da data alvo do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Vence em {data}'**
+  String notifLembreteDataCorpo(String data);
+
+  /// Corpo da notificação imediata quando o km alvo de um lembrete é atingido
+  ///
+  /// In pt, this message translates to:
+  /// **'Km alvo de {km} atingido!'**
+  String notifLembreteKmCorpo(int km);
 }
 
 class _AppLocalizationsDelegate

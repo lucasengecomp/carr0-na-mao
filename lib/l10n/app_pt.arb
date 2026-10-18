@@ -654,5 +654,26 @@
   "frequenciaDespesaAnual": "Anual",
   "@frequenciaDespesaAnual": {
     "description": "Label da frequência de despesa Anual"
+  },
+
+  "notifLembreteDataCorpo": "Vence em {data}",
+  "@notifLembreteDataCorpo": {
+    "description": "Corpo da notificação agendada 7 dias antes da data alvo do lembrete",
+    "placeholders": {
+      "data": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notifLembreteKmCorpo": "Km alvo de {km} atingido!",
+  "@notifLembreteKmCorpo": {
+    "description": "Corpo da notificação imediata quando o km alvo de um lembrete é atingido",
+    "placeholders": {
+      "km": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   }
 }
