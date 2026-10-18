@@ -376,6 +376,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get manutencoesListaVazia =>
+      'No maintenance recorded yet.\nTap \"New maintenance\" to get started.';
+
+  @override
+  String get semVeiculoCadastrarManutencao =>
+      'Register a vehicle to start recording maintenance.';
+
+  @override
+  String get manutencoesAgruparPorTipo => 'Group by type';
+
+  @override
+  String manutencoesOutrosComDescricao(String descricao) {
+    return '$descricao';
+  }
+
+  @override
   String get despesasTitulo => 'Expenses';
 
   @override

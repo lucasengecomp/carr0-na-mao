@@ -8,6 +8,7 @@ import 'screens/config/config_screen.dart';
 import 'screens/dashboard/dashboard_home_screen.dart';
 import 'screens/despesas/despesa_form_screen.dart';
 import 'screens/manutencoes/manutencao_form_screen.dart';
+import 'screens/manutencoes/manutencoes_list_screen.dart';
 import 'screens/placeholder_screen.dart';
 import 'screens/veiculos/veiculo_form_screen.dart';
 import 'screens/veiculos/veiculos_list_screen.dart';
@@ -42,10 +43,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/manutencoes',
-              builder: (context, state) => const PlaceholderScreen(
-                titulo: 'Manutenções',
-                descricao: 'Lista e cadastro de manutenções (issue #17).',
-              ),
+              builder: (context, state) => const ManutencoesListScreen(),
             ),
           ],
         ),

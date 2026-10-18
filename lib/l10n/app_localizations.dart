@@ -770,6 +770,30 @@ abstract class AppLocalizations {
   /// **'Não foi possível salvar: {erro}'**
   String manutencaoNaoPossivel(String erro);
 
+  /// Mensagem de lista vazia na tela de manutenções
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma manutenção registrada ainda.\nToque em \"Nova manutenção\" para começar.'**
+  String get manutencoesListaVazia;
+
+  /// Aviso exibido quando não há veículo cadastrado na tela de manutenções
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre um veículo para começar a registrar manutenções.'**
+  String get semVeiculoCadastrarManutencao;
+
+  /// Label do switch de agrupamento por tipo na tela de manutenções
+  ///
+  /// In pt, this message translates to:
+  /// **'Agrupar por tipo'**
+  String get manutencoesAgruparPorTipo;
+
+  /// Exibição do nome livre quando tipo é 'outros'
+  ///
+  /// In pt, this message translates to:
+  /// **'{descricao}'**
+  String manutencoesOutrosComDescricao(String descricao);
+
   /// Título da tela de lista de despesas
   ///
   /// In pt, this message translates to:
