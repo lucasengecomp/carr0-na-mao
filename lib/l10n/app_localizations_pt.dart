@@ -635,6 +635,46 @@ class AppLocalizationsPt extends AppLocalizations {
   String get lembretesEmBreve => 'Em breve';
 
   @override
+  String get lembreteFormNovoTitulo => 'Novo lembrete';
+
+  @override
+  String get lembreteFormEditarTitulo => 'Editar lembrete';
+
+  @override
+  String get lembreteFormCampoDescricao => 'Descrição';
+
+  @override
+  String get lembreteFormCampoVeiculo => 'Veículo';
+
+  @override
+  String get lembreteFormCampoDataAlvo => 'Data alvo (opcional)';
+
+  @override
+  String get lembreteFormSemDataAlvo => 'Não definida';
+
+  @override
+  String get lembreteFormLimparDataAlvo => 'Limpar data alvo';
+
+  @override
+  String get lembreteFormCampoKmAlvo => 'Km alvo (opcional)';
+
+  @override
+  String get lembreteFormValidacaoDataOuKm =>
+      'Informe ao menos uma data alvo ou um km alvo';
+
+  @override
+  String get lembreteFormValidacaoDescricaoMin => 'Mínimo de 2 caracteres';
+
+  @override
+  String lembreteFormNaoPossivel(String erro) {
+    return 'Não foi possível salvar: $erro';
+  }
+
+  @override
+  String get semVeiculoCadastrarLembreteForm =>
+      'Cadastre um veículo antes de criar lembretes.';
+
+  @override
   String get exportarDadosTitulo => 'Exportar dados';
 
   @override
