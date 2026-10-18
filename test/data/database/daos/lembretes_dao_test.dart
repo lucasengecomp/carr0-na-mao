@@ -172,4 +172,119 @@ void main() {
       expect(pendentes.single.kmAlvo, 25500);
     },
   );
+
+  // -------------------------------------------------------------------------
+  // watchAll — stream reativo (issue #25)
+  // -------------------------------------------------------------------------
+  group('watchAll', () {
+    test('emite lista vazia quando não há lembretes', () async {
+      expect(db.lembretesDao.watchAll(), emits(isEmpty));
+    });
+
+    test('emite lembrete recém-inserido', () async {
+      final stream = db.lembretesDao.watchAll();
+
+      await db.lembretesDao.insertLembrete(
+        _novoLembrete(kmAlvo: 20000, descricao: 'Trocar óleo'),
+      );
+
+      await expectLater(
+        stream,
+        emitsThrough(
+          predicate<List<Lembrete>>(
+            (list) => list.any((l) => l.descricao == 'Trocar óleo'),
+          ),
+        ),
+      );
+    });
+
+    test('emite atualização após marcarConcluido', () async {
+      final id = await db.lembretesDao.insertLembrete(
+        _novoLembrete(kmAlvo: 20000),
+      );
+
+      final stream = db.lembretesDao.watchAll();
+
+      await db.lembretesDao.marcarConcluido(id);
+
+      await expectLater(
+        stream,
+        emitsThrough(
+          predicate<List<Lembrete>>(
+            (list) => list.any(
+              (l) => l.id == id && l.status == StatusLembrete.concluido,
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('inclui lembretes de múltiplos veículos', () async {
+      await db.veiculosDao.insertVeiculo(
+        VeiculosCompanion.insert(
+          placa: 'XYZ9W87',
+          marca: 'Honda',
+          modelo: 'Civic',
+          ano: 2022,
+          tipo: TipoVeiculo.carro,
+          combustivel: TipoCombustivelVeiculo.gasolina,
+          kmInicial: 5000,
+        ),
+      );
+
+      await db.lembretesDao.insertLembrete(
+        _novoLembrete(
+          placa: 'ABC1D23',
+          kmAlvo: 20000,
+          descricao: 'Filtro Fiat',
+        ),
+      );
+      await db.lembretesDao.insertLembrete(
+        _novoLembrete(
+          placa: 'XYZ9W87',
+          kmAlvo: 30000,
+          descricao: 'Filtro Honda',
+        ),
+      );
+
+      final list = await db.lembretesDao.watchAll().first;
+      expect(list.map((l) => l.descricao).toSet(), {
+        'Filtro Fiat',
+        'Filtro Honda',
+      });
+    });
+
+    test('ordenado por data_alvo asc (SQLite coloca NULL primeiro), depois km_alvo asc', () async {
+      await db.lembretesDao.insertLembrete(
+        _novoLembrete(kmAlvo: 25000, descricao: 'Só km maior'),
+      );
+      await db.lembretesDao.insertLembrete(
+        _novoLembrete(kmAlvo: 10000, descricao: 'Só km menor'),
+      );
+      await db.lembretesDao.insertLembrete(
+        _novoLembrete(
+          dataAlvo: DateTime(2027, 6, 1),
+          kmAlvo: 20000,
+          descricao: 'Data posterior',
+        ),
+      );
+      await db.lembretesDao.insertLembrete(
+        _novoLembrete(
+          dataAlvo: DateTime(2027, 1, 1),
+          kmAlvo: 20000,
+          descricao: 'Data anterior',
+        ),
+      );
+
+      final list = await db.lembretesDao.watchAll().first;
+
+      // SQLite coloca NULL primeiro em ORDER BY ASC.
+      // Itens sem data vêm antes, ordenados entre si por km_alvo asc.
+      expect(list[0].descricao, 'Só km menor');
+      expect(list[1].descricao, 'Só km maior');
+      // Com data: data_alvo asc
+      expect(list[2].descricao, 'Data anterior');
+      expect(list[3].descricao, 'Data posterior');
+    });
+  });
 }

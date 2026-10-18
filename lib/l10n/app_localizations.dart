@@ -1171,6 +1171,78 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Km alvo de {km} atingido!'**
   String notifLembreteKmCorpo(int km);
+
+  /// Título da tela de lista de lembretes
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes'**
+  String get lembretesTitle;
+
+  /// Label da aba Pendentes na tela de lembretes
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendentes'**
+  String get lembretesTabPendentes;
+
+  /// Label da aba Atrasados na tela de lembretes
+  ///
+  /// In pt, this message translates to:
+  /// **'Atrasados'**
+  String get lembretesTabAtrasados;
+
+  /// Label da aba Concluídos na tela de lembretes
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluídos'**
+  String get lembretesTabConcluidos;
+
+  /// Mensagem de lista vazia na aba Pendentes
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum lembrete pendente.\nAdicione lembretes para ser notificado.'**
+  String get lembretesVazioPendentes;
+
+  /// Mensagem de lista vazia na aba Atrasados
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum lembrete atrasado.\nTudo em dia!'**
+  String get lembretesVazioAtrasados;
+
+  /// Mensagem de lista vazia na aba Concluídos
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum lembrete concluído ainda.'**
+  String get lembretesVazioConcluidos;
+
+  /// Label do FAB da tela de lembretes
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo lembrete'**
+  String get lembretesFab;
+
+  /// Badge de status pendente nos lembretes
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get lembretesStatusPendente;
+
+  /// Badge de status concluído nos lembretes
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluído'**
+  String get lembretesStatusConcluido;
+
+  /// Badge de status adiado nos lembretes
+  ///
+  /// In pt, this message translates to:
+  /// **'Adiado'**
+  String get lembretesStatusAdiado;
+
+  /// SnackBar exibido quando a funcionalidade ainda não está implementada
+  ///
+  /// In pt, this message translates to:
+  /// **'Em breve'**
+  String get lembretesEmBreve;
 }
 
 class _AppLocalizationsDelegate

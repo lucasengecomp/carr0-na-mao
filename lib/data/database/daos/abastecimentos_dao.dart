@@ -43,6 +43,14 @@ class AbastecimentosDao extends DatabaseAccessor<AppDatabase>
             ..limit(1))
           .getSingleOrNull();
 
+  /// Todos os abastecimentos de todos os veículos, sem filtro.
+  /// Usado para montar o mapa de km atual por placa (issue #68).
+  Stream<List<Abastecimento>> watchAll() =>
+      (select(abastecimentos)..orderBy([
+            (t) => OrderingTerm(expression: t.km, mode: OrderingMode.desc),
+          ]))
+          .watch();
+
   Stream<List<Abastecimento>> watchByVeiculo(String placa) =>
       (select(abastecimentos)
             ..where((t) => t.veiculoPlaca.equals(placa))

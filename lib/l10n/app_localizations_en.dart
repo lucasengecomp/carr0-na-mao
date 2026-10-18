@@ -596,4 +596,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
     return 'Target odometer of $kmString km reached!';
   }
+
+  @override
+  String get lembretesTitle => 'Reminders';
+
+  @override
+  String get lembretesTabPendentes => 'Pending';
+
+  @override
+  String get lembretesTabAtrasados => 'Overdue';
+
+  @override
+  String get lembretesTabConcluidos => 'Done';
+
+  @override
+  String get lembretesVazioPendentes =>
+      'No pending reminders.\nAdd reminders to get notified.';
+
+  @override
+  String get lembretesVazioAtrasados =>
+      'No overdue reminders.\nAll up to date!';
+
+  @override
+  String get lembretesVazioConcluidos => 'No completed reminders yet.';
+
+  @override
+  String get lembretesFab => 'New reminder';
+
+  @override
+  String get lembretesStatusPendente => 'Pending';
+
+  @override
+  String get lembretesStatusConcluido => 'Done';
+
+  @override
+  String get lembretesStatusAdiado => 'Snoozed';
+
+  @override
+  String get lembretesEmBreve => 'Coming soon';
 }

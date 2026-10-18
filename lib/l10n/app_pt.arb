@@ -950,5 +950,65 @@
         "format": "decimalPattern"
       }
     }
+  },
+
+  "lembretesTitle": "Lembretes",
+  "@lembretesTitle": {
+    "description": "Título da tela de lista de lembretes"
+  },
+
+  "lembretesTabPendentes": "Pendentes",
+  "@lembretesTabPendentes": {
+    "description": "Label da aba Pendentes na tela de lembretes"
+  },
+
+  "lembretesTabAtrasados": "Atrasados",
+  "@lembretesTabAtrasados": {
+    "description": "Label da aba Atrasados na tela de lembretes"
+  },
+
+  "lembretesTabConcluidos": "Concluídos",
+  "@lembretesTabConcluidos": {
+    "description": "Label da aba Concluídos na tela de lembretes"
+  },
+
+  "lembretesVazioPendentes": "Nenhum lembrete pendente.\nAdicione lembretes para ser notificado.",
+  "@lembretesVazioPendentes": {
+    "description": "Mensagem de lista vazia na aba Pendentes"
+  },
+
+  "lembretesVazioAtrasados": "Nenhum lembrete atrasado.\nTudo em dia!",
+  "@lembretesVazioAtrasados": {
+    "description": "Mensagem de lista vazia na aba Atrasados"
+  },
+
+  "lembretesVazioConcluidos": "Nenhum lembrete concluído ainda.",
+  "@lembretesVazioConcluidos": {
+    "description": "Mensagem de lista vazia na aba Concluídos"
+  },
+
+  "lembretesFab": "Novo lembrete",
+  "@lembretesFab": {
+    "description": "Label do FAB da tela de lembretes"
+  },
+
+  "lembretesStatusPendente": "Pendente",
+  "@lembretesStatusPendente": {
+    "description": "Badge de status pendente nos lembretes"
+  },
+
+  "lembretesStatusConcluido": "Concluído",
+  "@lembretesStatusConcluido": {
+    "description": "Badge de status concluído nos lembretes"
+  },
+
+  "lembretesStatusAdiado": "Adiado",
+  "@lembretesStatusAdiado": {
+    "description": "Badge de status adiado nos lembretes"
+  },
+
+  "lembretesEmBreve": "Em breve",
+  "@lembretesEmBreve": {
+    "description": "SnackBar exibido quando a funcionalidade ainda não está implementada"
   }
 }
