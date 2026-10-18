@@ -11,10 +11,10 @@ class ResultadoComparador {
     required this.metodo,
     required this.precoAlcool,
     required this.precoGasolina,
-    this.custoPorKmAlcool,
-    this.custoPorKmGasolina,
-    this.kmPorLitroAlcool,
-    this.kmPorLitroGasolina,
+    required this.custoPorKmAlcool,
+    required this.custoPorKmGasolina,
+    required this.kmPorLitroAlcool,
+    required this.kmPorLitroGasolina,
   });
 
   final CombustivelMaisVantajoso vencedor;
@@ -22,11 +22,14 @@ class ResultadoComparador {
   final double precoAlcool;
   final double precoGasolina;
 
-  /// Preenchido apenas quando [metodo] == [MetodoComparador.historico].
-  final double? custoPorKmAlcool;
-  final double? custoPorKmGasolina;
-  final double? kmPorLitroAlcool;
-  final double? kmPorLitroGasolina;
+  /// Custo por km para cada combustível.
+  /// Quando [metodo] == [MetodoComparador.regraSetenta] usa valores padrão de
+  /// rendimento (ver [ComparadorService.kmPorLitroAlcoolPadrao] e
+  /// [ComparadorService.kmPorLitroGasolinaPadrao]).
+  final double custoPorKmAlcool;
+  final double custoPorKmGasolina;
+  final double kmPorLitroAlcool;
+  final double kmPorLitroGasolina;
 
   double get razaoPrecos => precoAlcool / precoGasolina;
 }
@@ -36,16 +39,31 @@ class ResultadoComparador {
 /// Usa o rendimento (km/l) histórico do próprio veículo quando houver dados
 /// suficientes (seção 9.3). Caso contrário cai na regra heurística de 70%
 /// (álcool compensa se o preço do álcool for ≤ 70% do preço da gasolina).
+///
+/// No caminho da regra 70%, o custo por km é estimado com os valores padrão
+/// [kmPorLitroGasolinaPadrao] e [kmPorLitroAlcoolPadrao] (valores típicos
+/// brasileiros para carros flex médios). A lógica de histórico real ficará em
+/// #31.
 class ComparadorService {
   const ComparadorService({
     this.limiarRegra70 = 0.7,
     this.janelaMeses = 12,
     this.minimoPontosPorCombustivel = 2,
+    // Padrões típicos para carro flex médio (usados quando não há histórico).
+    // Gasolina: ~10 km/L; Álcool: ~7 km/L.
+    this.kmPorLitroGasolinaPadrao = 10.0,
+    this.kmPorLitroAlcoolPadrao = 7.0,
   });
 
   final double limiarRegra70;
   final int janelaMeses;
   final int minimoPontosPorCombustivel;
+
+  /// Rendimento padrão de gasolina quando não há histórico suficiente (km/L).
+  final double kmPorLitroGasolinaPadrao;
+
+  /// Rendimento padrão de álcool quando não há histórico suficiente (km/L).
+  final double kmPorLitroAlcoolPadrao;
 
   ResultadoComparador comparar({
     required double precoAlcool,
@@ -86,11 +104,19 @@ class ComparadorService {
       );
     }
 
+    // Sem histórico suficiente: usa regra 70% para a decisão e estimativas
+    // baseadas nos rendimentos padrão para exibir o custo por km.
+    final custoAlcEstimado = precoAlcool / kmPorLitroAlcoolPadrao;
+    final custoGasEstimado = precoGasolina / kmPorLitroGasolinaPadrao;
     return ResultadoComparador(
       vencedor: _regra70(precoAlcool, precoGasolina),
       metodo: MetodoComparador.regraSetenta,
       precoAlcool: precoAlcool,
       precoGasolina: precoGasolina,
+      custoPorKmAlcool: custoAlcEstimado,
+      custoPorKmGasolina: custoGasEstimado,
+      kmPorLitroAlcool: kmPorLitroAlcoolPadrao,
+      kmPorLitroGasolina: kmPorLitroGasolinaPadrao,
     );
   }
 
