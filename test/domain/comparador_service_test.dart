@@ -52,6 +52,57 @@ void main() {
       ),
     ];
 
+    // Dataset com 3 abastecimentos tanque cheio por combustível (RF-20/RF-21).
+    // Gasolina: pares (10000→10500)/50L = 10 km/L, (10500→11000)/50L = 10 km/L,
+    //           média 10 km/L.
+    // Álcool:   pares (10100→10450)/50L = 7 km/L, (10450→10800)/50L = 7 km/L,
+    //           média 7 km/L.
+    List<Abastecimento> historico3Pontos() => [
+      _abast(id: 10, data: DateTime(2026, 4, 1), km: 10000, litros: 50),
+      _abast(id: 11, data: DateTime(2026, 6, 1), km: 10500, litros: 50),
+      _abast(id: 12, data: DateTime(2026, 8, 1), km: 11000, litros: 50),
+      _abast(
+        id: 13,
+        data: DateTime(2026, 4, 15),
+        km: 10100,
+        litros: 50,
+        combustivel: TipoCombustivelAbastecimento.alcool,
+      ),
+      _abast(
+        id: 14,
+        data: DateTime(2026, 6, 15),
+        km: 10450,
+        litros: 50,
+        combustivel: TipoCombustivelAbastecimento.alcool,
+      ),
+      _abast(
+        id: 15,
+        data: DateTime(2026, 8, 15),
+        km: 10800,
+        litros: 50,
+        combustivel: TipoCombustivelAbastecimento.alcool,
+      ),
+    ];
+
+    test('3 pontos por combustível: km/L calculado pelos 2 pares consecutivos', () {
+      final r = service.comparar(
+        precoAlcool: 4.00,
+        precoGasolina: 6.00,
+        historico: historico3Pontos(),
+        agora: hoje,
+      );
+
+      expect(r.metodo, MetodoComparador.historico);
+      // Gasolina: (10500-10000)/50 = 10, (11000-10500)/50 = 10 → média 10 km/L
+      // Álcool:   (10450-10100)/50 = 7,  (10800-10450)/50 = 7  → média 7 km/L
+      expect(r.kmPorLitroGasolina, closeTo(10.0, 0.001));
+      expect(r.kmPorLitroAlcool, closeTo(7.0, 0.001));
+      expect(r.custoPorKmGasolina, closeTo(6.0 / 10.0, 0.001));
+      expect(r.custoPorKmAlcool, closeTo(4.0 / 7.0, 0.001));
+      // custo gasolina 0,60 > custo alcool ~0,571 → álcool compensa
+      expect(r.vencedor, CombustivelMaisVantajoso.alcool);
+    });
+
     test('álcool compensa quando custo/km do álcool é menor', () {
       final r = service.comparar(
         precoAlcool: 3.80,
@@ -150,9 +201,129 @@ void main() {
       expect(r.kmPorLitroGasolina, closeTo(12.0, 0.001));
       expect(r.kmPorLitroAlcool, closeTo(8.0, 0.001));
     });
+
+    test('abastecimento exatamente na fronteira de 12 meses é incluído', () {
+      // hoje = 2026-10-01; fronteira = DateTime(2026, 10-12, 1) = 2025-10-01.
+      // !isBefore(2025-10-01) → data == 2025-10-01 deve ser INCLUÍDA.
+      final historico = [
+        _abast(id: 1, data: DateTime(2025, 10, 1), km: 10000, litros: 40),
+        _abast(id: 2, data: DateTime(2026, 6, 1), km: 10600, litros: 50),
+        _abast(
+          id: 3,
+          data: DateTime(2025, 10, 15),
+          km: 10100,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+        _abast(
+          id: 4,
+          data: DateTime(2026, 6, 15),
+          km: 10400,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+      ];
+      final r = service.comparar(
+        precoAlcool: 3.80,
+        precoGasolina: 6.00,
+        historico: historico,
+        agora: hoje,
+      );
+      // Ambos os combustíveis têm 2 pontos na janela → histórico.
+      expect(r.metodo, MetodoComparador.historico);
+    });
+
+    test('abastecimento 1 dia antes da fronteira de 12 meses é excluído', () {
+      // hoje = 2026-10-01; fronteira = 2025-10-01.
+      // 2025-09-30 está FORA → com apenas 1 ponto por combustível → fallback.
+      final historico = [
+        _abast(id: 1, data: DateTime(2025, 9, 30), km: 10000, litros: 40),
+        _abast(id: 2, data: DateTime(2026, 6, 1), km: 10600, litros: 50),
+        _abast(
+          id: 3,
+          data: DateTime(2025, 9, 30),
+          km: 10100,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+        _abast(
+          id: 4,
+          data: DateTime(2026, 6, 15),
+          km: 10400,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+      ];
+      final r = service.comparar(
+        precoAlcool: 3.80,
+        precoGasolina: 6.00,
+        historico: historico,
+        agora: hoje,
+      );
+      // id:1 excluído → gasolina tem só 1 ponto elegível → fallback.
+      expect(r.metodo, MetodoComparador.regraSetenta);
+    });
+
+    test('km duplicado (odômetro repetido) faz fallback sem crash', () {
+      // Dois abastecimentos com o mesmo valor de km: a diferença é 0,
+      // kmTotal fica 0 e _kmPorLitro retorna null → regraSetenta.
+      final historico = [
+        _abast(id: 1, data: DateTime(2026, 6, 1), km: 10000, litros: 40),
+        _abast(id: 2, data: DateTime(2026, 7, 1), km: 10000, litros: 50),
+        _abast(
+          id: 3,
+          data: DateTime(2026, 6, 15),
+          km: 10200,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+        _abast(
+          id: 4,
+          data: DateTime(2026, 7, 15),
+          km: 10400,
+          litros: 25,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+      ];
+      final r = service.comparar(
+        precoAlcool: 3.80,
+        precoGasolina: 6.00,
+        historico: historico,
+        agora: hoje,
+      );
+      // kmTotal de gasolina == 0 → _kmPorLitro retorna null → fallback.
+      expect(r.metodo, MetodoComparador.regraSetenta);
+    });
   });
 
   group('caminho regra 70% (fallback)', () {
+    test('fallback: 3 tanque cheio gasolina mas só 1 álcool → regraSetenta', () {
+      // Caso explícito do RF-21: gasolina com histórico suficiente (3 pontos),
+      // álcool insuficiente (1 ponto) → deve cair na regra 70%.
+      final historico = [
+        _abast(id: 1, data: DateTime(2026, 4, 1), km: 10000, litros: 50),
+        _abast(id: 2, data: DateTime(2026, 6, 1), km: 10500, litros: 50),
+        _abast(id: 3, data: DateTime(2026, 8, 1), km: 11000, litros: 50),
+        _abast(
+          id: 4,
+          data: DateTime(2026, 6, 15),
+          km: 10200,
+          litros: 50,
+          combustivel: TipoCombustivelAbastecimento.alcool,
+        ),
+      ];
+      final r = service.comparar(
+        precoAlcool: 3.80,
+        precoGasolina: 6.00,
+        historico: historico,
+        agora: hoje,
+      );
+
+      expect(r.metodo, MetodoComparador.regraSetenta);
+      expect(r.kmPorLitroAlcool, closeTo(7.0, 0.001));
+      expect(r.kmPorLitroGasolina, closeTo(10.0, 0.001));
+    });
+
     test('cai na regra 70% sem histórico suficiente de álcool', () {
       // 2 pontos de gasolina (OK) mas só 1 de álcool: fallback.
       final historico = [
