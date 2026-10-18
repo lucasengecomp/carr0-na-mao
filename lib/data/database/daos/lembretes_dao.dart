@@ -88,7 +88,7 @@ class LembretesDao extends DatabaseAccessor<AppDatabase>
         LembretesCompanion(
           dataAlvo: Value(novaData),
           kmAlvo: Value(novoKm),
-          status: const Value(StatusLembrete.pendente),
+          status: const Value(StatusLembrete.adiado),
         ),
       );
 

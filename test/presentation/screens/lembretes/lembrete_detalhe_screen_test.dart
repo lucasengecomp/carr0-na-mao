@@ -106,6 +106,21 @@ Future<void> _insertVeiculo(AppDatabase db, {String placa = 'ABC1D23'}) async {
   );
 }
 
+/// Insere uma manutenção e retorna seu id.
+Future<int> _insertManutencao(
+  AppDatabase db, {
+  String placa = 'ABC1D23',
+}) async {
+  return db.manutencoesDao.insertManutencao(
+    ManutencoesCompanion.insert(
+      veiculoPlaca: placa,
+      tipo: TipoManutencao.oleoMotor,
+      data: DateTime(2026, 1, 10),
+      km: 10200,
+    ),
+  );
+}
+
 /// Insere um lembrete e retorna seu id.
 Future<int> _insertLembrete(
   AppDatabase db, {
@@ -353,21 +368,29 @@ void main() {
       await _teardown(tester);
     });
 
-    testWidgets('oferta "Registrar manutenção" aparece para tipo != avulso', (
-      tester,
-    ) async {
-      final id = await _insertLembrete(db, tipo: 'oleoMotor');
-      await _pumpScreen(tester, db: db, id: id);
+    testWidgets(
+      'oferta "Registrar manutenção" aparece para tipo != avulso com manutencaoId',
+      (tester) async {
+        // RF-17: critério é manutencaoId != null, não tipo != avulso.
+        // Inserimos um lembrete com tipo != avulso E manutencaoId preenchido.
+        final manutId = await _insertManutencao(db);
+        final id = await _insertLembrete(
+          db,
+          tipo: 'oleoMotor',
+          manutencaoId: manutId,
+        );
+        await _pumpScreen(tester, db: db, id: id);
 
-      await tester.tap(find.byKey(const Key('btn_concluir')));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('btn_concluir')));
+        await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const Key('btn_concluir_registrar_manutencao')),
-        findsOneWidget,
-      );
-      await _teardown(tester);
-    });
+        expect(
+          find.byKey(const Key('btn_concluir_registrar_manutencao')),
+          findsOneWidget,
+        );
+        await _teardown(tester);
+      },
+    );
 
     testWidgets('oferta "Registrar manutenção" NÃO aparece para tipo avulso', (
       tester,
@@ -457,6 +480,67 @@ void main() {
       final lembrete = await db.lembretesDao.byId(id);
       expect(lembrete?.kmAlvo, 50000);
       expect(lembrete?.status, StatusLembrete.pendente);
+      await _teardown(tester);
+    });
+
+    testWidgets('adiar muda status para adiado no banco', (tester) async {
+      final id = await _insertLembrete(db, kmAlvo: 50000, dataAlvo: null);
+      await _pumpScreen(tester, db: db, id: id);
+
+      await tester.tap(find.byKey(const Key('btn_adiar')));
+      await tester.pumpAndSettle();
+
+      // km já vem pré-preenchido; confirmar direto
+      await tester.tap(find.byKey(const Key('btn_adiar_confirmar')));
+      await tester.pumpAndSettle();
+
+      final lembrete = await db.lembretesDao.byId(id);
+      // Lembrete adiado deve ficar com status adiado, não pendente
+      expect(lembrete?.status, StatusLembrete.adiado);
+      await _teardown(tester);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Oferta "Registrar manutenção" — critério RF-17 (manutencaoId)
+  // -------------------------------------------------------------------------
+  group('oferta registrar manutenção por manutencaoId', () {
+    testWidgets('oferta aparece para tipo avulso quando manutencaoId != null', (
+      tester,
+    ) async {
+      // Segundo o RF-17 da issue #26, a oferta deve aparecer quando o
+      // lembrete tem manutencao_id preenchido, independente do tipo.
+      final manutId = await _insertManutencao(db);
+      final id = await _insertLembrete(
+        db,
+        tipo: 'avulso',
+        manutencaoId: manutId,
+      );
+      await _pumpScreen(tester, db: db, id: id);
+
+      await tester.tap(find.byKey(const Key('btn_concluir')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('btn_concluir_registrar_manutencao')),
+        findsOneWidget,
+      );
+      await _teardown(tester);
+    });
+
+    testWidgets('oferta NÃO aparece quando manutencaoId é nulo e tipo avulso', (
+      tester,
+    ) async {
+      final id = await _insertLembrete(db, tipo: 'avulso', manutencaoId: null);
+      await _pumpScreen(tester, db: db, id: id);
+
+      await tester.tap(find.byKey(const Key('btn_concluir')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('btn_concluir_registrar_manutencao')),
+        findsNothing,
+      );
       await _teardown(tester);
     });
   });

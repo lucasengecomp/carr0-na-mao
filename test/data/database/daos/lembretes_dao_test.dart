@@ -103,7 +103,7 @@ void main() {
     expect((await db.lembretesDao.byId(id))!.status, StatusLembrete.concluido);
   });
 
-  test('adiar atualiza data e km e volta a pendente', () async {
+  test('adiar atualiza data, km e status para adiado', () async {
     final id = await db.lembretesDao.insertLembrete(
       _novoLembrete(dataAlvo: DateTime(2026, 1, 1), kmAlvo: 20000),
     );
@@ -116,7 +116,8 @@ void main() {
     );
 
     final l = (await db.lembretesDao.byId(id))!;
-    expect(l.status, StatusLembrete.pendente);
+    // RF-87: adiar() deve persistir StatusLembrete.adiado, não pendente.
+    expect(l.status, StatusLembrete.adiado);
     expect(l.dataAlvo, DateTime(2026, 6, 1));
     expect(l.kmAlvo, 25000);
   });

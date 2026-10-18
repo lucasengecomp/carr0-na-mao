@@ -214,7 +214,8 @@ void main() {
     expect(l!.dataAlvo?.year, novaData.year);
     expect(l.dataAlvo?.month, novaData.month);
     expect(l.dataAlvo?.day, novaData.day);
-    expect(l.status, StatusLembrete.pendente);
+    // RF-87: adiar() deve persistir StatusLembrete.adiado, não pendente.
+    expect(l.status, StatusLembrete.adiado);
   });
 
   test('adiar com novoKm re-agenda pelo id após atualização', () async {
@@ -232,7 +233,8 @@ void main() {
 
     final l = await db.lembretesDao.byId(id);
     expect(l!.kmAlvo, 70000);
-    expect(l.status, StatusLembrete.pendente);
+    // RF-87: adiar() deve persistir StatusLembrete.adiado, não pendente.
+    expect(l.status, StatusLembrete.adiado);
   });
 
   test('upsertByManutencao persiste lembrete e agenda notificação', () async {

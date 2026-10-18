@@ -384,9 +384,9 @@ class _ConcluirDialog extends StatelessWidget {
 
   final Lembrete lembrete;
 
-  /// Oferece a opção de registrar manutenção quando o lembrete tem tipo
-  /// diferente de "avulso" (ou seja, está associado a um tipo de manutenção).
-  bool get _temTipoManutencao => lembrete.tipo != 'avulso';
+  /// Oferece a opção de registrar manutenção quando o lembrete tem
+  /// manutencaoId preenchido (RF-17).
+  bool get _temTipoManutencao => lembrete.manutencaoId != null;
 
   @override
   Widget build(BuildContext context) {
