@@ -1010,5 +1010,60 @@
   "lembretesEmBreve": "Em breve",
   "@lembretesEmBreve": {
     "description": "SnackBar exibido quando a funcionalidade ainda não está implementada"
+  },
+
+  "graficosTooltip": "Gráficos",
+  "@graficosTooltip": {
+    "description": "Tooltip do botão de gráficos na AppBar do dashboard"
+  },
+
+  "graficosTitulo": "Gráficos",
+  "@graficosTitulo": {
+    "description": "Título da tela de gráficos do dashboard"
+  },
+
+  "graficosGastosEvolucao": "Evolução de gastos (últimos 12 meses)",
+  "@graficosGastosEvolucao": {
+    "description": "Título do gráfico de barras de evolução de gastos"
+  },
+
+  "graficosConsumoEvolucao": "Consumo médio km/l (últimos 12 meses)",
+  "@graficosConsumoEvolucao": {
+    "description": "Título do gráfico de linha de consumo mensal"
+  },
+
+  "graficosDistribuicao": "Distribuição por categoria (últimos 12 meses)",
+  "@graficosDistribuicao": {
+    "description": "Título do gráfico de pizza de distribuição por categoria"
+  },
+
+  "graficosSemDadosGastos": "Nenhum gasto registrado nos últimos 12 meses.",
+  "@graficosSemDadosGastos": {
+    "description": "Estado vazio do gráfico de gastos"
+  },
+
+  "graficosSemDadosConsumo": "Dados insuficientes.\nRegistre abastecimentos com tanque cheio para ver o consumo.",
+  "@graficosSemDadosConsumo": {
+    "description": "Estado vazio do gráfico de consumo"
+  },
+
+  "graficosSemDadosDistribuicao": "Nenhum gasto nos últimos 12 meses.",
+  "@graficosSemDadosDistribuicao": {
+    "description": "Estado vazio do gráfico de distribuição"
+  },
+
+  "graficosLegendaAbastec": "Abastec.",
+  "@graficosLegendaAbastec": {
+    "description": "Legenda do segmento de abastecimento no gráfico de barras"
+  },
+
+  "graficosLegendaManut": "Manut.",
+  "@graficosLegendaManut": {
+    "description": "Legenda do segmento de manutenção no gráfico de barras"
+  },
+
+  "graficosLegendaDespesas": "Despesas",
+  "@graficosLegendaDespesas": {
+    "description": "Legenda do segmento de despesas no gráfico de barras"
   }
 }

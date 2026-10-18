@@ -21,6 +21,14 @@ class DashboardHomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: _HomeTitle(ativos: ativos, atual: veiculo),
         actions: [
+          if (veiculo != null)
+            IconButton(
+              tooltip: 'Gráficos',
+              icon: const Icon(Icons.bar_chart_outlined),
+              onPressed: () => context.push(
+                '/dashboard/graficos?placa=${Uri.encodeComponent(veiculo.placa)}',
+              ),
+            ),
           IconButton(
             tooltip: 'Comparador',
             icon: const Icon(Icons.swap_horiz),
