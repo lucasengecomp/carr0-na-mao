@@ -840,4 +840,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get graficosLegendaDespesas => 'Despesas';
+
+  @override
+  String get configuracoesPrivacidadeTitulo => 'Política de privacidade';
+
+  @override
+  String get configuracoesPrivacidadeSubtitulo =>
+      'Zero coleta · dados ficam no dispositivo';
+
+  @override
+  String get configuracoesPrivacidadeUrl =>
+      'https://lucasengecomp.github.io/carr0-na-mao/privacidade/';
 }
