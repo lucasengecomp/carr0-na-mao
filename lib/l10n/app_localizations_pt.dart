@@ -840,4 +840,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get graficosLegendaDespesas => 'Despesas';
+
+  @override
+  String get a11ySalvando => 'Salvando';
+
+  @override
+  String get a11yToquePAraAbrir => 'Toque para abrir o seletor';
 }

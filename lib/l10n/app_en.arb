@@ -559,5 +559,8 @@
   "graficosLegendaDespesas": "Expenses",
   "@graficosLegendaDespesas": {
     "description": "Legend label for the expenses segment in the bar chart"
-  }
+  },
+
+  "a11ySalvando": "Saving",
+  "a11yToquePAraAbrir": "Tap to open the picker"
 }
