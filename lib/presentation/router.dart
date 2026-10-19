@@ -9,6 +9,7 @@ import 'screens/dashboard/dashboard_graficos_screen.dart';
 import 'screens/dashboard/dashboard_home_screen.dart';
 import 'screens/despesas/despesa_form_screen.dart';
 import 'screens/despesas/despesas_list_screen.dart';
+import 'screens/lembretes/lembrete_detalhe_screen.dart';
 import 'screens/lembretes/lembrete_form_screen.dart';
 import 'screens/lembretes/lembretes_list_screen.dart';
 import 'screens/manutencoes/manutencao_form_screen.dart';
@@ -105,6 +106,12 @@ final GoRouter appRouter = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/lembretes/novo',
       builder: (context, state) => const LembreteFormScreen(),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/lembretes/:id',
+      builder: (context, state) =>
+          LembreteDetalheScreen(id: int.parse(state.pathParameters['id']!)),
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,

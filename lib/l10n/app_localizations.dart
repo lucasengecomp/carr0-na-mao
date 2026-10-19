@@ -1244,6 +1244,156 @@ abstract class AppLocalizations {
   /// **'Em breve'**
   String get lembretesEmBreve;
 
+  /// Título da tela de detalhe de lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Detalhe do lembrete'**
+  String get lembreteDetalheTitulo;
+
+  /// Mensagem exibida quando o lembrete não existe
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete não encontrado.'**
+  String get lembreteDetalheNaoEncontrado;
+
+  /// Label do campo Veículo no detalhe do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Veículo'**
+  String get lembreteDetalheCampoVeiculo;
+
+  /// Label do campo Tipo no detalhe do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo'**
+  String get lembreteDetalheCampoTipo;
+
+  /// Label do campo Descrição no detalhe do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição'**
+  String get lembreteDetalheCampoDescricao;
+
+  /// Label do campo Data alvo no detalhe do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Data alvo'**
+  String get lembreteDetalheCampoDataAlvo;
+
+  /// Label do campo Km alvo no detalhe do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Km alvo'**
+  String get lembreteDetalheCampoKmAlvo;
+
+  /// Label do campo Status no detalhe do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Status'**
+  String get lembreteDetalheCampoStatus;
+
+  /// Label do campo manutenção associada no detalhe do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Manutenção associada'**
+  String get lembreteDetalheCampoManutencao;
+
+  /// Botão de concluir lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluir'**
+  String get lembreteDetalheAcaoConcluir;
+
+  /// Botão de adiar lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Adiar'**
+  String get lembreteDetalheAcaoAdiar;
+
+  /// Botão de excluir lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir'**
+  String get lembreteDetalheAcaoExcluir;
+
+  /// Título do dialog de confirmação de conclusão
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluir lembrete'**
+  String get lembreteDetalheConcluirTitulo;
+
+  /// Mensagem do dialog de confirmação de conclusão
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar este lembrete como concluído?'**
+  String get lembreteDetalheConcluirMensagem;
+
+  /// Botão secundário para registrar manutenção ao concluir
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar manutenção'**
+  String get lembreteDetalheConcluirRegistrarManutencao;
+
+  /// Título do dialog de confirmação de exclusão
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir lembrete'**
+  String get lembreteDetalheExcluirTitulo;
+
+  /// Mensagem do dialog de confirmação de exclusão
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja excluir este lembrete? Esta ação não pode ser desfeita.'**
+  String get lembreteDetalheExcluirMensagem;
+
+  /// Título do dialog de adiamento de lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Adiar lembrete'**
+  String get lembreteDetalheAdiarTitulo;
+
+  /// Label do campo nova data alvo no dialog de adiamento
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova data alvo (opcional)'**
+  String get lembreteDetalheAdiarDataAlvo;
+
+  /// Label do campo novo km alvo no dialog de adiamento
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo km alvo (opcional)'**
+  String get lembreteDetalheAdiarKmAlvo;
+
+  /// Erro no dialog de adiamento quando nenhum campo foi preenchido
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe ao menos uma data ou km.'**
+  String get lembreteDetalheAdiarSemCampos;
+
+  /// SnackBar de confirmação após concluir lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete concluído.'**
+  String get lembreteDetalheConcluido;
+
+  /// SnackBar de confirmação após adiar lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete adiado.'**
+  String get lembreteDetalheAdiado;
+
+  /// SnackBar de confirmação após excluir lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete excluído.'**
+  String get lembreteDetalheExcluido;
+
+  /// SnackBar de erro ao executar ação no detalhe do lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao executar ação: {erro}'**
+  String lembreteDetalheErroAcao(String erro);
+
   /// Título da tela de criação de lembrete avulso
   ///
   /// In pt, this message translates to:
@@ -1309,6 +1459,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível salvar: {erro}'**
   String lembreteFormNaoPossivel(String erro);
+
+  /// Label do botão Cancelar
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get botaoCancelar;
+
+  /// Label do botão Confirmar
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar'**
+  String get botaoConfirmar;
+
+  /// Label do botão Selecionar (para pickers)
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar'**
+  String get botaoSelecionar;
+
+  /// Texto quando data alvo não está definida no lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Não definida'**
+  String get lembreteDetalheSemData;
+
+  /// Texto quando km alvo não está definido no lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Não definido'**
+  String get lembreteDetalheSemKm;
+
+  /// Texto quando não há manutenção associada ao lembrete
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma'**
+  String get lembreteDetalheSemManutencao;
+
+  /// Exibição do ID da manutenção associada
+  ///
+  /// In pt, this message translates to:
+  /// **'ID {id}'**
+  String lembreteDetalheManutencaoId(int id);
 
   /// Aviso no form de lembrete quando não há veículo
   ///

@@ -193,9 +193,7 @@ class _LembreteTile extends StatelessWidget {
   }
 
   void _onTap(BuildContext context, AppLocalizations l10n) {
-    // Issue #26 implementará /lembretes/:id (detalhe/ações).
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(l10n.lembretesEmBreve)));
+    unawaited(context.push('/lembretes/${item.id}'));
   }
 
   Color _badgeColor(BuildContext context, StatusLembrete status) {
