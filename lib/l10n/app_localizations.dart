@@ -1615,6 +1615,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Despesas'**
   String get graficosLegendaDespesas;
+
+  /// Título do item de política de privacidade nas configurações
+  ///
+  /// In pt, this message translates to:
+  /// **'Política de privacidade'**
+  String get configuracoesPrivacidadeTitulo;
+
+  /// Subtítulo do item de política de privacidade nas configurações
+  ///
+  /// In pt, this message translates to:
+  /// **'Zero coleta · dados ficam no dispositivo'**
+  String get configuracoesPrivacidadeSubtitulo;
+
+  /// URL da política de privacidade hospedada no GitHub Pages
+  ///
+  /// In pt, this message translates to:
+  /// **'https://lucasengecomp.github.io/carr0-na-mao/privacidade/'**
+  String get configuracoesPrivacidadeUrl;
 }
 
 class _AppLocalizationsDelegate

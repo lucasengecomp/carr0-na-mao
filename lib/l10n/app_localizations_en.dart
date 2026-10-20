@@ -841,4 +841,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get graficosLegendaDespesas => 'Expenses';
+
+  @override
+  String get configuracoesPrivacidadeTitulo => 'Privacy policy';
+
+  @override
+  String get configuracoesPrivacidadeSubtitulo =>
+      'Zero data collection · data stays on device';
+
+  @override
+  String get configuracoesPrivacidadeUrl =>
+      'https://lucasengecomp.github.io/carr0-na-mao/privacidade/';
 }

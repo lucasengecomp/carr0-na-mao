@@ -559,5 +559,20 @@
   "graficosLegendaDespesas": "Expenses",
   "@graficosLegendaDespesas": {
     "description": "Legend label for the expenses segment in the bar chart"
+  },
+
+  "configuracoesPrivacidadeTitulo": "Privacy policy",
+  "@configuracoesPrivacidadeTitulo": {
+    "description": "Title of the privacy policy item in settings"
+  },
+
+  "configuracoesPrivacidadeSubtitulo": "Zero data collection · data stays on device",
+  "@configuracoesPrivacidadeSubtitulo": {
+    "description": "Subtitle of the privacy policy item in settings"
+  },
+
+  "configuracoesPrivacidadeUrl": "https://lucasengecomp.github.io/carr0-na-mao/privacidade/",
+  "@configuracoesPrivacidadeUrl": {
+    "description": "URL of the privacy policy hosted on GitHub Pages"
   }
 }
