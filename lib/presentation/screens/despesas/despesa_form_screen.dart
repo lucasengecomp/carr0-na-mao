@@ -323,35 +323,46 @@ class _DespesaFormScreenState extends ConsumerState<DespesaFormScreen> {
             ],
 
             // Data de início
-            InkWell(
-              onTap: () => unawaited(_escolherDataInicio()),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: l10n.despesaCampoDataInicio,
+            Semantics(
+              label: '${l10n.despesaCampoDataInicio}: ${_fmtData(_dataInicio)}',
+              hint: l10n.a11yToquePAraAbrir,
+              button: true,
+              child: InkWell(
+                onTap: () => unawaited(_escolherDataInicio()),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: l10n.despesaCampoDataInicio,
+                  ),
+                  child: Text(_fmtData(_dataInicio)),
                 ),
-                child: Text(_fmtData(_dataInicio)),
               ),
             ),
             const SizedBox(height: 12),
 
             // Data de fim (opcional)
-            InkWell(
-              onTap: () => unawaited(_escolherDataFim()),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: l10n.despesaCampoDataFim,
-                  suffixIcon: _dataFim != null
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          tooltip: l10n.despesaLimparDataFim,
-                          onPressed: () => setState(() => _dataFim = null),
-                        )
-                      : null,
-                ),
-                child: Text(
-                  _dataFim != null
-                      ? _fmtData(_dataFim!)
-                      : l10n.despesaDataFimVazia,
+            Semantics(
+              label:
+                  '${l10n.despesaCampoDataFim}: ${_dataFim != null ? _fmtData(_dataFim!) : l10n.despesaDataFimVazia}',
+              hint: l10n.a11yToquePAraAbrir,
+              button: true,
+              child: InkWell(
+                onTap: () => unawaited(_escolherDataFim()),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: l10n.despesaCampoDataFim,
+                    suffixIcon: _dataFim != null
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            tooltip: l10n.despesaLimparDataFim,
+                            onPressed: () => setState(() => _dataFim = null),
+                          )
+                        : null,
+                  ),
+                  child: Text(
+                    _dataFim != null
+                        ? _fmtData(_dataFim!)
+                        : l10n.despesaDataFimVazia,
+                  ),
                 ),
               ),
             ),
@@ -367,15 +378,19 @@ class _DespesaFormScreenState extends ConsumerState<DespesaFormScreen> {
             ),
             const SizedBox(height: 24),
 
-            FilledButton(
-              onPressed: _saving ? null : () => unawaited(_submit(veiculo)),
-              child: _saving
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.botaoSalvar),
+            Semantics(
+              label: _saving ? l10n.a11ySalvando : l10n.botaoSalvar,
+              button: true,
+              child: FilledButton(
+                onPressed: _saving ? null : () => unawaited(_submit(veiculo)),
+                child: _saving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n.botaoSalvar),
+              ),
             ),
           ],
         ),
@@ -423,18 +438,23 @@ class _VeiculoChip extends StatelessWidget {
     final icone = veiculo.tipo == TipoVeiculo.carro
         ? Icons.directions_car
         : Icons.two_wheeler;
-    return Row(
-      children: [
-        Icon(icone, size: 20),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            '$titulo · ${veiculo.placa}',
-            style: Theme.of(context).textTheme.bodyMedium,
-            overflow: TextOverflow.ellipsis,
+    return Semantics(
+      label: '$titulo · ${veiculo.placa}',
+      child: Row(
+        children: [
+          ExcludeSemantics(child: Icon(icone, size: 20)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: ExcludeSemantics(
+              child: Text(
+                '$titulo · ${veiculo.placa}',
+                style: Theme.of(context).textTheme.bodyMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

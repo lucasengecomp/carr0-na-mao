@@ -843,6 +843,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get graficosLegendaDespesas => 'Expenses';
 
   @override
+  String get a11ySalvando => 'Saving';
+
+  @override
+  String get a11yToquePAraAbrir => 'Tap to open the picker';
+
+  @override
   String get configuracoesPrivacidadeTitulo => 'Privacy policy';
 
   @override

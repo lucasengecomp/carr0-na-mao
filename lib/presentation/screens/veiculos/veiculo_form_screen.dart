@@ -324,15 +324,19 @@ class _VeiculoFormScreenState extends ConsumerState<VeiculoFormScreen> {
                 validator: _validateKm,
               ),
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _saving ? null : () => unawaited(_submit()),
-                child: _saving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.botaoSalvar),
+              Semantics(
+                label: _saving ? l10n.a11ySalvando : l10n.botaoSalvar,
+                button: true,
+                child: FilledButton(
+                  onPressed: _saving ? null : () => unawaited(_submit()),
+                  child: _saving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.botaoSalvar),
+                ),
               ),
             ],
           ),

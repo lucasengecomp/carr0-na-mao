@@ -1347,6 +1347,16 @@
     "description": "Legenda do segmento de despesas no gráfico de barras"
   },
 
+  "a11ySalvando": "Salvando",
+  "@a11ySalvando": {
+    "description": "Rótulo semântico do botão enquanto a operação de salvar está em andamento"
+  },
+
+  "a11yToquePAraAbrir": "Toque para abrir o seletor",
+  "@a11yToquePAraAbrir": {
+    "description": "Dica semântica para campos que abrem um seletor (DatePicker, etc.)"
+  },
+
   "configuracoesPrivacidadeTitulo": "Política de privacidade",
   "@configuracoesPrivacidadeTitulo": {
     "description": "Título do item de política de privacidade nas configurações"

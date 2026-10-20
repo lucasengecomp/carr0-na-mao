@@ -1616,6 +1616,18 @@ abstract class AppLocalizations {
   /// **'Despesas'**
   String get graficosLegendaDespesas;
 
+  /// Rótulo semântico do botão enquanto a operação de salvar está em andamento
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvando'**
+  String get a11ySalvando;
+
+  /// Dica semântica para campos que abrem um seletor (DatePicker, etc.)
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para abrir o seletor'**
+  String get a11yToquePAraAbrir;
+
   /// Título do item de política de privacidade nas configurações
   ///
   /// In pt, this message translates to:
