@@ -593,9 +593,9 @@ class _VeiculoChip extends StatelessWidget {
 /// Widget de autocomplete para o campo Posto.
 /// Busca sugestões no [PostoSugestaoDao] ordenadas por frequência de uso.
 ///
-/// O overlay de sugestões é ancorado ao campo TextField via
-/// [CompositedTransformFollower] + [LayerLink], garantindo que a lista apareça
-/// imediatamente abaixo do campo em qualquer posição da tela (fix #72).
+/// Usa [Autocomplete<String>] do Material, que gerencia overlay, ancoragem e
+/// hit testing internamente — eliminando o tap-through no botão Salvar que
+/// ocorria com o [RawAutocomplete] + [CompositedTransformFollower] (#91).
 class _PostoAutocomplete extends ConsumerStatefulWidget {
   const _PostoAutocomplete({required this.controller});
 
@@ -606,38 +606,18 @@ class _PostoAutocomplete extends ConsumerStatefulWidget {
 }
 
 class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
-  /// Controller e FocusNode próprios, criados uma única vez no initState.
-  /// Evita que o fieldViewBuilder execute atribuição em todo build().
-  late final TextEditingController _fieldController;
+  /// FocusNode próprio passado ao [Autocomplete]. Necessário para que o par
+  /// (textEditingController + focusNode) seja gerenciado externamente.
   late final FocusNode _focusNode;
-
-  /// LayerLink que conecta o [CompositedTransformTarget] no fieldViewBuilder
-  /// ao [CompositedTransformFollower] no optionsViewBuilder, ancorando o
-  /// overlay de sugestões ao TextField (fix #72).
-  final LayerLink _layerLink = LayerLink();
 
   @override
   void initState() {
     super.initState();
-    // Inicializa com o valor atual do controller externo (caso de edição).
-    _fieldController = TextEditingController(text: widget.controller.text);
     _focusNode = FocusNode();
-    // Sincroniza field → controller externo (digitação normal).
-    // Não há listener no sentido inverso para evitar loop de notificações
-    // que dispara _onChangedField múltiplas vezes e descarta os resultados.
-    _fieldController.addListener(_syncToExternal);
-  }
-
-  void _syncToExternal() {
-    if (widget.controller.text != _fieldController.text) {
-      widget.controller.text = _fieldController.text;
-    }
   }
 
   @override
   void dispose() {
-    _fieldController.removeListener(_syncToExternal);
-    _fieldController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -650,10 +630,14 @@ class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return RawAutocomplete<String>(
-      textEditingController: _fieldController,
+    // Passamos o controller externo diretamente ao Autocomplete. Quando o
+    // usuário digita ou seleciona uma sugestão, o widget.controller já é
+    // atualizado — não há necessidade de listener extra de sincronização.
+    // onSelected é chamado pelo Autocomplete para atualizar o textController
+    // após a seleção; o form pai lê widget.controller.text em _submit().
+    return Autocomplete<String>(
+      textEditingController: widget.controller,
       focusNode: _focusNode,
-      optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
       optionsBuilder: (textEditingValue) {
         final query = textEditingValue.text.trim();
         if (query.isEmpty) return const Iterable<String>.empty();
@@ -662,64 +646,19 @@ class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
       displayStringForOption: (s) => s,
       fieldViewBuilder:
           (context, fieldController, focusNode, onFieldSubmitted) {
-            // CompositedTransformTarget marca a posição exata do campo para
-            // que o CompositedTransformFollower no overlay possa se ancorar.
-            return CompositedTransformTarget(
-              link: _layerLink,
-              child: TextFormField(
-                key: const Key('abast_posto'),
-                controller: fieldController,
-                focusNode: focusNode,
-                decoration: InputDecoration(
-                  labelText: l10n.abastecimentoCampoPosto,
-                ),
-                textCapitalization: TextCapitalization.words,
-                onFieldSubmitted: (_) => onFieldSubmitted(),
+            return TextFormField(
+              key: const Key('abast_posto'),
+              controller: fieldController,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                labelText: l10n.abastecimentoCampoPosto,
               ),
+              textCapitalization: TextCapitalization.words,
+              onFieldSubmitted: (_) => onFieldSubmitted(),
             );
           },
       onSelected: (option) {
-        // onSelected é chamado pelo RawAutocomplete que já atualiza
-        // _fieldController; atualizamos o controller externo também.
         widget.controller.text = option;
-      },
-      optionsViewBuilder: (context, onSelected, options) {
-        // O optionsViewBuilder recebe um context dentro do Overlay, que ocupa
-        // a tela inteira. O Align(topLeft) dá coordenadas absolutas (0,0) a
-        // partir das quais o CompositedTransformFollower recalcula a posição
-        // usando o LayerLink — ancorando bottomLeft do campo ao topLeft da
-        // lista. showWhenUnlinked: false evita renderização em (0,0) durante
-        // o dispose.
-        return Align(
-          alignment: Alignment.topLeft,
-          child: CompositedTransformFollower(
-            link: _layerLink,
-            showWhenUnlinked: false,
-            targetAnchor: Alignment.bottomLeft,
-            followerAnchor: Alignment.topLeft,
-            child: TextFieldTapRegion(
-              child: Material(
-                elevation: 4,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (context, index) {
-                      final option = options.elementAt(index);
-                      return ListTile(
-                        dense: true,
-                        title: Text(option),
-                        onTap: () => onSelected(option),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
       },
     );
   }

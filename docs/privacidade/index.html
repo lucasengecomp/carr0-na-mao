@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidade — Carro na Mão</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem;
+      line-height: 1.7;
+      color: #222;
+    }
+    h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ddd;
+         padding-bottom: 0.25rem; }
+    .meta { color: #555; font-size: 0.9rem; margin-bottom: 2rem; }
+    .resumo {
+      background: #f0f7f0;
+      border-left: 4px solid #2e7d32;
+      padding: 0.75rem 1rem;
+      margin-bottom: 2rem;
+      border-radius: 0 4px 4px 0;
+    }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #f5f5f5; }
+    footer { margin-top: 3rem; font-size: 0.85rem; color: #777; text-align: center; }
+    a { color: #1565c0; }
+  </style>
+</head>
+<body>
+  <h1>Política de Privacidade — Carro na Mão</h1>
+  <p class="meta">
+    <strong>Desenvolvedor:</strong> Lucas Castro &nbsp;|&nbsp;
+    <strong>Contato:</strong>
+    <a href="mailto:lucasengecomp@gmail.com">lucasengecomp@gmail.com</a>
+    &nbsp;|&nbsp;
+    <strong>Vigência:</strong> 18 de outubro de 2026 &nbsp;|&nbsp;
+    <strong>Versão:</strong> 1.0
+  </p>
+
+  <div class="resumo">
+    <strong>Resumo:</strong> O Carro na Mão <strong>não coleta nenhum dado
+    pessoal</strong> e <strong>nenhuma informação sai do seu
+    dispositivo</strong>. Tudo fica armazenado localmente, sob seu controle
+    exclusivo.
+  </div>
+
+  <h2>1. Dados coletados</h2>
+  <p><strong>Nenhum.</strong></p>
+  <p>
+    O aplicativo não solicita nome, e-mail, número de telefone, localização
+    geográfica, identificadores de dispositivo, nem qualquer outro dado pessoal.
+  </p>
+  <p>
+    Informações como quilometragem, abastecimentos, manutenções e despesas que
+    você registra ficam <strong>exclusivamente no banco de dados local</strong>
+    (SQLite) do seu dispositivo. Esses dados nunca são enviados a nenhum
+    servidor ou serviço externo.
+  </p>
+
+  <h2>2. Permissões do sistema</h2>
+  <p>
+    O aplicativo pode solicitar as seguintes permissões, descritas aqui com
+    transparência:
+  </p>
+  <table>
+    <tr>
+      <th>Permissão</th>
+      <th>Por que é necessária</th>
+    </tr>
+    <tr>
+      <td><strong>Notificações</strong></td>
+      <td>
+        Para enviar lembretes de manutenção ou vencimentos que você configurou.
+        Concedida apenas sob solicitação (opt-in). Nenhuma notificação é enviada
+        por servidor — todas partem do próprio dispositivo via
+        <code>flutter_local_notifications</code>.
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Armazenamento / compartilhamento de arquivos</strong></td>
+      <td>
+        Para gerar e compartilhar arquivos CSV com os seus registros, quando
+        você usa a função "Exportar CSV". O compartilhamento é sempre iniciado
+        por você, nunca automático.
+      </td>
+    </tr>
+  </table>
+  <p>Nenhuma outra permissão é utilizada.</p>
+
+  <h2>3. Compartilhamento de dados</h2>
+  <p><strong>Nenhum dado é compartilhado com terceiros.</strong></p>
+  <p>
+    A função de exportação gera um arquivo CSV no próprio dispositivo e abre o
+    seletor de compartilhamento nativo do sistema operacional. A escolha do
+    destinatário (e-mail, nuvem pessoal etc.) é <strong>sua e somente
+    sua</strong>. O aplicativo não tem acesso ao destino escolhido.
+  </p>
+  <p>
+    Não há integração com redes sociais, serviços de análise (analytics),
+    rastreamento de anúncios ou qualquer API de terceiros.
+  </p>
+
+  <h2>4. Retenção e exclusão dos dados</h2>
+  <p>
+    Seus dados residem no banco de dados interno do aplicativo (SQLite) e ficam
+    no dispositivo enquanto o aplicativo estiver instalado.
+  </p>
+  <ul>
+    <li>
+      <strong>Para excluir todos os dados:</strong> basta desinstalar o
+      aplicativo. O sistema operacional remove o banco de dados junto.
+    </li>
+    <li>Não há conta para apagar, porque não há cadastro.</li>
+  </ul>
+
+  <h2>5. Crianças</h2>
+  <p>
+    O aplicativo não é direcionado a crianças e não coleta intencionalmente
+    dados de menores de 13 anos. Por não haver coleta de qualquer dado pessoal,
+    esta política cumpre automaticamente as exigências aplicáveis.
+  </p>
+
+  <h2>6. Contato</h2>
+  <p>Dúvidas ou sugestões sobre esta política:</p>
+  <ul>
+    <li>
+      <strong>E-mail:</strong>
+      <a href="mailto:lucasengecomp@gmail.com">lucasengecomp@gmail.com</a>
+    </li>
+    <li>
+      <strong>Issues do projeto:</strong>
+      <a href="https://github.com/lucasengecomp/carr0-na-mao/issues"
+         target="_blank" rel="noopener">
+        github.com/lucasengecomp/carr0-na-mao/issues
+      </a>
+    </li>
+  </ul>
+
+  <h2>7. Alterações nesta política</h2>
+  <p>
+    Caso esta política seja atualizada, a nova versão será publicada neste mesmo
+    endereço com a data de vigência atualizada. Como o aplicativo não coleta
+    dados de contato, recomendamos consultar esta página periodicamente.
+  </p>
+
+  <footer>
+    <em>
+      Carro na Mão é um aplicativo offline-first: sem login, sem telemetria,
+      sem analytics. Seus dados são seus.
+    </em>
+  </footer>
+</body>
+</html>

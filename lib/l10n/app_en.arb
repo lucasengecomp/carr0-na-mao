@@ -562,5 +562,20 @@
   },
 
   "a11ySalvando": "Saving",
-  "a11yToquePAraAbrir": "Tap to open the picker"
+  "a11yToquePAraAbrir": "Tap to open the picker",
+
+  "configuracoesPrivacidadeTitulo": "Privacy policy",
+  "@configuracoesPrivacidadeTitulo": {
+    "description": "Title of the privacy policy item in settings"
+  },
+
+  "configuracoesPrivacidadeSubtitulo": "Zero data collection · data stays on device",
+  "@configuracoesPrivacidadeSubtitulo": {
+    "description": "Subtitle of the privacy policy item in settings"
+  },
+
+  "configuracoesPrivacidadeUrl": "https://lucasengecomp.github.io/carr0-na-mao/privacidade/",
+  "@configuracoesPrivacidadeUrl": {
+    "description": "URL of the privacy policy hosted on GitHub Pages"
+  }
 }

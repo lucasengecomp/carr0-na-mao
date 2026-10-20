@@ -31,6 +31,22 @@ fvm flutter run
 - [Documento de requisitos V1](https://claude.ai/code/artifact/62b88c1f-8df8-46f0-ba76-1824e5853abe)
 - [Board de tasks](https://github.com/users/lucasengecomp/projects/1)
 
+## Privacidade
+
+O aplicativo não coleta nenhum dado pessoal. Nenhuma informação sai do
+dispositivo do usuário.
+
+- Documento: [`docs/privacidade/politica-de-privacidade.md`](docs/privacidade/politica-de-privacidade.md)
+- URL pública (GitHub Pages): `https://lucasengecomp.github.io/carr0-na-mao/privacidade/`
+
+**Para ativar o GitHub Pages** (passo manual, requer permissão de admin):
+
+1. Acesse **Settings > Pages** no repositório.
+2. Em **Source**, selecione **Deploy from a branch**.
+3. Escolha a branch `main` e a pasta **`/docs`**.
+4. Salve. O site ficará disponível em
+   `https://lucasengecomp.github.io/carr0-na-mao/`.
+
 ## Base de marcas e modelos
 
 A lista curada vive em `assets/data/marcas_modelos.json` e é 100% offline

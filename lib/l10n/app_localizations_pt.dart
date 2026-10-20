@@ -846,4 +846,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get a11yToquePAraAbrir => 'Toque para abrir o seletor';
+
+  @override
+  String get configuracoesPrivacidadeTitulo => 'Política de privacidade';
+
+  @override
+  String get configuracoesPrivacidadeSubtitulo =>
+      'Zero coleta · dados ficam no dispositivo';
+
+  @override
+  String get configuracoesPrivacidadeUrl =>
+      'https://lucasengecomp.github.io/carr0-na-mao/privacidade/';
 }

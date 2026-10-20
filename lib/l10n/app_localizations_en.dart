@@ -847,4 +847,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get a11yToquePAraAbrir => 'Tap to open the picker';
+
+  @override
+  String get configuracoesPrivacidadeTitulo => 'Privacy policy';
+
+  @override
+  String get configuracoesPrivacidadeSubtitulo =>
+      'Zero data collection · data stays on device';
+
+  @override
+  String get configuracoesPrivacidadeUrl =>
+      'https://lucasengecomp.github.io/carr0-na-mao/privacidade/';
 }
