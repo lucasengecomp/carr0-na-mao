@@ -117,6 +117,19 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get abastecimentoAcaoExcluir => 'Excluir';
+
+  @override
+  String get abastecimentoExcluirTitulo => 'Excluir abastecimento';
+
+  @override
+  String get abastecimentoExcluirMensagem =>
+      'Tem certeza que deseja excluir este abastecimento? Esta ação não pode ser desfeita.';
+
+  @override
+  String get abastecimentoExcluido => 'Abastecimento excluído.';
+
+  @override
   String get validacaoObrigatorio => 'Obrigatório';
 
   @override

@@ -318,9 +318,47 @@ class _AbastecimentoFormScreenState
               ? l10n.abastecimentoEditarTitulo
               : l10n.abastecimentoNovoTitulo,
         ),
+        actions: [
+          if (_isEdit)
+            Semantics(
+              label: l10n.abastecimentoAcaoExcluir,
+              button: true,
+              child: IconButton(
+                key: const Key('btn_excluir_abastecimento_appbar'),
+                icon: const Icon(Icons.delete_outline),
+                tooltip: l10n.abastecimentoAcaoExcluir,
+                onPressed: () => unawaited(_excluir(context)),
+              ),
+            ),
+        ],
       ),
       body: _isEdit ? _buildEditBody() : _buildNewBody(),
     );
+  }
+
+  Future<void> _excluir(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _ExcluirAbastecimentoDialog(),
+    );
+    if (confirm != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final service = ref.read(abastecimentosServiceProvider);
+      await service.deleteAbastecimento(widget.id!);
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.abastecimentoExcluido)),
+      );
+      Navigator.of(context).pop();
+    } on Object catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.abastecimentoNaoPossivel(e.toString()))),
+      );
+    }
   }
 
   Widget _buildEditBody() {
@@ -660,6 +698,37 @@ class _PostoAutocompleteState extends ConsumerState<_PostoAutocomplete> {
       onSelected: (option) {
         widget.controller.text = option;
       },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dialog de confirmação de exclusão (StatefulWidget local — padrão do app)
+// ---------------------------------------------------------------------------
+
+class _ExcluirAbastecimentoDialog extends StatelessWidget {
+  const _ExcluirAbastecimentoDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.abastecimentoExcluirTitulo),
+      content: Text(l10n.abastecimentoExcluirMensagem),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.botaoCancelar),
+        ),
+        FilledButton(
+          key: const Key('btn_excluir_abastecimento_confirmar'),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.abastecimentoAcaoExcluir),
+        ),
+      ],
     );
   }
 }

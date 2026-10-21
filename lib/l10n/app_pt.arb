@@ -171,6 +171,26 @@
     }
   },
 
+  "abastecimentoAcaoExcluir": "Excluir",
+  "@abastecimentoAcaoExcluir": {
+    "description": "Ação de excluir abastecimento no menu de 3 pontos e no AppBar"
+  },
+
+  "abastecimentoExcluirTitulo": "Excluir abastecimento",
+  "@abastecimentoExcluirTitulo": {
+    "description": "Título do dialog de confirmação de exclusão de abastecimento"
+  },
+
+  "abastecimentoExcluirMensagem": "Tem certeza que deseja excluir este abastecimento? Esta ação não pode ser desfeita.",
+  "@abastecimentoExcluirMensagem": {
+    "description": "Mensagem do dialog de confirmação de exclusão de abastecimento"
+  },
+
+  "abastecimentoExcluido": "Abastecimento excluído.",
+  "@abastecimentoExcluido": {
+    "description": "Snackbar de confirmação após exclusão de abastecimento"
+  },
+
   "validacaoObrigatorio": "Obrigatório",
   "@validacaoObrigatorio": {
     "description": "Mensagem de validação de campo obrigatório"

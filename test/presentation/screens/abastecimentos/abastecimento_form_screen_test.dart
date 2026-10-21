@@ -934,4 +934,132 @@ void main() {
       await _teardownUI(tester);
     },
   );
+
+  // ---------------------------------------------------------------------------
+  // Ação de excluir no AppBar (issue #78)
+  // ---------------------------------------------------------------------------
+
+  testWidgets('modo novo NÃO exibe botão de excluir no AppBar', (tester) async {
+    await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+    expect(
+      find.byKey(const Key('btn_excluir_abastecimento_appbar')),
+      findsNothing,
+    );
+    await _teardownUI(tester);
+  });
+
+  testWidgets('modo edição exibe botão de excluir no AppBar', (tester) async {
+    final id = await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 3, 1),
+        km: 50000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 300,
+        litros: 50,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, id: id);
+
+    expect(
+      find.byKey(const Key('btn_excluir_abastecimento_appbar')),
+      findsOneWidget,
+    );
+    await _teardownUI(tester);
+  });
+
+  testWidgets('excluir — cancelar dialog mantém o form e o registro no banco', (
+    tester,
+  ) async {
+    final id = await db.abastecimentosDao.insertAbastecimento(
+      AbastecimentosCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        data: DateTime(2026, 3, 1),
+        km: 50000,
+        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        precoLitro: 6,
+        valorTotal: 300,
+        litros: 50,
+      ),
+    );
+
+    await _pumpForm(tester, db: db, id: id);
+
+    await tester.tap(find.byKey(const Key('btn_excluir_abastecimento_appbar')));
+    await tester.pumpAndSettle();
+
+    // Cancela o dialog
+    await tester.tap(find.text('Cancelar'));
+    await tester.pumpAndSettle();
+
+    // Ainda no form
+    expect(find.text('Editar abastecimento'), findsOneWidget);
+    // Registro ainda existe
+    expect(await db.abastecimentosDao.byId(id), isNotNull);
+    await _teardownUI(tester);
+  });
+
+  testWidgets(
+    'excluir — confirmar remove do banco, exibe snackbar e navega de volta',
+    (tester) async {
+      final id = await db.abastecimentosDao.insertAbastecimento(
+        AbastecimentosCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          data: DateTime(2026, 3, 1),
+          km: 50000,
+          tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+          precoLitro: 6,
+          valorTotal: 300,
+          litros: 50,
+        ),
+      );
+
+      // Monta a tela com Navigator para que pop() funcione
+      SharedPreferences.setMockInitialValues(const {});
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [appDatabaseProvider.overrideWithValue(db)],
+          child: MaterialApp(
+            locale: localeDefault,
+            localizationsDelegates: l10nDelegates,
+            supportedLocales: supportedLocales,
+            home: const Scaffold(body: Text('TELA_ANTERIOR')),
+            routes: {'/editar': (_) => AbastecimentoFormScreen(id: id)},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('TELA_ANTERIOR'));
+      await tester.pumpAndSettle();
+
+      // Navega para o form de edição
+      final navState = tester.state<NavigatorState>(find.byType(Navigator));
+      navState.pushNamed('/editar');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Editar abastecimento'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('btn_excluir_abastecimento_appbar')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(const Key('btn_excluir_abastecimento_confirmar')),
+      );
+      await tester.pumpAndSettle();
+
+      // Registro removido
+      expect(await db.abastecimentosDao.byId(id), isNull);
+      // Snackbar visível
+      expect(find.text('Abastecimento excluído.'), findsOneWidget);
+      // Voltou para tela anterior
+      expect(find.text('TELA_ANTERIOR'), findsOneWidget);
+      await _teardownUI(tester);
+    },
+  );
 }

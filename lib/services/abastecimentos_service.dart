@@ -68,6 +68,10 @@ class AbastecimentosService {
       _dao.updateAbastecimento(a);
 
   Future<int> deleteById(int id) => _dao.deleteById(id);
+
+  /// Exclui permanentemente (hard delete) o abastecimento com o [id] dado.
+  /// Não há efeito em cascade: outros registros do veículo permanecem intactos.
+  Future<int> deleteAbastecimento(int id) => _dao.deleteById(id);
 }
 
 // ── Provider ─────────────────────────────────────────────────────────────────

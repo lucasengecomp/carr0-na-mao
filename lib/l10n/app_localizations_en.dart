@@ -118,6 +118,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get abastecimentoAcaoExcluir => 'Delete';
+
+  @override
+  String get abastecimentoExcluirTitulo => 'Delete fuel-up';
+
+  @override
+  String get abastecimentoExcluirMensagem =>
+      'Are you sure you want to delete this fuel-up? This action cannot be undone.';
+
+  @override
+  String get abastecimentoExcluido => 'Fuel-up deleted.';
+
+  @override
   String get validacaoObrigatorio => 'Required';
 
   @override
