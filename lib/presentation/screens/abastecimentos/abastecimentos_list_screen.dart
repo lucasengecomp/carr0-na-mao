@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/abastecimentos_service.dart';
 import '../veiculos/veiculos_providers.dart';
 import 'abastecimentos_list_providers.dart';
 import 'enum_labels.dart';
@@ -205,13 +206,13 @@ class _CabecalhoMes extends StatelessWidget {
   }
 }
 
-class _AbastecimentoTile extends StatelessWidget {
+class _AbastecimentoTile extends ConsumerWidget {
   const _AbastecimentoTile({required this.item});
 
   final Abastecimento item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final a = item;
     return Semantics(
@@ -241,7 +242,88 @@ class _AbastecimentoTile extends StatelessWidget {
           '${a.posto != null && a.posto!.isNotEmpty ? ' · ${a.posto}' : ''}',
         ),
         onTap: () => context.push('/abastecimentos/${a.id}/editar'),
+        trailing: _AbastecimentoMenu(item: a),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Menu de ações (3-dots) — padrão das despesas
+// ---------------------------------------------------------------------------
+
+class _AbastecimentoMenu extends ConsumerWidget {
+  const _AbastecimentoMenu({required this.item});
+
+  final Abastecimento item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return PopupMenuButton<_AcaoAbastecimento>(
+      key: Key('menu_abastecimento_${item.id}'),
+      icon: const Icon(Icons.more_vert),
+      tooltip: l10n.abastecimentoAcaoExcluir,
+      onSelected: (acao) async {
+        switch (acao) {
+          case _AcaoAbastecimento.excluir:
+            await _confirmarExclusao(context, ref);
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: _AcaoAbastecimento.excluir,
+          child: Text(l10n.abastecimentoAcaoExcluir),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _confirmarExclusao(BuildContext context, WidgetRef ref) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _ExcluirAbastecimentoDialog(),
+    );
+    if (confirm != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    await ref.read(abastecimentosServiceProvider).deleteAbastecimento(item.id);
+    if (!context.mounted) return;
+    messenger.showSnackBar(SnackBar(content: Text(l10n.abastecimentoExcluido)));
+  }
+}
+
+enum _AcaoAbastecimento { excluir }
+
+// ---------------------------------------------------------------------------
+// Dialog de confirmação de exclusão (padrão StatefulWidget local do app)
+// ---------------------------------------------------------------------------
+
+class _ExcluirAbastecimentoDialog extends StatelessWidget {
+  const _ExcluirAbastecimentoDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.abastecimentoExcluirTitulo),
+      content: Text(l10n.abastecimentoExcluirMensagem),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.botaoCancelar),
+        ),
+        FilledButton(
+          key: const Key('btn_excluir_abastecimento_confirmar'),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.abastecimentoAcaoExcluir),
+        ),
+      ],
     );
   }
 }

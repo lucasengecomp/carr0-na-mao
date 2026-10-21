@@ -129,6 +129,28 @@ void main() {
     expect(await db.abastecimentosDao.byId(id), isNull);
   });
 
+  test(
+    'deleteById remove apenas o registro solicitado — outros permanecem',
+    () async {
+      final id1 = await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 1, 10), km: 10100),
+      );
+      final id2 = await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 2, 10), km: 10500),
+      );
+      final id3 = await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 10), km: 10900),
+      );
+
+      // Deleta o do meio (intermediário)
+      final rows = await db.abastecimentosDao.deleteById(id2);
+      expect(rows, 1);
+      expect(await db.abastecimentosDao.byId(id1), isNotNull);
+      expect(await db.abastecimentosDao.byId(id2), isNull);
+      expect(await db.abastecimentosDao.byId(id3), isNotNull);
+    },
+  );
+
   test('watchByVeiculo emite ao inserir', () async {
     final events = <int>[];
     final sub = db.abastecimentosDao

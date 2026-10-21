@@ -490,6 +490,142 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
+  // Ação de excluir (menu 3-dots)
+  // -------------------------------------------------------------------------
+  group('excluir abastecimento via menu 3-dots', () {
+    testWidgets('menu exibe opção "Excluir"', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      final id = await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 1), km: 100, posto: 'Shell'),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      // Abre o menu de 3 pontos do item
+      await tester.tap(find.byKey(Key('menu_abastecimento_$id')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Excluir'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('cancelar dialog NÃO exclui o registro', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      final id = await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 1), km: 100, posto: 'Shell'),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(find.byKey(Key('menu_abastecimento_$id')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Excluir'));
+      await tester.pumpAndSettle();
+
+      // Dialog de confirmação abriu; toca em Cancelar
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      expect(await db.abastecimentosDao.byId(id), isNotNull);
+      await _teardownUI(tester);
+    });
+
+    testWidgets('confirmar exclusão remove o registro e exibe snackbar', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      final id = await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(data: DateTime(2026, 3, 1), km: 100, posto: 'Shell'),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(find.byKey(Key('menu_abastecimento_$id')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Excluir'));
+      await tester.pumpAndSettle();
+
+      // Dialog abriu; toca no botão de confirmação
+      await tester.tap(
+        find.byKey(const Key('btn_excluir_abastecimento_confirmar')),
+      );
+      await tester.pumpAndSettle();
+
+      // Registro removido do banco
+      expect(await db.abastecimentosDao.byId(id), isNull);
+
+      // Snackbar de confirmação aparece
+      expect(find.text('Abastecimento excluído.'), findsOneWidget);
+      await _teardownUI(tester);
+    });
+
+    testWidgets(
+      'lista atualiza reativamente após exclusão (item some da tela)',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        final id = await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(data: DateTime(2026, 3, 1), km: 100, posto: 'UnicoItem'),
+        );
+
+        await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+        expect(find.textContaining('UnicoItem'), findsOneWidget);
+
+        await tester.tap(find.byKey(Key('menu_abastecimento_$id')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Excluir'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_abastecimento_confirmar')),
+        );
+        await tester.pumpAndSettle();
+
+        // Item deve sumir da lista
+        expect(find.textContaining('UnicoItem'), findsNothing);
+        await _teardownUI(tester);
+      },
+    );
+
+    testWidgets(
+      'regressão: excluir intermediário NÃO afeta demais registros na lista',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(data: DateTime(2026, 1, 1), km: 100, posto: 'Primeiro'),
+        );
+        final idMeio = await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(data: DateTime(2026, 2, 1), km: 200, posto: 'Meio'),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(data: DateTime(2026, 3, 1), km: 300, posto: 'Ultimo'),
+        );
+
+        await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+        // Exclui o intermediário
+        await tester.tap(find.byKey(Key('menu_abastecimento_$idMeio')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Excluir'));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_abastecimento_confirmar')),
+        );
+        await tester.pumpAndSettle();
+
+        // Primeiro e Ultimo ainda estão na lista
+        expect(find.textContaining('Primeiro'), findsOneWidget);
+        expect(find.textContaining('Ultimo'), findsOneWidget);
+        expect(find.textContaining('Meio'), findsNothing);
+        await _teardownUI(tester);
+      },
+    );
+  });
+
+  // -------------------------------------------------------------------------
   // Estado de erro
   // -------------------------------------------------------------------------
   group('estado de erro', () {

@@ -183,6 +183,23 @@ void main() {
     },
   );
 
+  test(
+    'deleteAbastecimento delega ao DAO e remove apenas o registro solicitado',
+    () async {
+      final id1 = await service.insertAbastecimento(
+        _novoAbast(placa: 'ABC1D23', km: 10000),
+      );
+      final id2 = await service.insertAbastecimento(
+        _novoAbast(placa: 'ABC1D23', km: 20000),
+      );
+
+      await service.deleteAbastecimento(id1);
+
+      expect(await db.abastecimentosDao.byId(id1), isNull);
+      expect(await db.abastecimentosDao.byId(id2), isNotNull);
+    },
+  );
+
   test('insertAbastecimento dispara notificação para múltiplos lembretes atingidos', () async {
     final id1 = await db.lembretesDao.insertLembrete(
       LembretesCompanion.insert(

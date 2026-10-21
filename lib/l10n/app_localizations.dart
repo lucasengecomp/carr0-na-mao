@@ -290,6 +290,30 @@ abstract class AppLocalizations {
   /// **'Não foi possível salvar: {erro}'**
   String abastecimentoNaoPossivel(String erro);
 
+  /// Ação de excluir abastecimento no menu de 3 pontos e no AppBar
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir'**
+  String get abastecimentoAcaoExcluir;
+
+  /// Título do dialog de confirmação de exclusão de abastecimento
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir abastecimento'**
+  String get abastecimentoExcluirTitulo;
+
+  /// Mensagem do dialog de confirmação de exclusão de abastecimento
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja excluir este abastecimento? Esta ação não pode ser desfeita.'**
+  String get abastecimentoExcluirMensagem;
+
+  /// Snackbar de confirmação após exclusão de abastecimento
+  ///
+  /// In pt, this message translates to:
+  /// **'Abastecimento excluído.'**
+  String get abastecimentoExcluido;
+
   /// Mensagem de validação de campo obrigatório
   ///
   /// In pt, this message translates to:
