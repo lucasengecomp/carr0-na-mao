@@ -43,9 +43,17 @@ class AbastecimentosListScreen extends ConsumerWidget {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) =>
                   Center(child: Text(l10n.erroGenerico(e.toString()))),
-              data: (lista) => lista.isEmpty
-                  ? const _ListaVazia()
-                  : _ListaAgrupada(itens: lista),
+              data: (lista) {
+                final filtros = ref.watch(filtrosAbastecimentoProvider);
+                // Nenhum combustível selecionado → estado vazio específico.
+                if (filtros.tiposCombustivel != null &&
+                    filtros.tiposCombustivel!.isEmpty) {
+                  return const _NenhumCombustivelSelecionado();
+                }
+                return lista.isEmpty
+                    ? const _ListaVazia()
+                    : _ListaAgrupada(itens: lista);
+              },
             ),
       floatingActionButton: veiculo == null
           ? null
@@ -93,30 +101,23 @@ class _FiltrosBar extends ConsumerWidget {
             ],
           ),
         ),
-        // Filtro de combustível
+        // Filtro de combustível (multi-select) — issue #77
         SizedBox(
           height: 48,
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(l10n.filtroTodos),
-                  selected: filtros.tipoCombustivel == null,
-                  onSelected: (_) => notifier.setTipoCombustivel(null),
-                ),
-              ),
               for (final t in TipoCombustivelAbastecimento.values)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
                     label: Text(t.label(l10n)),
-                    selected: filtros.tipoCombustivel == t,
-                    onSelected: (_) => notifier.setTipoCombustivel(
-                      filtros.tipoCombustivel == t ? null : t,
-                    ),
+                    // null = todos selecionados; set não-vazio = contém o tipo.
+                    selected:
+                        filtros.tiposCombustivel == null ||
+                        filtros.tiposCombustivel!.contains(t),
+                    onSelected: (_) => notifier.toggleTipoCombustivel(t),
                   ),
                 ),
             ],
@@ -374,6 +375,28 @@ class _ListaVazia extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Text(
           l10n.abastecimentoListaVaziaFiltro,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+/// Estado exibido quando nenhum chip de combustível está selecionado.
+/// Informa ao usuário de forma clara que ele precisa selecionar ao menos um
+/// tipo para visualizar os registros (evita a ambiguidade "vazio = tudo").
+class _NenhumCombustivelSelecionado extends StatelessWidget {
+  const _NenhumCombustivelSelecionado();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      key: const Key('estado_nenhum_combustivel'),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          l10n.filtroNenhumCombustivelSelecionado,
           textAlign: TextAlign.center,
         ),
       ),
