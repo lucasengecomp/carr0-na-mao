@@ -193,5 +193,80 @@ void main() {
       expect(fake.cancelledIds, isEmpty);
       expect((await db.veiculosDao.byPlaca('ABC1D23'))!.arquivado, isFalse);
     });
+
+    // ── Delegação de leitura ────────────────────────────────────────────────
+
+    test('byPlaca retorna o veículo inserido', () async {
+      final v = await service.byPlaca('ABC1D23');
+      expect(v, isNotNull);
+      expect(v!.placa, 'ABC1D23');
+    });
+
+    test('byPlaca retorna null para placa inexistente', () async {
+      final v = await service.byPlaca('ZZZ9Z99');
+      expect(v, isNull);
+    });
+
+    test('listAtivos retorna veículos não arquivados', () async {
+      final list = await service.listAtivos();
+      expect(list, hasLength(1));
+      expect(list.first.placa, 'ABC1D23');
+    });
+
+    test(
+      'listArquivados retorna lista vazia quando nenhum foi arquivado',
+      () async {
+        final list = await service.listArquivados();
+        expect(list, isEmpty);
+      },
+    );
+
+    test('listArquivados retorna veículo após arquivamento', () async {
+      await service.arquivar('ABC1D23');
+      final list = await service.listArquivados();
+      expect(list, hasLength(1));
+      expect(list.first.placa, 'ABC1D23');
+    });
+
+    test('watchAtivos emite lista com o veículo ativo', () async {
+      final list = await service.watchAtivos().first;
+      expect(list, hasLength(1));
+      expect(list.first.placa, 'ABC1D23');
+    });
+
+    test('watchArquivados emite lista vazia quando nenhum arquivado', () async {
+      final list = await service.watchArquivados().first;
+      expect(list, isEmpty);
+    });
+
+    test('insertVeiculo adiciona novo veículo ao banco', () async {
+      await service.insertVeiculo(
+        VeiculosCompanion.insert(
+          placa: 'NEW1N00',
+          marca: 'VW',
+          modelo: 'Gol',
+          ano: 2022,
+          tipo: TipoVeiculo.carro,
+          combustivel: TipoCombustivelVeiculo.flex,
+          kmInicial: 5000,
+        ),
+      );
+      final list = await service.listAtivos();
+      expect(list.any((v) => v.placa == 'NEW1N00'), isTrue);
+    });
+
+    test('updateByPlaca persiste alteração de kmInicial', () async {
+      await service.updateByPlaca(
+        'ABC1D23',
+        const VeiculosCompanion(kmInicial: Value(99999)),
+      );
+      final v = await service.byPlaca('ABC1D23');
+      expect(v!.kmInicial, 99999);
+    });
+
+    test('deleteByPlaca remove veículo do banco', () async {
+      await service.deleteByPlaca('ABC1D23');
+      expect(await service.byPlaca('ABC1D23'), isNull);
+    });
   });
 }
