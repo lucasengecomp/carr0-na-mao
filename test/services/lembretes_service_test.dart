@@ -308,4 +308,126 @@ void main() {
     expect(pendentes, hasLength(1));
     expect(pendentes.single.kmAlvo, 25500);
   });
+
+  // ── Delegação de leitura ──────────────────────────────────────────────────
+
+  test('byId retorna o lembrete inserido pelo service', () async {
+    final id = await service.insertLembrete(
+      LembretesCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        tipo: 'avulso',
+        descricao: 'Palhetas',
+        dataAlvo: Value(DateTime.now().add(const Duration(days: 30))),
+        status: StatusLembrete.pendente,
+      ),
+    );
+    final found = await service.byId(id);
+    expect(found, isNotNull);
+    expect(found!.id, id);
+  });
+
+  test('byId retorna null para id inexistente', () async {
+    final found = await service.byId(999999);
+    expect(found, isNull);
+  });
+
+  test('listByVeiculo retorna todos os lembretes do veículo', () async {
+    await service.insertLembrete(
+      LembretesCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        tipo: 'avulso',
+        descricao: 'A',
+        dataAlvo: Value(DateTime.now().add(const Duration(days: 10))),
+        status: StatusLembrete.pendente,
+      ),
+    );
+    await service.insertLembrete(
+      LembretesCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        tipo: 'avulso',
+        descricao: 'B',
+        dataAlvo: Value(DateTime.now().add(const Duration(days: 20))),
+        status: StatusLembrete.pendente,
+      ),
+    );
+    final list = await service.listByVeiculo('ABC1D23');
+    expect(list, hasLength(2));
+  });
+
+  test('listByVeiculo retorna lista vazia quando sem lembretes', () async {
+    final list = await service.listByVeiculo('ABC1D23');
+    expect(list, isEmpty);
+  });
+
+  test('listPendentesByVeiculo filtra apenas pendentes', () async {
+    final id = await service.insertLembrete(
+      LembretesCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        tipo: 'avulso',
+        descricao: 'Pendente',
+        dataAlvo: Value(DateTime.now().add(const Duration(days: 10))),
+        status: StatusLembrete.pendente,
+      ),
+    );
+    // Marca como concluído
+    await service.marcarConcluido(id);
+
+    // Insere outro lembrete pendente
+    await service.insertLembrete(
+      LembretesCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        tipo: 'avulso',
+        descricao: 'Outro pendente',
+        dataAlvo: Value(DateTime.now().add(const Duration(days: 20))),
+        status: StatusLembrete.pendente,
+      ),
+    );
+
+    final pendentes = await service.listPendentesByVeiculo('ABC1D23');
+    expect(pendentes, hasLength(1));
+    expect(pendentes.first.descricao, 'Outro pendente');
+  });
+
+  test('watchPendentesByVeiculo emite apenas lembretes pendentes', () async {
+    await service.insertLembrete(
+      LembretesCompanion.insert(
+        veiculoPlaca: 'ABC1D23',
+        tipo: 'avulso',
+        descricao: 'Pendente stream',
+        dataAlvo: Value(DateTime.now().add(const Duration(days: 10))),
+        status: StatusLembrete.pendente,
+      ),
+    );
+    final list = await service.watchPendentesByVeiculo('ABC1D23').first;
+    expect(list, hasLength(1));
+    expect(list.first.descricao, 'Pendente stream');
+  });
+
+  test(
+    'findVencidosPorKm retorna lembretes cujo kmAlvo foi atingido',
+    () async {
+      await service.insertLembrete(
+        LembretesCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          tipo: 'avulso',
+          descricao: 'Óleo',
+          kmAlvo: const Value(20000),
+          status: StatusLembrete.pendente,
+        ),
+      );
+      // Km alvo ainda não atingido
+      await service.insertLembrete(
+        LembretesCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          tipo: 'avulso',
+          descricao: 'Pneu',
+          kmAlvo: const Value(50000),
+          status: StatusLembrete.pendente,
+        ),
+      );
+      final vencidos = await service.findVencidosPorKm('ABC1D23', 25000);
+      expect(vencidos, hasLength(1));
+      expect(vencidos.first.descricao, 'Óleo');
+    },
+  );
 }

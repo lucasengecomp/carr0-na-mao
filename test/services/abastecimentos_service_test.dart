@@ -223,4 +223,116 @@ void main() {
     await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 20000));
     expect(fake.shownIds, containsAll([id1 + 100000, id2 + 100000]));
   });
+
+  // ── Delegação de leitura (RF-06, RF-08) ──────────────────────────────────
+
+  test('byId retorna o abastecimento inserido', () async {
+    final id = await service.insertAbastecimento(
+      _novoAbast(placa: 'ABC1D23', km: 12000),
+    );
+    final found = await service.byId(id);
+    expect(found, isNotNull);
+    expect(found!.id, id);
+    expect(found.km, 12000);
+  });
+
+  test('byId retorna null para id inexistente', () async {
+    final found = await service.byId(999999);
+    expect(found, isNull);
+  });
+
+  test('listByVeiculo retorna todos os abastecimentos do veículo', () async {
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 10000));
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 11000));
+    final list = await service.listByVeiculo('ABC1D23');
+    expect(list, hasLength(2));
+  });
+
+  test(
+    'listByVeiculo retorna lista vazia quando veículo sem abastecimentos',
+    () async {
+      final list = await service.listByVeiculo('ABC1D23');
+      expect(list, isEmpty);
+    },
+  );
+
+  test('lastByVeiculo retorna o abastecimento com maior km', () async {
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 10000));
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 15000));
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 12000));
+    final last = await service.lastByVeiculo('ABC1D23');
+    expect(last, isNotNull);
+    expect(last!.km, 15000);
+  });
+
+  test('lastByVeiculo retorna null quando sem abastecimentos', () async {
+    final last = await service.lastByVeiculo('ABC1D23');
+    expect(last, isNull);
+  });
+
+  test('watchByVeiculo emite lista com os abastecimentos inseridos', () async {
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 10000));
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 11000));
+    final list = await service.watchByVeiculo('ABC1D23').first;
+    expect(list, hasLength(2));
+  });
+
+  test(
+    'watchFiltered retorna stream vazio quando set de tipos é vazio',
+    () async {
+      await service.insertAbastecimento(
+        _novoAbast(placa: 'ABC1D23', km: 10000),
+      );
+      final list = await service
+          .watchFiltered(
+            placa: 'ABC1D23',
+            tiposCombustivel: const <TipoCombustivelAbastecimento>{},
+          )
+          .first;
+      expect(list, isEmpty);
+    },
+  );
+
+  test('watchFiltered filtra por tipo de combustível', () async {
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 10000));
+    final list = await service
+        .watchFiltered(
+          placa: 'ABC1D23',
+          tiposCombustivel: {TipoCombustivelAbastecimento.gasolina},
+        )
+        .first;
+    expect(list, hasLength(1));
+    expect(list.first.tipoCombustivel, TipoCombustivelAbastecimento.gasolina);
+  });
+
+  test('watchFiltered sem filtros retorna todos', () async {
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 10000));
+    await service.insertAbastecimento(_novoAbast(placa: 'ABC1D23', km: 11000));
+    final list = await service.watchFiltered(placa: 'ABC1D23').first;
+    expect(list, hasLength(2));
+  });
+
+  test('updateAbastecimento persiste alteração no banco', () async {
+    final id = await service.insertAbastecimento(
+      _novoAbast(placa: 'ABC1D23', km: 10000),
+    );
+    final original = (await db.abastecimentosDao.byId(id))!;
+    final atualizado = original.copyWith(km: 11111);
+    final ok = await service.updateAbastecimento(atualizado);
+    expect(ok, isTrue);
+    final after = await db.abastecimentosDao.byId(id);
+    expect(after!.km, 11111);
+  });
+
+  test('deleteById remove apenas o abastecimento solicitado', () async {
+    final id1 = await service.insertAbastecimento(
+      _novoAbast(placa: 'ABC1D23', km: 10000),
+    );
+    final id2 = await service.insertAbastecimento(
+      _novoAbast(placa: 'ABC1D23', km: 11000),
+    );
+    await service.deleteById(id1);
+    expect(await db.abastecimentosDao.byId(id1), isNull);
+    expect(await db.abastecimentosDao.byId(id2), isNotNull);
+  });
 }

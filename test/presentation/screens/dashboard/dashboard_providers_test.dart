@@ -649,4 +649,167 @@ void main() {
       expect(val.value, isNull);
     });
   });
+
+  // =========================================================================
+  // _resolveVeiculoAtivo — placa selecionada não corresponde a nenhum ativo
+  // =========================================================================
+  //
+  // Quando SharedPreferences traz uma placa que não está na lista de ativos
+  // (ex.: veículo arquivado), o provider deve retornar o primeiro veículo ativo.
+
+  group('_resolveVeiculoAtivo fallback para primeiro ativo', () {
+    test('custoMensalProvider usa primeiro ativo quando placa selecionada é inválida', () async {
+      // Placa selecionada no SharedPreferences não existe na lista de ativos.
+      final container2 = _makeContainer(db, placa: 'PLACAINEXISTENTE');
+      addTearDown(container2.dispose);
+
+      final now = DateTime.now();
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(now.year, now.month, 5),
+          km: 10100,
+          valorTotal: 200.0,
+        ),
+      );
+
+      final val = await _awaitMensal(container2);
+      // Deve ter encontrado o primeiro ativo (ABC1D23) e retornar o custo dele.
+      expect(val.value, isNotNull);
+      expect(val.value!.total, closeTo(200.0, 0.01));
+    });
+
+    test('custoPorKmProvider usa primeiro ativo quando placa selecionada é inválida', () async {
+      final container2 = _makeContainer(db, placa: 'PLACAINEXISTENTE');
+      addTearDown(container2.dispose);
+
+      final now = DateTime.now();
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(now.year, now.month, 1),
+          km: 10000,
+          valorTotal: 300.0,
+        ),
+      );
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(now.year, now.month, 15),
+          km: 11000,
+          valorTotal: 300.0,
+        ),
+      );
+
+      final val = await _awaitKm(container2);
+      expect(val.value, isNotNull);
+      expect(val.value!.custoPorKm, closeTo(0.60, 0.001));
+    });
+
+    test('consumoMedioProvider usa primeiro ativo quando placa selecionada é inválida', () async {
+      final container2 = _makeContainer(db, placa: 'PLACAINEXISTENTE');
+      addTearDown(container2.dispose);
+
+      final now = DateTime.now();
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(now.year, now.month, 1),
+          km: 10000,
+          litros: 40.0,
+          tanqueCheio: true,
+        ),
+      );
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(now.year, now.month, 15),
+          km: 11000,
+          litros: 50.0,
+          tanqueCheio: true,
+        ),
+      );
+
+      final val = await _awaitConsumo(container2);
+      expect(val.value, isNotNull);
+      // 1000 km / 50 L = 20.0 km/L
+      expect(val.value!.kmPorLitro, closeTo(20.0, 0.01));
+    });
+
+    test('proximasManutencoeProvider usa primeiro ativo quando placa selecionada é inválida', () async {
+      final container2 = _makeContainer(db, placa: 'PLACAINEXISTENTE');
+      addTearDown(container2.dispose);
+
+      await db.lembretesDao.insertLembrete(
+        _novoLembrete(descricao: 'Revisão', dataAlvo: DateTime(2027, 1, 1)),
+      );
+
+      final val = await _awaitManutenco(container2);
+      expect(val.value, isNotNull);
+      expect(val.value!, hasLength(1));
+      expect(val.value!.first.descricao, 'Revisão');
+    });
+  });
+
+  // =========================================================================
+  // custoPorKmProvider — inclui manutenções no cálculo de custo
+  // =========================================================================
+
+  group('custoPorKmProvider com manutenções', () {
+    test(
+      'inclui manutenção com valor nos últimos 12m no custo total',
+      () async {
+        final now = DateTime.now();
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(now.year, now.month, 1),
+            km: 10000,
+            valorTotal: 200.0,
+          ),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(now.year, now.month, 15),
+            km: 11000,
+            valorTotal: 200.0,
+          ),
+        );
+        // Manutenção com valor = 100 nos últimos 12m
+        await db.manutencoesDao.insertManutencao(
+          _novaManut(
+            data: DateTime(now.year, now.month, 10),
+            km: 10500,
+            valor: 100.0,
+          ),
+        );
+
+        final val = await _awaitKm(container);
+        expect(val.value, isNotNull);
+        // Total = 200+200+100 = 500; km = 11000-10000 = 1000; custo = 0,50/km
+        expect(val.value!.custoPorKm, closeTo(0.50, 0.001));
+      },
+    );
+
+    test('ignora manutenção sem valor', () async {
+      final now = DateTime.now();
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(now.year, now.month, 1),
+          km: 10000,
+          valorTotal: 300.0,
+        ),
+      );
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(now.year, now.month, 15),
+          km: 11000,
+          valorTotal: 300.0,
+        ),
+      );
+      // Manutenção sem valor
+      await db.manutencoesDao.insertManutencao(
+        _novaManut(data: DateTime(now.year, now.month, 10), km: 10500),
+      );
+
+      final val = await _awaitKm(container);
+      expect(val.value, isNotNull);
+      // Total = 600 / 1000 km = 0,60/km (manutenção sem valor não conta)
+      expect(val.value!.custoPorKm, closeTo(0.60, 0.001));
+    });
+  });
 }
