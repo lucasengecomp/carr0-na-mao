@@ -290,9 +290,13 @@ class _AbastecimentoMenu extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
     try {
-      await ref.read(abastecimentosServiceProvider).deleteAbastecimento(item.id);
+      await ref
+          .read(abastecimentosServiceProvider)
+          .deleteAbastecimento(item.id);
       if (!context.mounted) return;
-      messenger.showSnackBar(SnackBar(content: Text(l10n.abastecimentoExcluido)));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.abastecimentoExcluido)),
+      );
     } on Object catch (e) {
       if (!context.mounted) return;
       messenger.showSnackBar(
