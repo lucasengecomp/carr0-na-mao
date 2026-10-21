@@ -3,15 +3,77 @@ import 'package:carro_na_mao/data/database/enums.dart';
 import 'package:carro_na_mao/data/providers.dart';
 import 'package:carro_na_mao/presentation/screens/abastecimentos/abastecimentos_list_providers.dart';
 import 'package:carro_na_mao/presentation/screens/abastecimentos/abastecimentos_list_screen.dart';
+import 'package:carro_na_mao/services/abastecimentos_service.dart';
+import 'package:carro_na_mao/services/lembretes_service.dart';
+import 'package:carro_na_mao/services/notifications_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../../helpers/l10n_delegates.dart';
+
+// ---------------------------------------------------------------------------
+// Fake plugin — mesma estrutura do abastecimentos_service_test.dart
+// ---------------------------------------------------------------------------
+class _FakePlugin implements NotificationsPluginInterface {
+  @override
+  Future<void> initialize(InitializationSettings settings) async {}
+
+  @override
+  Future<void> createAndroidChannel(AndroidNotificationChannel channel) async {}
+
+  @override
+  Future<bool?> requestAndroidPermission() async => true;
+
+  @override
+  Future<bool?> requestIosPermission({
+    bool alert = true,
+    bool badge = true,
+    bool sound = true,
+  }) async => null;
+
+  @override
+  Future<void> zonedSchedule({
+    required int id,
+    required String? title,
+    required String? body,
+    required tz.TZDateTime scheduledDate,
+    required NotificationDetails details,
+    required AndroidScheduleMode androidScheduleMode,
+  }) async {}
+
+  @override
+  Future<void> show({
+    required int id,
+    required String? title,
+    required String? body,
+    required NotificationDetails details,
+  }) async {}
+
+  @override
+  Future<void> cancel(int id) async {}
+}
+
+// Subclasse que simula falha no banco ao excluir — usada para confirmar que
+// _AbastecimentoMenu não trata erros de deleteAbastecimento (bug #issue).
+class _AbastecimentosServiceQueFalha extends AbastecimentosService {
+  _AbastecimentosServiceQueFalha({
+    required super.dao,
+    required super.lembretesService,
+    required super.notifications,
+  });
+
+  @override
+  Future<int> deleteAbastecimento(int id) async {
+    throw Exception('Falha simulada no banco de dados');
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -620,6 +682,104 @@ void main() {
         expect(find.textContaining('Primeiro'), findsOneWidget);
         expect(find.textContaining('Ultimo'), findsOneWidget);
         expect(find.textContaining('Meio'), findsNothing);
+        await _teardownUI(tester);
+      },
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Tratamento de erro ao excluir via menu da lista
+  // -------------------------------------------------------------------------
+  group('excluir abastecimento — caminho de erro', () {
+    // Documenta o bug: _AbastecimentoMenu não trata exceções de
+    // deleteAbastecimento — ao contrário do form screen que tem try/catch.
+    testWidgets(
+      '[bug] falha no banco ao excluir pela lista exibe snackbar de erro em vez de propagar exceção',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        final id = await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(data: DateTime(2026, 3, 1), km: 100, posto: 'Shell'),
+        );
+
+        // Monta a tela com service que sempre lança ao deletar
+        SharedPreferences.setMockInitialValues(const {
+          'veiculo_selecionado_placa': 'ABC1D23',
+        });
+
+        final notifService = NotificationsService(plugin: _FakePlugin());
+        await notifService.init();
+        final lembretesService = LembretesService(
+          dao: db.lembretesDao,
+          notifications: notifService,
+        );
+        final serviceQueFalha = _AbastecimentosServiceQueFalha(
+          dao: db.abastecimentosDao,
+          lembretesService: lembretesService,
+          notifications: notifService,
+        );
+
+        final router = GoRouter(
+          initialLocation: '/abastecimentos',
+          routes: [
+            GoRoute(
+              path: '/abastecimentos',
+              builder: (c, s) => const AbastecimentosListScreen(),
+            ),
+            GoRoute(
+              path: '/abastecimentos/novo',
+              builder: (c, s) =>
+                  const Scaffold(body: Text('TELA_NOVO_ABASTECIMENTO')),
+            ),
+            GoRoute(
+              path: '/abastecimentos/:id/editar',
+              builder: (c, s) =>
+                  Scaffold(body: Text('TELA_EDITAR_${s.pathParameters["id"]}')),
+            ),
+            GoRoute(
+              path: '/veiculos/novo',
+              builder: (c, s) =>
+                  const Scaffold(body: Text('TELA_NOVO_VEICULO')),
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              appDatabaseProvider.overrideWithValue(db),
+              abastecimentosServiceProvider.overrideWithValue(serviceQueFalha),
+            ],
+            child: MaterialApp.router(
+              locale: localeDefault,
+              localizationsDelegates: l10nDelegates,
+              supportedLocales: supportedLocales,
+              routerConfig: router,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(Key('menu_abastecimento_$id')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Excluir'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_abastecimento_confirmar')),
+        );
+
+        // O comportamento ESPERADO (correto) é exibir snackbar de erro, como
+        // faz o form screen. O comportamento ATUAL é propagar a exceção.
+        // Este teste documenta o bug: ao pumpAndSettle a exceção vai explodir.
+        await tester.pumpAndSettle();
+
+        // Se chegar aqui sem lançar, verifica se snackbar de erro aparece
+        expect(
+          find.textContaining('Não foi possível'),
+          findsOneWidget,
+          reason: 'Esperado snackbar de erro; _AbastecimentoMenu não trata exceções de deleteAbastecimento',
+        );
         await _teardownUI(tester);
       },
     );
