@@ -56,6 +56,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Nenhum abastecimento encontrado para os filtros selecionados.';
 
   @override
+  String get filtroNenhumCombustivelSelecionado =>
+      'Selecione pelo menos um combustível para ver os registros.';
+
+  @override
   String get abastecimentoListaVazia =>
       'Nenhum abastecimento registrado ainda.\nToque em \"Abastecer\" para começar.';
 
