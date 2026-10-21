@@ -30,11 +30,6 @@ class DashboardHomeScreen extends ConsumerWidget {
               ),
             ),
           IconButton(
-            tooltip: 'Comparador',
-            icon: const Icon(Icons.swap_horiz),
-            onPressed: () => context.push('/comparador'),
-          ),
-          IconButton(
             tooltip: 'Configurações',
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/config'),
