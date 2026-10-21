@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Nenhum abastecimento encontrado para os filtros selecionados.'**
   String get abastecimentoListaVaziaFiltro;
 
+  /// Estado vazio quando nenhum chip de combustível está selecionado no filtro multi-select
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione pelo menos um combustível para ver os registros.'**
+  String get filtroNenhumCombustivelSelecionado;
+
   /// Mensagem de lista vazia na tela simples de abastecimentos
   ///
   /// In pt, this message translates to:

@@ -76,6 +76,11 @@
     "description": "Mensagem de lista vazia na tela com filtros"
   },
 
+  "filtroNenhumCombustivelSelecionado": "Selecione pelo menos um combustível para ver os registros.",
+  "@filtroNenhumCombustivelSelecionado": {
+    "description": "Estado vazio quando nenhum chip de combustível está selecionado no filtro multi-select"
+  },
+
   "abastecimentoListaVazia": "Nenhum abastecimento registrado ainda.\nToque em \"Abastecer\" para começar.",
   "@abastecimentoListaVazia": {
     "description": "Mensagem de lista vazia na tela simples de abastecimentos"

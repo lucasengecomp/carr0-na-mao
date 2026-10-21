@@ -57,6 +57,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No fuel-ups found for the selected filters.';
 
   @override
+  String get filtroNenhumCombustivelSelecionado =>
+      'Select at least one fuel type to see records.';
+
+  @override
   String get abastecimentoListaVazia =>
       'No fuel-ups registered yet.\nTap \"Fuel up\" to get started.';
 

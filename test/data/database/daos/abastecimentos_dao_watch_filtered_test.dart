@@ -157,10 +157,10 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  // watchFiltered – filtro de tipo de combustível
+  // watchFiltered – filtro de tipo de combustível (multi-select, issue #77)
   // ---------------------------------------------------------------------------
   group('watchFiltered – filtro de combustível', () {
-    test('filtra corretamente por tipo de combustível', () async {
+    test('filtra corretamente por 1 tipo (set com 1 elemento)', () async {
       await db.abastecimentosDao.insertAbastecimento(
         _novoAbast(
           data: DateTime(2026, 1, 1),
@@ -186,7 +186,7 @@ void main() {
       final lista = await db.abastecimentosDao
           .watchFiltered(
             placa: 'ABC1D23',
-            tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+            tiposCombustivel: {TipoCombustivelAbastecimento.gasolina},
           )
           .first;
 
@@ -197,6 +197,69 @@ void main() {
         ),
         isTrue,
       );
+    });
+
+    test(
+      'filtra corretamente por 2 tipos (set com 2 elementos) — IN (?)',
+      () async {
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 1, 1),
+            km: 100,
+            combustivel: TipoCombustivelAbastecimento.gasolina,
+          ),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 1, 2),
+            km: 200,
+            combustivel: TipoCombustivelAbastecimento.alcool,
+          ),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 1, 3),
+            km: 300,
+            combustivel: TipoCombustivelAbastecimento.diesel,
+          ),
+        );
+
+        final lista = await db.abastecimentosDao
+            .watchFiltered(
+              placa: 'ABC1D23',
+              tiposCombustivel: {
+                TipoCombustivelAbastecimento.gasolina,
+                TipoCombustivelAbastecimento.alcool,
+              },
+            )
+            .first;
+
+        expect(lista, hasLength(2));
+        expect(
+          lista.every(
+            (a) =>
+                a.tipoCombustivel == TipoCombustivelAbastecimento.gasolina ||
+                a.tipoCombustivel == TipoCombustivelAbastecimento.alcool,
+          ),
+          isTrue,
+        );
+      },
+    );
+
+    test('set vazio retorna lista vazia imediatamente', () async {
+      await db.abastecimentosDao.insertAbastecimento(
+        _novoAbast(
+          data: DateTime(2026, 1, 1),
+          km: 100,
+          combustivel: TipoCombustivelAbastecimento.gasolina,
+        ),
+      );
+
+      final lista = await db.abastecimentosDao
+          .watchFiltered(placa: 'ABC1D23', tiposCombustivel: {})
+          .first;
+
+      expect(lista, isEmpty);
     });
 
     test('combustível sem registros retorna lista vazia', () async {
@@ -211,7 +274,7 @@ void main() {
       final lista = await db.abastecimentosDao
           .watchFiltered(
             placa: 'ABC1D23',
-            tipoCombustivel: TipoCombustivelAbastecimento.diesel,
+            tiposCombustivel: {TipoCombustivelAbastecimento.diesel},
           )
           .first;
 
@@ -219,7 +282,7 @@ void main() {
     });
 
     test(
-      'quando tipoCombustivel=null, todos os combustíveis aparecem',
+      'quando tiposCombustivel=null, todos os combustíveis aparecem',
       () async {
         for (final tipo in TipoCombustivelAbastecimento.values) {
           await db.abastecimentosDao.insertAbastecimento(
@@ -240,7 +303,7 @@ void main() {
   // watchFiltered – combinação de filtros
   // ---------------------------------------------------------------------------
   group('watchFiltered – filtros combinados', () {
-    test('período + combustível juntos filtram corretamente', () async {
+    test('período + 1 combustível filtram corretamente', () async {
       final corte = DateTime(2026, 2, 1);
 
       // Dentro do período, gasolina → DEVE aparecer
@@ -272,7 +335,7 @@ void main() {
           .watchFiltered(
             placa: 'ABC1D23',
             desde: corte,
-            tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+            tiposCombustivel: {TipoCombustivelAbastecimento.gasolina},
           )
           .first;
 
@@ -283,6 +346,63 @@ void main() {
         TipoCombustivelAbastecimento.gasolina,
       );
     });
+
+    test(
+      'período + 2 combustíveis (flex: gasolina+álcool) retorna união',
+      () async {
+        final corte = DateTime(2026, 2, 1);
+
+        // Dentro do período, gasolina → DEVE aparecer
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 3, 1),
+            km: 300,
+            combustivel: TipoCombustivelAbastecimento.gasolina,
+          ),
+        );
+        // Dentro do período, álcool → DEVE aparecer (multi-select)
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 2, 15),
+            km: 200,
+            combustivel: TipoCombustivelAbastecimento.alcool,
+          ),
+        );
+        // Dentro do período, diesel → NÃO deve aparecer
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 2, 10),
+            km: 150,
+            combustivel: TipoCombustivelAbastecimento.diesel,
+          ),
+        );
+        // Fora do período, gasolina → NÃO deve aparecer
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 1, 31),
+            km: 100,
+            combustivel: TipoCombustivelAbastecimento.gasolina,
+          ),
+        );
+
+        final lista = await db.abastecimentosDao
+            .watchFiltered(
+              placa: 'ABC1D23',
+              desde: corte,
+              tiposCombustivel: {
+                TipoCombustivelAbastecimento.gasolina,
+                TipoCombustivelAbastecimento.alcool,
+              },
+            )
+            .first;
+
+        expect(lista, hasLength(2));
+        expect(lista.map((a) => a.tipoCombustivel).toSet(), {
+          TipoCombustivelAbastecimento.gasolina,
+          TipoCombustivelAbastecimento.alcool,
+        });
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------

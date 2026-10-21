@@ -36,24 +36,34 @@ enum FiltroPeriodo {
 }
 
 /// Estado dos filtros da tela de lista de abastecimentos.
+///
+/// [tiposCombustivel]:
+///   - null  → sem filtro aplicado (equivale a "todos selecionados").
+///   - Set não-vazio → filtra pelos tipos incluídos no set.
+///   - Set vazio → nenhum tipo selecionado; a tela exibe estado vazio com
+///     mensagem explicativa (evita a ambiguidade "vazio = tudo").
 class FiltrosAbastecimento {
   const FiltrosAbastecimento({
     this.periodo = FiltroPeriodo.tudo,
-    this.tipoCombustivel,
+    this.tiposCombustivel,
   });
 
   final FiltroPeriodo periodo;
-  final TipoCombustivelAbastecimento? tipoCombustivel;
+
+  /// null = todos selecionados (sem filtro ativo).
+  /// Set vazio = nenhum selecionado → estado vazio.
+  /// Set não-vazio = filtra pelos tipos listados.
+  final Set<TipoCombustivelAbastecimento>? tiposCombustivel;
 
   FiltrosAbastecimento copyWith({
     FiltroPeriodo? periodo,
-    Object? tipoCombustivel = _sentinel,
+    Object? tiposCombustivel = _sentinel,
   }) {
     return FiltrosAbastecimento(
       periodo: periodo ?? this.periodo,
-      tipoCombustivel: tipoCombustivel == _sentinel
-          ? this.tipoCombustivel
-          : tipoCombustivel as TipoCombustivelAbastecimento?,
+      tiposCombustivel: tiposCombustivel == _sentinel
+          ? this.tiposCombustivel
+          : tiposCombustivel as Set<TipoCombustivelAbastecimento>?,
     );
   }
 }
@@ -70,8 +80,29 @@ class FiltrosAbastecimentoNotifier extends Notifier<FiltrosAbastecimento> {
     state = state.copyWith(periodo: periodo);
   }
 
-  void setTipoCombustivel(TipoCombustivelAbastecimento? tipo) {
-    state = state.copyWith(tipoCombustivel: tipo);
+  /// Alterna (toggle) um tipo de combustível no set de filtros.
+  ///
+  /// - Se [tiposCombustivel] for null (estado inicial "todos"), inicia um set
+  ///   com todos os tipos e remove o que foi desmarcado.
+  /// - Se o tipo já estava selecionado, remove-o.
+  /// - Se não estava, adiciona-o.
+  /// - Se o resultado for um set com todos os tipos, normaliza para null
+  ///   (equivalente ao estado "sem filtro").
+  void toggleTipoCombustivel(TipoCombustivelAbastecimento tipo) {
+    final todos = TipoCombustivelAbastecimento.values.toSet();
+    final atual = state.tiposCombustivel ?? todos;
+    final novo = Set<TipoCombustivelAbastecimento>.of(atual);
+
+    if (novo.contains(tipo)) {
+      novo.remove(tipo);
+    } else {
+      novo.add(tipo);
+    }
+
+    // Todos selecionados → normaliza para null (sem filtro explícito).
+    state = state.copyWith(
+      tiposCombustivel: novo.length == todos.length ? null : novo,
+    );
   }
 
   void limpar() {
@@ -95,6 +126,6 @@ final abastecimentosFiltradosProvider =
           .watchFiltered(
             placa: placa,
             desde: filtros.periodo.desde,
-            tipoCombustivel: filtros.tipoCombustivel,
+            tiposCombustivel: filtros.tiposCombustivel,
           );
     });
