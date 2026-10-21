@@ -345,24 +345,167 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // Filtros de combustível (FilterChips)
+  // Filtros de combustível (multi-select chips — issue #77)
   // -------------------------------------------------------------------------
-  group('filtros de combustível', () {
-    testWidgets('chip "Todos" de combustível está selecionado por padrão', (
+  group('filtros de combustível multi-select', () {
+    testWidgets('todos os chips de combustível estão selecionados por padrão', (
       tester,
     ) async {
       await db.veiculosDao.insertVeiculo(_novoVeiculo());
       await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
 
+      // Estado inicial: tiposCombustivel=null → todos selecionados.
       final chips = tester.widgetList<FilterChip>(find.byType(FilterChip));
-      final todosChip = chips.firstWhere(
-        (c) => (c.label as Text).data == 'Todos',
-      );
-      expect(todosChip.selected, isTrue);
+      final combustivelChips = chips
+          .where(
+            (c) =>
+                (c.label as Text).data != 'Tudo' &&
+                (c.label as Text).data != 'Últimos 30d' &&
+                (c.label as Text).data != 'Últimos 90d' &&
+                (c.label as Text).data != 'Últimos 12m',
+          )
+          .toList();
+      expect(combustivelChips.every((c) => c.selected), isTrue);
       await _teardownUI(tester);
     });
 
-    testWidgets('filtro de combustível oculta combustível diferente', (
+    testWidgets(
+      '1 chip selecionado (outros desmarcados) oculta outros combustíveis',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 3, 1),
+            km: 100,
+            combustivel: TipoCombustivelAbastecimento.gasolina,
+            posto: 'PostoGas',
+          ),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 3, 2),
+            km: 200,
+            combustivel: TipoCombustivelAbastecimento.alcool,
+            posto: 'PostoAlc',
+          ),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 3, 3),
+            km: 300,
+            combustivel: TipoCombustivelAbastecimento.diesel,
+            posto: 'PostoDiesel',
+          ),
+        );
+
+        await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+        // Desmarca Álcool, Diesel, GNV, Elétrico → só Gasolina fica.
+        await tester.tap(find.text('Álcool'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Diesel'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('GNV'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Elétrico'));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('PostoGas'), findsOneWidget);
+        expect(find.textContaining('PostoAlc'), findsNothing);
+        expect(find.textContaining('PostoDiesel'), findsNothing);
+        await _teardownUI(tester);
+      },
+    );
+
+    testWidgets(
+      '2 chips selecionados exibem os dois combustíveis (flex use case)',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 3, 1),
+            km: 100,
+            combustivel: TipoCombustivelAbastecimento.gasolina,
+            posto: 'PostoGas',
+          ),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 3, 2),
+            km: 200,
+            combustivel: TipoCombustivelAbastecimento.alcool,
+            posto: 'PostoAlc',
+          ),
+        );
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 3, 3),
+            km: 300,
+            combustivel: TipoCombustivelAbastecimento.diesel,
+            posto: 'PostoDiesel',
+          ),
+        );
+
+        await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+        // Desmarca tudo exceto Gasolina e Álcool.
+        await tester.tap(find.text('Diesel'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('GNV'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Elétrico'));
+        await tester.pumpAndSettle();
+
+        // Gasolina e Álcool devem aparecer; Diesel não.
+        expect(find.textContaining('PostoGas'), findsOneWidget);
+        expect(find.textContaining('PostoAlc'), findsOneWidget);
+        expect(find.textContaining('PostoDiesel'), findsNothing);
+        await _teardownUI(tester);
+      },
+    );
+
+    testWidgets(
+      '0 chips selecionados exibe estado vazio com mensagem específica',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        await db.abastecimentosDao.insertAbastecimento(
+          _novoAbast(
+            data: DateTime(2026, 3, 1),
+            km: 100,
+            combustivel: TipoCombustivelAbastecimento.gasolina,
+            posto: 'PostoGas',
+          ),
+        );
+
+        await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+        // Desmarca todos os chips.
+        for (final label in [
+          'Gasolina',
+          'Álcool',
+          'Diesel',
+          'GNV',
+          'Elétrico',
+        ]) {
+          await tester.tap(find.text(label));
+          await tester.pumpAndSettle();
+        }
+
+        // A lista some e o estado vazio específico aparece.
+        expect(find.textContaining('PostoGas'), findsNothing);
+        expect(
+          find.byKey(const Key('estado_nenhum_combustivel')),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('Selecione pelo menos um combustível'),
+          findsOneWidget,
+        );
+        await _teardownUI(tester);
+      },
+    );
+
+    testWidgets('remarcar chip após 0 selecionados restaura lista', (
       tester,
     ) async {
       await db.veiculosDao.insertVeiculo(_novoVeiculo());
@@ -374,50 +517,25 @@ void main() {
           posto: 'PostoGas',
         ),
       );
-      await db.abastecimentosDao.insertAbastecimento(
-        _novoAbast(
-          data: DateTime(2026, 3, 2),
-          km: 200,
-          combustivel: TipoCombustivelAbastecimento.alcool,
-          posto: 'PostoAlc',
-        ),
-      );
 
       await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
 
-      // Toca no chip de Gasolina para filtrar
+      // Desmarca todos.
+      for (final label in ['Gasolina', 'Álcool', 'Diesel', 'GNV', 'Elétrico']) {
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+      }
+      expect(
+        find.byKey(const Key('estado_nenhum_combustivel')),
+        findsOneWidget,
+      );
+
+      // Remarca Gasolina.
       await tester.tap(find.text('Gasolina'));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('PostoGas'), findsOneWidget);
-      expect(find.textContaining('PostoAlc'), findsNothing);
-      await _teardownUI(tester);
-    });
-
-    testWidgets('toque no mesmo chip de combustível desseleciona (toggle)', (
-      tester,
-    ) async {
-      await db.veiculosDao.insertVeiculo(_novoVeiculo());
-      await db.abastecimentosDao.insertAbastecimento(
-        _novoAbast(
-          data: DateTime(2026, 3, 1),
-          km: 100,
-          combustivel: TipoCombustivelAbastecimento.alcool,
-          posto: 'PostoAlc',
-        ),
-      );
-
-      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
-
-      // Seleciona Gasolina → PostoAlc some
-      await tester.tap(find.text('Gasolina'));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('PostoAlc'), findsNothing);
-
-      // Toca novamente → desseleciona → PostoAlc reaparece
-      await tester.tap(find.text('Gasolina'));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('PostoAlc'), findsOneWidget);
+      expect(find.byKey(const Key('estado_nenhum_combustivel')), findsNothing);
       await _teardownUI(tester);
     });
   });

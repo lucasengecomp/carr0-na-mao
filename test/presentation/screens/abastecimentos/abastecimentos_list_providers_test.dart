@@ -93,44 +93,55 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  // FiltrosAbastecimento.copyWith
+  // FiltrosAbastecimento.copyWith (multi-select, issue #77)
   // ---------------------------------------------------------------------------
   group('FiltrosAbastecimento.copyWith', () {
-    test('estado inicial tem periodo=tudo e tipoCombustivel=null', () {
+    test('estado inicial tem periodo=tudo e tiposCombustivel=null', () {
       const f = FiltrosAbastecimento();
       expect(f.periodo, FiltroPeriodo.tudo);
-      expect(f.tipoCombustivel, isNull);
+      expect(f.tiposCombustivel, isNull);
     });
 
-    test('copyWith altera período sem mexer no combustível', () {
+    test('copyWith altera período sem mexer nos tipos de combustível', () {
       const f = FiltrosAbastecimento(
         periodo: FiltroPeriodo.tudo,
-        tipoCombustivel: TipoCombustivelAbastecimento.gasolina,
+        tiposCombustivel: {TipoCombustivelAbastecimento.gasolina},
       );
       final atualizado = f.copyWith(periodo: FiltroPeriodo.ultimos30dias);
 
       expect(atualizado.periodo, FiltroPeriodo.ultimos30dias);
-      expect(atualizado.tipoCombustivel, TipoCombustivelAbastecimento.gasolina);
+      expect(atualizado.tiposCombustivel, {
+        TipoCombustivelAbastecimento.gasolina,
+      });
     });
 
-    test('copyWith seta tipoCombustivel para null explicitamente', () {
+    test('copyWith seta tiposCombustivel para null explicitamente', () {
       const f = FiltrosAbastecimento(
-        tipoCombustivel: TipoCombustivelAbastecimento.alcool,
+        tiposCombustivel: {TipoCombustivelAbastecimento.alcool},
       );
-      final atualizado = f.copyWith(tipoCombustivel: null);
+      final atualizado = f.copyWith(tiposCombustivel: null);
 
-      expect(atualizado.tipoCombustivel, isNull);
+      expect(atualizado.tiposCombustivel, isNull);
+    });
+
+    test('copyWith seta tiposCombustivel para set vazio', () {
+      const f = FiltrosAbastecimento();
+      final atualizado = f.copyWith(
+        tiposCombustivel: <TipoCombustivelAbastecimento>{},
+      );
+
+      expect(atualizado.tiposCombustivel, isEmpty);
     });
 
     test('copyWith sem parâmetros mantém estado inalterado', () {
       const f = FiltrosAbastecimento(
         periodo: FiltroPeriodo.ultimos90dias,
-        tipoCombustivel: TipoCombustivelAbastecimento.diesel,
+        tiposCombustivel: {TipoCombustivelAbastecimento.diesel},
       );
       final copia = f.copyWith();
 
       expect(copia.periodo, f.periodo);
-      expect(copia.tipoCombustivel, f.tipoCombustivel);
+      expect(copia.tiposCombustivel, f.tiposCombustivel);
     });
   });
 
@@ -148,10 +159,10 @@ void main() {
       container.dispose();
     });
 
-    test('estado inicial é padrão', () {
+    test('estado inicial é padrão (tiposCombustivel=null)', () {
       final state = container.read(filtrosAbastecimentoProvider);
       expect(state.periodo, FiltroPeriodo.tudo);
-      expect(state.tipoCombustivel, isNull);
+      expect(state.tiposCombustivel, isNull);
     });
 
     test('setPeriodo atualiza periodo', () {
@@ -161,50 +172,93 @@ void main() {
 
       final state = container.read(filtrosAbastecimentoProvider);
       expect(state.periodo, FiltroPeriodo.ultimos30dias);
-      expect(state.tipoCombustivel, isNull);
+      expect(state.tiposCombustivel, isNull);
     });
 
-    test('setTipoCombustivel atualiza combustível sem mexer no período', () {
+    test(
+      'toggleTipoCombustivel do null inicia set com todos menos o toggleado',
+      () {
+        // Estado inicial: null (todos). Toggle gasolina → todos menos gasolina.
+        container
+            .read(filtrosAbastecimentoProvider.notifier)
+            .toggleTipoCombustivel(TipoCombustivelAbastecimento.gasolina);
+
+        final state = container.read(filtrosAbastecimentoProvider);
+        expect(
+          state.tiposCombustivel,
+          isNotNull,
+          reason: 'deve ter saído do estado null',
+        );
+        expect(
+          state.tiposCombustivel!.contains(
+            TipoCombustivelAbastecimento.gasolina,
+          ),
+          isFalse,
+        );
+        // Os demais tipos devem estar presentes.
+        for (final t in TipoCombustivelAbastecimento.values) {
+          if (t != TipoCombustivelAbastecimento.gasolina) {
+            expect(state.tiposCombustivel!.contains(t), isTrue);
+          }
+        }
+      },
+    );
+
+    test('toggleTipoCombustivel adiciona tipo que não estava no set', () {
+      // Começa com {alcool} e adiciona gasolina.
       container
           .read(filtrosAbastecimentoProvider.notifier)
-          .setPeriodo(FiltroPeriodo.ultimos90dias);
+          .toggleTipoCombustivel(
+            TipoCombustivelAbastecimento.gasolina,
+          ); // remove gasolina do default
+      // Agora toggle de volta para adicionar gasolina.
       container
           .read(filtrosAbastecimentoProvider.notifier)
-          .setTipoCombustivel(TipoCombustivelAbastecimento.gasolina);
+          .toggleTipoCombustivel(
+            TipoCombustivelAbastecimento.gasolina,
+          ); // adiciona gasolina
 
       final state = container.read(filtrosAbastecimentoProvider);
-      expect(state.periodo, FiltroPeriodo.ultimos90dias);
-      expect(state.tipoCombustivel, TipoCombustivelAbastecimento.gasolina);
+      // Todos os tipos estão selecionados → normaliza para null.
+      expect(state.tiposCombustivel, isNull);
     });
 
-    test('setTipoCombustivel(null) desseleciona combustível (toggle)', () {
-      container
-          .read(filtrosAbastecimentoProvider.notifier)
-          .setTipoCombustivel(TipoCombustivelAbastecimento.alcool);
-      container
-          .read(filtrosAbastecimentoProvider.notifier)
-          .setTipoCombustivel(null);
+    test('toggleTipoCombustivel remove tipo e chega a set vazio', () {
+      // Começa com null (todos). Vai removendo tipo a tipo até zero.
+      final notifier = container.read(filtrosAbastecimentoProvider.notifier);
+      for (final t in TipoCombustivelAbastecimento.values) {
+        notifier.toggleTipoCombustivel(t);
+      }
 
       final state = container.read(filtrosAbastecimentoProvider);
-      expect(state.tipoCombustivel, isNull);
+      expect(state.tiposCombustivel, isEmpty);
     });
 
-    test('limpar() reseta para estado inicial', () {
-      container
-          .read(filtrosAbastecimentoProvider.notifier)
-          .setPeriodo(FiltroPeriodo.ultimos12meses);
-      container
-          .read(filtrosAbastecimentoProvider.notifier)
-          .setTipoCombustivel(TipoCombustivelAbastecimento.diesel);
+    test('quando todos os tipos estão no set, normaliza para null', () {
+      final notifier = container.read(filtrosAbastecimentoProvider.notifier);
+      // Remove um tipo para sair do null.
+      notifier.toggleTipoCombustivel(TipoCombustivelAbastecimento.diesel);
 
-      container.read(filtrosAbastecimentoProvider.notifier).limpar();
+      // Adiciona de volta → todos selecionados → deve virar null.
+      notifier.toggleTipoCombustivel(TipoCombustivelAbastecimento.diesel);
+
+      final state = container.read(filtrosAbastecimentoProvider);
+      expect(state.tiposCombustivel, isNull);
+    });
+
+    test('limpar() reseta para estado inicial (tiposCombustivel=null)', () {
+      final notifier = container.read(filtrosAbastecimentoProvider.notifier);
+      notifier.setPeriodo(FiltroPeriodo.ultimos12meses);
+      notifier.toggleTipoCombustivel(TipoCombustivelAbastecimento.diesel);
+
+      notifier.limpar();
 
       final state = container.read(filtrosAbastecimentoProvider);
       expect(state.periodo, FiltroPeriodo.tudo);
-      expect(state.tipoCombustivel, isNull);
+      expect(state.tiposCombustivel, isNull);
     });
 
-    test('sequência de mudanças de estado é refletida corretamente', () {
+    test('sequência de mudanças de período é refletida corretamente', () {
       final notifier = container.read(filtrosAbastecimentoProvider.notifier);
 
       notifier.setPeriodo(FiltroPeriodo.ultimos30dias);
