@@ -60,21 +60,34 @@ class AbastecimentosDao extends DatabaseAccessor<AppDatabase>
             ]))
           .watch();
 
-  /// Stream filtrado por veículo, com filtros opcionais de período e tipo de
+  /// Stream filtrado por veículo, com filtros opcionais de período e tipos de
   /// combustível. Usado pela tela de lista com filtros (RF-08 / issue #14).
+  ///
+  /// [tiposCombustivel]:
+  ///   - null → sem filtro (todos os combustíveis).
+  ///   - Set não-vazio → WHERE combustivel IN (...).
+  ///   - Set vazio → chamador deve exibir estado vazio; este método retorna
+  ///     stream vazio imediatamente para evitar query desnecessária.
   Stream<List<Abastecimento>> watchFiltered({
     required String placa,
     DateTime? desde,
-    TipoCombustivelAbastecimento? tipoCombustivel,
+    Set<TipoCombustivelAbastecimento>? tiposCombustivel,
   }) {
+    // Nenhum tipo selecionado → estado vazio sem consultar o banco.
+    if (tiposCombustivel != null && tiposCombustivel.isEmpty) {
+      return Stream.value(const []);
+    }
+
     final query = select(abastecimentos)
       ..where((t) {
         Expression<bool> expr = t.veiculoPlaca.equals(placa);
         if (desde != null) {
           expr = expr & t.data.isBiggerOrEqualValue(desde);
         }
-        if (tipoCombustivel != null) {
-          expr = expr & t.tipoCombustivel.equalsValue(tipoCombustivel);
+        if (tiposCombustivel != null && tiposCombustivel.isNotEmpty) {
+          expr =
+              expr &
+              t.tipoCombustivel.isIn(tiposCombustivel.map((e) => e.name));
         }
         return expr;
       })

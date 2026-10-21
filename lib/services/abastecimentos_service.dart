@@ -39,11 +39,11 @@ class AbastecimentosService {
   Stream<List<Abastecimento>> watchFiltered({
     required String placa,
     DateTime? desde,
-    TipoCombustivelAbastecimento? tipoCombustivel,
+    Set<TipoCombustivelAbastecimento>? tiposCombustivel,
   }) => _dao.watchFiltered(
     placa: placa,
     desde: desde,
-    tipoCombustivel: tipoCombustivel,
+    tiposCombustivel: tiposCombustivel,
   );
 
   // ── Escrita + notificações ────────────────────────────────────────────────
