@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
@@ -452,6 +453,35 @@ class _AbastecimentoFormScreenState
                   DropdownMenuItem(value: c, child: Text(c.label(l10n))),
               ],
             ),
+            if (combustiveis.contains(TipoCombustivelAbastecimento.alcool) &&
+                combustiveis.contains(
+                  TipoCombustivelAbastecimento.gasolina,
+                )) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Semantics(
+                  button: true,
+                  label: l10n.abastecimentoCtaComparador,
+                  child: TextButton(
+                    key: const Key('cta_comparador'),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 48),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: () => context.push('/comparador'),
+                    child: Text(
+                      l10n.abastecimentoCtaComparador,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
             TextFormField(
               key: const Key('abast_preco'),
