@@ -1675,6 +1675,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'https://lucasengecomp.github.io/carr0-na-mao/privacidade/'**
   String get configuracoesPrivacidadeUrl;
+
+  /// Link contextual no form de abastecimento que abre o Comparador álcool×gasolina
+  ///
+  /// In pt, this message translates to:
+  /// **'Vale a pena comparar álcool x gasolina?'**
+  String get abastecimentoCtaComparador;
 }
 
 class _AppLocalizationsDelegate
