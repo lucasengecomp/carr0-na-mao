@@ -544,13 +544,10 @@ void main() {
   // =========================================================================
 
   group('DashboardHomeScreen — AppBar', () {
-    testWidgets('botão comparador navega para /comparador', (tester) async {
+    testWidgets('botão comparador NÃO aparece no AppBar (#79)', (tester) async {
       await _pumpDashboard(tester, db);
 
-      await tester.tap(find.byTooltip('Comparador'));
-      await _advance(tester);
-
-      expect(find.text('ROTA_COMPARADOR'), findsOneWidget);
+      expect(find.byTooltip('Comparador'), findsNothing);
 
       await _teardownUi(tester);
     });

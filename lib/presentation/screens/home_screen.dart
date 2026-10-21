@@ -23,11 +23,6 @@ class HomeScreen extends ConsumerWidget {
         title: _HomeTitle(ativos: ativos, atual: atual),
         actions: [
           IconButton(
-            tooltip: l10n.tooltipComparador,
-            icon: const Icon(Icons.swap_horiz),
-            onPressed: () => context.push('/comparador'),
-          ),
-          IconButton(
             tooltip: l10n.tooltipConfiguracoes,
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/config'),

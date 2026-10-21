@@ -582,5 +582,10 @@
   "configuracoesPrivacidadeUrl": "https://lucasengecomp.github.io/carr0-na-mao/privacidade/",
   "@configuracoesPrivacidadeUrl": {
     "description": "URL of the privacy policy hosted on GitHub Pages"
+  },
+
+  "abastecimentoCtaComparador": "Is ethanol worth it vs gasoline?",
+  "@abastecimentoCtaComparador": {
+    "description": "Contextual link in the fuel-up form that opens the Ethanol×Gasoline Comparator"
   }
 }

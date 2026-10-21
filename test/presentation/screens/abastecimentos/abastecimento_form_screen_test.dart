@@ -7,6 +7,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/l10n_delegates.dart';
@@ -845,6 +846,15 @@ void main() {
   testWidgets(
     'autocomplete #72: overlay de sugestões fica próximo ao campo posto (não em Offset.zero)',
     (tester) async {
+      // Viewport maior para garantir que o campo posto fique dentro da tela
+      // após a adição do CTA do Comparador (#79) que empurra o conteúdo para baixo.
+      tester.view.physicalSize = const Size(800 * 3, 1200 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       await db.postoSugestaoDao.upsert('Shell');
 
       await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
@@ -883,6 +893,93 @@ void main() {
   // ---------------------------------------------------------------------------
   // Teste de regressão: tap-through no botão Salvar (#91)
   // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // CTA Comparador contextual no form (#79)
+  // ---------------------------------------------------------------------------
+
+  testWidgets(
+    '#79 — veículo flex: link "Vale a pena comparar..." aparece no form',
+    (tester) async {
+      // O veículo padrão do setUp é flex — deve exibir o CTA.
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(find.byKey(const Key('cta_comparador')), findsOneWidget);
+      await _teardownUI(tester);
+    },
+  );
+
+  testWidgets('#79 — veículo álcool-only: link do comparador NÃO aparece', (
+    tester,
+  ) async {
+    final dbAlcool = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(dbAlcool.close);
+    await _seedVeiculo(
+      dbAlcool,
+      placa: 'ALC0001',
+      combustivel: TipoCombustivelVeiculo.alcool,
+    );
+
+    SharedPreferences.setMockInitialValues(const {
+      'veiculo_selecionado_placa': 'ALC0001',
+    });
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(dbAlcool)],
+        child: const MaterialApp(
+          locale: localeDefault,
+          localizationsDelegates: l10nDelegates,
+          supportedLocales: supportedLocales,
+          home: AbastecimentoFormScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('cta_comparador')), findsNothing);
+    await _teardownUI(tester);
+  });
+
+  testWidgets('#79 — tocar no link do comparador navega para /comparador', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(const {
+      'veiculo_selecionado_placa': 'ABC1D23',
+    });
+    final router = GoRouter(
+      initialLocation: '/abastecimentos/novo',
+      routes: [
+        GoRoute(
+          path: '/abastecimentos/novo',
+          builder: (c, s) => const AbastecimentoFormScreen(),
+        ),
+        GoRoute(
+          path: '/comparador',
+          builder: (c, s) => const Scaffold(body: Text('ROTA_COMPARADOR')),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
+        child: MaterialApp.router(
+          locale: localeDefault,
+          localizationsDelegates: l10nDelegates,
+          supportedLocales: supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('cta_comparador')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('cta_comparador')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ROTA_COMPARADOR'), findsOneWidget);
+    await _teardownUI(tester);
+  });
 
   testWidgets(
     'autocomplete #91: tap em sugestão NÃO dispara _submit (sem erros de validação)',

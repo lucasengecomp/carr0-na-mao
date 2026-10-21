@@ -167,4 +167,51 @@ void main() {
     expect(find.text('Mobinho'), findsOneWidget);
     await _teardownUi(tester);
   });
+
+  testWidgets('Comparador NÃO está acessível pelo AppBar (#79)', (
+    tester,
+  ) async {
+    await _pumpHome(tester, db);
+
+    // O ícone ⇄ do Comparador foi removido do AppBar da Home (#79).
+    expect(find.byIcon(Icons.swap_horiz), findsNothing);
+    expect(find.byTooltip('Comparador'), findsNothing);
+
+    await _teardownUi(tester);
+  });
+
+  testWidgets('1 veículo: sem botão ⇄ no AppBar (#79)', (tester) async {
+    await db.veiculosDao.insertVeiculo(
+      _novo(placa: 'ABC1D23', apelido: 'Solo'),
+    );
+
+    await _pumpHome(tester, db);
+
+    expect(find.byIcon(Icons.swap_horiz), findsNothing);
+
+    await _teardownUi(tester);
+  });
+
+  testWidgets('2+ veículos: seletor dropdown no título abre menu (#79)', (
+    tester,
+  ) async {
+    await db.veiculosDao.insertVeiculo(
+      _novo(placa: 'ABC1D23', apelido: 'Uninho'),
+    );
+    await db.veiculosDao.insertVeiculo(
+      _novo(placa: 'XYZ9A99', apelido: 'Mobinho'),
+    );
+
+    await _pumpHome(tester, db);
+
+    // O seletor está no TÍTULO (PopupMenuButton) — não é um IconButton no AppBar.
+    expect(find.byIcon(Icons.arrow_drop_down), findsOneWidget);
+    // Toca no dropdown e verifica que a lista de veículos aparece.
+    await tester.tap(find.byIcon(Icons.arrow_drop_down));
+    await _advance(tester);
+    expect(find.text('Uninho'), findsWidgets);
+    expect(find.text('Mobinho'), findsWidgets);
+
+    await _teardownUi(tester);
+  });
 }
