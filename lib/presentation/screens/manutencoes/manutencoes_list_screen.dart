@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/database/enums.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/manutencoes_service.dart';
 import '../veiculos/veiculos_providers.dart';
 import 'manutencao_enum_labels.dart';
 import 'manutencoes_providers.dart';
@@ -171,13 +172,13 @@ class _CabecalhoTipo extends StatelessWidget {
 // Tile de manutenção
 // ---------------------------------------------------------------------------
 
-class _ManutencaoTile extends StatelessWidget {
+class _ManutencaoTile extends ConsumerWidget {
   const _ManutencaoTile({required this.item});
 
   final Manutencao item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final m = item;
 
@@ -222,7 +223,95 @@ class _ManutencaoTile extends StatelessWidget {
         ),
         subtitle: Text(subtituloPartes.join(' · ')),
         onTap: () => context.push('/manutencoes/${m.id}/editar'),
+        trailing: _ManutencaoMenu(item: m),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Menu de ações (3-dots)
+// ---------------------------------------------------------------------------
+
+class _ManutencaoMenu extends ConsumerWidget {
+  const _ManutencaoMenu({required this.item});
+
+  final Manutencao item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return PopupMenuButton<_AcaoManutencao>(
+      key: Key('menu_manutencao_${item.id}'),
+      icon: const Icon(Icons.more_vert),
+      tooltip: l10n.manutencaoAcaoExcluir,
+      onSelected: (acao) async {
+        switch (acao) {
+          case _AcaoManutencao.excluir:
+            await _confirmarExclusao(context, ref);
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: _AcaoManutencao.excluir,
+          child: Text(l10n.manutencaoAcaoExcluir),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _confirmarExclusao(BuildContext context, WidgetRef ref) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _ExcluirManutencaoDialog(),
+    );
+    if (confirm != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await ref.read(manutencoesServiceProvider).deleteManutencao(item.id);
+      if (!context.mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.manutencaoExcluida)));
+    } on Object catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.manutencaoNaoPossivel(e.toString()))),
+      );
+    }
+  }
+}
+
+enum _AcaoManutencao { excluir }
+
+// ---------------------------------------------------------------------------
+// Dialog de confirmação de exclusão
+// ---------------------------------------------------------------------------
+
+class _ExcluirManutencaoDialog extends StatelessWidget {
+  const _ExcluirManutencaoDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.manutencaoExcluirTitulo),
+      content: Text(l10n.manutencaoExcluirMensagem),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.botaoCancelar),
+        ),
+        FilledButton(
+          key: const Key('btn_excluir_manutencao_confirmar'),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.manutencaoAcaoExcluir),
+        ),
+      ],
     );
   }
 }

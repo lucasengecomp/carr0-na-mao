@@ -794,11 +794,35 @@ abstract class AppLocalizations {
   /// **'Meses até o próximo (sugestão)'**
   String get manutencaoCampoProximoMeses;
 
-  /// Snackbar de erro ao salvar manutenção
+  /// Snackbar de erro ao salvar ou excluir manutenção
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar: {erro}'**
+  /// **'Não foi possível realizar a operação: {erro}'**
   String manutencaoNaoPossivel(String erro);
+
+  /// Ação de excluir manutenção no menu de 3 pontos e no AppBar
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir'**
+  String get manutencaoAcaoExcluir;
+
+  /// Título do dialog de confirmação de exclusão de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir manutenção'**
+  String get manutencaoExcluirTitulo;
+
+  /// Mensagem do dialog de confirmação de exclusão de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja excluir esta manutenção? Esta ação não pode ser desfeita.'**
+  String get manutencaoExcluirMensagem;
+
+  /// Snackbar de confirmação após exclusão de manutenção
+  ///
+  /// In pt, this message translates to:
+  /// **'Manutenção excluída.'**
+  String get manutencaoExcluida;
 
   /// Mensagem de lista vazia na tela de manutenções
   ///

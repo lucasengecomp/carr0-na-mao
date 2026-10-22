@@ -6,6 +6,7 @@ import 'package:carro_na_mao/data/providers.dart';
 import 'package:carro_na_mao/presentation/screens/manutencoes/manutencoes_list_screen.dart';
 import 'package:carro_na_mao/presentation/screens/manutencoes/manutencoes_providers.dart';
 import 'package:carro_na_mao/presentation/screens/veiculos/veiculos_providers.dart';
+import 'package:carro_na_mao/services/manutencoes_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,19 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/l10n_delegates.dart';
+
+// ---------------------------------------------------------------------------
+// Service que simula falha ao excluir — padrão do abastecimentos_list_screen_test
+// ---------------------------------------------------------------------------
+
+class _ManutencoesServiceQueFalha extends ManutencoesService {
+  _ManutencoesServiceQueFalha({required super.dao});
+
+  @override
+  Future<int> deleteManutencao(int id) async {
+    throw Exception('Falha simulada no banco de dados');
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -779,5 +793,243 @@ void main() {
       expect(find.text('Manutenções'), findsOneWidget);
       await _teardown(tester);
     });
+  });
+
+  // -------------------------------------------------------------------------
+  // Ação de excluir (menu 3-dots)
+  // -------------------------------------------------------------------------
+  group('excluir manutenção via menu 3-dots', () {
+    testWidgets('menu exibe opção "Excluir"', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      final id = await db.manutencoesDao.insertManutencao(
+        _novaManutencao(
+          data: DateTime(2026, 3, 1),
+          km: 15000,
+          oficina: 'Oficina Centro',
+        ),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(find.byKey(Key('menu_manutencao_$id')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Excluir'), findsOneWidget);
+      await _teardown(tester);
+    });
+
+    testWidgets('cancelar dialog NÃO exclui o registro', (tester) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      final id = await db.manutencoesDao.insertManutencao(
+        _novaManutencao(data: DateTime(2026, 3, 1), km: 15000),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(find.byKey(Key('menu_manutencao_$id')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Excluir'));
+      await tester.pumpAndSettle();
+
+      // Dialog de confirmação abriu; toca em Cancelar
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      expect(await db.manutencoesDao.byId(id), isNotNull);
+      await _teardown(tester);
+    });
+
+    testWidgets('confirmar exclusão remove o registro e exibe snackbar', (
+      tester,
+    ) async {
+      await db.veiculosDao.insertVeiculo(_novoVeiculo());
+      final id = await db.manutencoesDao.insertManutencao(
+        _novaManutencao(data: DateTime(2026, 3, 1), km: 15000),
+      );
+
+      await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+      await tester.tap(find.byKey(Key('menu_manutencao_$id')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Excluir'));
+      await tester.pumpAndSettle();
+
+      // Dialog abriu; toca no botão de confirmação
+      await tester.tap(
+        find.byKey(const Key('btn_excluir_manutencao_confirmar')),
+      );
+      await tester.pumpAndSettle();
+
+      // Registro removido do banco
+      expect(await db.manutencoesDao.byId(id), isNull);
+
+      // Snackbar de confirmação aparece
+      expect(find.text('Manutenção excluída.'), findsOneWidget);
+      await _teardown(tester);
+    });
+
+    testWidgets(
+      'lista atualiza reativamente após exclusão (item some da tela)',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        final id = await db.manutencoesDao.insertManutencao(
+          _novaManutencao(
+            data: DateTime(2026, 3, 1),
+            km: 15000,
+            oficina: 'OficinaNica',
+          ),
+        );
+
+        await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+        expect(find.textContaining('OficinaNica'), findsOneWidget);
+
+        await tester.tap(find.byKey(Key('menu_manutencao_$id')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Excluir'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_manutencao_confirmar')),
+        );
+        await tester.pumpAndSettle();
+
+        // Item deve sumir da lista
+        expect(find.textContaining('OficinaNica'), findsNothing);
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets(
+      'regressão: excluir intermediário NÃO afeta demais registros na lista',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        await db.manutencoesDao.insertManutencao(
+          _novaManutencao(
+            data: DateTime(2026, 1, 1),
+            km: 10000,
+            oficina: 'Primeiro',
+          ),
+        );
+        final idMeio = await db.manutencoesDao.insertManutencao(
+          _novaManutencao(
+            data: DateTime(2026, 2, 1),
+            km: 11000,
+            oficina: 'Meio',
+          ),
+        );
+        await db.manutencoesDao.insertManutencao(
+          _novaManutencao(
+            data: DateTime(2026, 3, 1),
+            km: 12000,
+            oficina: 'Ultimo',
+          ),
+        );
+
+        await _pumpScreen(tester, db: db, placaAtiva: 'ABC1D23');
+
+        // Exclui o intermediário
+        await tester.tap(find.byKey(Key('menu_manutencao_$idMeio')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Excluir'));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_manutencao_confirmar')),
+        );
+        await tester.pumpAndSettle();
+
+        // Primeiro e Ultimo ainda estão na lista
+        expect(find.textContaining('Primeiro'), findsOneWidget);
+        expect(find.textContaining('Ultimo'), findsOneWidget);
+        expect(find.textContaining('Meio'), findsNothing);
+        await _teardown(tester);
+      },
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // Tratamento de erro ao excluir via menu da lista
+  // -------------------------------------------------------------------------
+  group('excluir manutenção — caminho de erro', () {
+    testWidgets(
+      'falha no service ao excluir pela lista exibe snackbar de erro em vez de propagar exceção',
+      (tester) async {
+        await db.veiculosDao.insertVeiculo(_novoVeiculo());
+        final id = await db.manutencoesDao.insertManutencao(
+          _novaManutencao(data: DateTime(2026, 3, 1), km: 15000),
+        );
+
+        SharedPreferences.setMockInitialValues(const {
+          'veiculo_selecionado_placa': 'ABC1D23',
+        });
+
+        final serviceQueFalha = _ManutencoesServiceQueFalha(
+          dao: db.manutencoesDao,
+        );
+
+        final router = GoRouter(
+          initialLocation: '/manutencoes',
+          routes: [
+            GoRoute(
+              path: '/manutencoes',
+              builder: (c, s) => const ManutencoesListScreen(),
+            ),
+            GoRoute(
+              path: '/manutencoes/novo',
+              builder: (c, s) =>
+                  const Scaffold(body: Text('TELA_NOVA_MANUTENCAO')),
+            ),
+            GoRoute(
+              path: '/manutencoes/:id/editar',
+              builder: (c, s) =>
+                  Scaffold(body: Text('TELA_EDITAR_${s.pathParameters["id"]}')),
+            ),
+            GoRoute(
+              path: '/veiculos/novo',
+              builder: (c, s) =>
+                  const Scaffold(body: Text('TELA_NOVO_VEICULO')),
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              appDatabaseProvider.overrideWithValue(db),
+              manutencoesServiceProvider.overrideWithValue(serviceQueFalha),
+            ],
+            child: MaterialApp.router(
+              locale: localeDefault,
+              localizationsDelegates: l10nDelegates,
+              supportedLocales: supportedLocales,
+              routerConfig: router,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(Key('menu_manutencao_$id')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Excluir'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_manutencao_confirmar')),
+        );
+        await tester.pumpAndSettle();
+
+        // Deve exibir snackbar de erro em vez de propagar exceção
+        expect(
+          find.textContaining('Não foi possível'),
+          findsOneWidget,
+          reason: 'Esperado snackbar de erro; _ManutencaoMenu deve capturar exceções de deleteManutencao',
+        );
+        await _teardown(tester);
+      },
+    );
   });
 }

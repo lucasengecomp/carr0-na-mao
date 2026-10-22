@@ -389,8 +389,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String manutencaoNaoPossivel(String erro) {
-    return 'Could not save: $erro';
+    return 'Could not complete the operation: $erro';
   }
+
+  @override
+  String get manutencaoAcaoExcluir => 'Delete';
+
+  @override
+  String get manutencaoExcluirTitulo => 'Delete maintenance';
+
+  @override
+  String get manutencaoExcluirMensagem =>
+      'Are you sure you want to delete this maintenance record? This action cannot be undone.';
+
+  @override
+  String get manutencaoExcluida => 'Maintenance record deleted.';
 
   @override
   String get manutencoesListaVazia =>
