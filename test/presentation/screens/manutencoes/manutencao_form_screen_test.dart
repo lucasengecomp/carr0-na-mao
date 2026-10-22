@@ -3,6 +3,7 @@ import 'package:carro_na_mao/data/database/enums.dart';
 import 'package:carro_na_mao/data/providers.dart';
 import 'package:carro_na_mao/presentation/screens/manutencoes/manutencao_form_screen.dart';
 import 'package:carro_na_mao/services/lembretes_service.dart';
+import 'package:carro_na_mao/services/manutencoes_service.dart';
 import 'package:carro_na_mao/services/notifications_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
@@ -983,4 +984,189 @@ void main() {
       },
     );
   });
+
+  // -------------------------------------------------------------------------
+  // Ação de excluir no AppBar (mode edição)
+  // -------------------------------------------------------------------------
+  group('excluir manutenção via AppBar (modo edição)', () {
+    testWidgets('botão de excluir NÃO aparece em modo novo', (tester) async {
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+
+      expect(
+        find.byKey(const Key('btn_excluir_manutencao_appbar')),
+        findsNothing,
+      );
+      await _teardown(tester);
+    });
+
+    testWidgets('botão de excluir aparece em modo edição', (tester) async {
+      final id = await db.manutencoesDao.insertManutencao(
+        ManutencoesCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          tipo: TipoManutencao.oleoMotor,
+          data: DateTime(2026, 3, 1),
+          km: 15000,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23', id: id);
+
+      expect(
+        find.byKey(const Key('btn_excluir_manutencao_appbar')),
+        findsOneWidget,
+      );
+      await _teardown(tester);
+    });
+
+    testWidgets('cancelar dialog NÃO exclui o registro', (tester) async {
+      final id = await db.manutencoesDao.insertManutencao(
+        ManutencoesCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          tipo: TipoManutencao.oleoMotor,
+          data: DateTime(2026, 3, 1),
+          km: 15000,
+        ),
+      );
+
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23', id: id);
+
+      await tester.tap(find.byKey(const Key('btn_excluir_manutencao_appbar')));
+      await tester.pumpAndSettle();
+
+      // Dialog de confirmação abriu; toca em Cancelar
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      expect(await db.manutencoesDao.byId(id), isNotNull);
+      await _teardown(tester);
+    });
+
+    testWidgets(
+      'confirmar exclusão remove do banco, exibe snackbar e navega de volta',
+      (tester) async {
+        final id = await db.manutencoesDao.insertManutencao(
+          ManutencoesCompanion.insert(
+            veiculoPlaca: 'ABC1D23',
+            tipo: TipoManutencao.oleoMotor,
+            data: DateTime(2026, 3, 1),
+            km: 15000,
+          ),
+        );
+
+        // Monta a tela com Navigator para que pop() funcione e o snackbar persista
+        SharedPreferences.setMockInitialValues(const {});
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [appDatabaseProvider.overrideWithValue(db)],
+            child: MaterialApp(
+              locale: localeDefault,
+              localizationsDelegates: l10nDelegates,
+              supportedLocales: supportedLocales,
+              home: const Scaffold(body: Text('TELA_ANTERIOR')),
+              routes: {'/editar': (_) => ManutencaoFormScreen(id: id)},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Navega para o form de edição
+        final navState = tester.state<NavigatorState>(find.byType(Navigator));
+        navState.pushNamed('/editar');
+        await tester.pumpAndSettle();
+
+        expect(find.text('Editar manutenção'), findsOneWidget);
+
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_manutencao_appbar')),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_manutencao_confirmar')),
+        );
+        await tester.pumpAndSettle();
+
+        // Registro removido do banco
+        expect(await db.manutencoesDao.byId(id), isNull);
+
+        // Snackbar de confirmação aparece
+        expect(find.text('Manutenção excluída.'), findsOneWidget);
+
+        // Voltou para tela anterior
+        expect(find.text('TELA_ANTERIOR'), findsOneWidget);
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets(
+      'caminho de erro: falha no service exibe snackbar de erro em vez de propagar exceção',
+      (tester) async {
+        final id = await db.manutencoesDao.insertManutencao(
+          ManutencoesCompanion.insert(
+            veiculoPlaca: 'ABC1D23',
+            tipo: TipoManutencao.oleoMotor,
+            data: DateTime(2026, 3, 1),
+            km: 15000,
+          ),
+        );
+
+        // Service que sempre lança ao deletar
+        final serviceQueFalha = _ManutencoesServiceQueFalha(
+          dao: db.manutencoesDao,
+        );
+
+        SharedPreferences.setMockInitialValues(const {
+          'veiculo_selecionado_placa': 'ABC1D23',
+        });
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              appDatabaseProvider.overrideWithValue(db),
+              manutencoesServiceProvider.overrideWithValue(serviceQueFalha),
+            ],
+            child: MaterialApp(
+              locale: localeDefault,
+              localizationsDelegates: l10nDelegates,
+              supportedLocales: supportedLocales,
+              home: ManutencaoFormScreen(id: id),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_manutencao_appbar')),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_excluir_manutencao_confirmar')),
+        );
+        await tester.pumpAndSettle();
+
+        // Deve exibir snackbar de erro
+        expect(
+          find.textContaining('Não foi possível'),
+          findsOneWidget,
+          reason: 'Esperado snackbar de erro ao falhar a exclusão',
+        );
+        // Registro não deve ter sido removido
+        expect(await db.manutencoesDao.byId(id), isNotNull);
+        await _teardown(tester);
+      },
+    );
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Service que simula falha ao excluir — padrão de abastecimento_form_screen_test
+// ---------------------------------------------------------------------------
+
+class _ManutencoesServiceQueFalha extends ManutencoesService {
+  _ManutencoesServiceQueFalha({required super.dao});
+
+  @override
+  Future<int> deleteManutencao(int id) async {
+    throw Exception('Falha simulada no banco de dados');
+  }
 }

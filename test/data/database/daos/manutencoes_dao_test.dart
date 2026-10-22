@@ -108,6 +108,31 @@ void main() {
       await sub.cancel();
       expect(events, [0, 1]);
     });
+
+    test(
+      'deleteById remove o registro solicitado sem afetar os demais',
+      () async {
+        final id1 = await db.manutencoesDao.insertManutencao(
+          _novaManut(data: DateTime(2026, 1, 10), km: 10200),
+        );
+        final id2 = await db.manutencoesDao.insertManutencao(
+          _novaManut(
+            tipo: TipoManutencao.pneus,
+            data: DateTime(2026, 3, 1),
+            km: 10800,
+          ),
+        );
+
+        await db.manutencoesDao.deleteById(id1);
+
+        expect(await db.manutencoesDao.byId(id1), isNull);
+        expect(await db.manutencoesDao.byId(id2), isNotNull);
+
+        final todas = await db.manutencoesDao.listByVeiculo('ABC1D23');
+        expect(todas, hasLength(1));
+        expect(todas.first.id, id2);
+      },
+    );
   });
 
   group('TiposManutencaoPadraoDao', () {
