@@ -611,14 +611,34 @@
     "description": "Label do campo Próximo em meses no form de manutenção"
   },
 
-  "manutencaoNaoPossivel": "Não foi possível salvar: {erro}",
+  "manutencaoNaoPossivel": "Não foi possível realizar a operação: {erro}",
   "@manutencaoNaoPossivel": {
-    "description": "Snackbar de erro ao salvar manutenção",
+    "description": "Snackbar de erro ao salvar ou excluir manutenção",
     "placeholders": {
       "erro": {
         "type": "String"
       }
     }
+  },
+
+  "manutencaoAcaoExcluir": "Excluir",
+  "@manutencaoAcaoExcluir": {
+    "description": "Ação de excluir manutenção no menu de 3 pontos e no AppBar"
+  },
+
+  "manutencaoExcluirTitulo": "Excluir manutenção",
+  "@manutencaoExcluirTitulo": {
+    "description": "Título do dialog de confirmação de exclusão de manutenção"
+  },
+
+  "manutencaoExcluirMensagem": "Tem certeza que deseja excluir esta manutenção? Esta ação não pode ser desfeita.",
+  "@manutencaoExcluirMensagem": {
+    "description": "Mensagem do dialog de confirmação de exclusão de manutenção"
+  },
+
+  "manutencaoExcluida": "Manutenção excluída.",
+  "@manutencaoExcluida": {
+    "description": "Snackbar de confirmação após exclusão de manutenção"
   },
 
   "manutencoesListaVazia": "Nenhuma manutenção registrada ainda.\nToque em \"Nova manutenção\" para começar.",
