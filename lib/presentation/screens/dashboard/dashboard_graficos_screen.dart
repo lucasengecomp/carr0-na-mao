@@ -5,6 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dashboard_graficos_providers.dart';
 
 // Cores dos segmentos das barras empilhadas e do pie.
+// Mantidas como literais fixos pois são cores de dado (identidade de série),
+// não UI chrome. Em dark mode o contraste das séries principais foi verificado:
+//   _corAbastec (#2196F3, azul)   ≈ 4,0:1 vs #121212 — aceitável para série.
+//   _corManut   (#FF9800, laranja) ≈ 8,4:1 — OK.
+//   _corDespesas (#9C27B0, roxo)  — cor de preenchimento de barra, não texto.
+// Para o texto branco sobre as fatias do pie, o contraste depende de cada
+// segmento; o design mantém Colors.white pois as cores das fatias são
+// suficientemente saturadas. Detalhes na seção "Decisão sobre paleta" do PR.
 const _corAbastec = Color(0xFF2196F3); // azul
 const _corManut = Color(0xFFFF9800); // laranja
 const _corDespesas = Color(0xFF9C27B0); // roxo
@@ -92,12 +100,17 @@ class _GraficoSection extends StatelessWidget {
 // Placeholder de estado vazio
 // ---------------------------------------------------------------------------
 
-Widget _semDados(String msg) => SizedBox(
+// Recebe o BuildContext para obter a cor do tema, evitando Colors.grey
+// hardcoded que não se adapta ao dark mode.
+Widget _semDados(BuildContext context, String msg) => SizedBox(
   height: 120,
   child: Center(
     child: Text(
       msg,
-      style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+      style: TextStyle(
+        fontStyle: FontStyle.italic,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
       textAlign: TextAlign.center,
     ),
   ),
@@ -154,6 +167,7 @@ class _GastosBarChart extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(gastosMensaisProvider(placa));
+    final labelColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return async.when(
       loading: _loading,
@@ -161,7 +175,10 @@ class _GastosBarChart extends ConsumerWidget {
       data: (meses) {
         final comDados = meses.any((m) => m.total > 0);
         if (!comDados) {
-          return _semDados('Nenhum gasto registrado nos últimos 12 meses.');
+          return _semDados(
+            context,
+            'Nenhum gasto registrado nos últimos 12 meses.',
+          );
         }
 
         final maxY = meses.fold<double>(
@@ -221,7 +238,7 @@ class _GastosBarChart extends ConsumerWidget {
                             if (value == 0) return const SizedBox.shrink();
                             return Text(
                               _fmtMoeda(value),
-                              style: const TextStyle(fontSize: 9),
+                              style: TextStyle(fontSize: 9, color: labelColor),
                             );
                           },
                         ),
@@ -242,7 +259,7 @@ class _GastosBarChart extends ConsumerWidget {
                             }
                             return Text(
                               _fmtMes(meses[idx].mes),
-                              style: const TextStyle(fontSize: 9),
+                              style: TextStyle(fontSize: 9, color: labelColor),
                             );
                           },
                         ),
@@ -258,6 +275,10 @@ class _GastosBarChart extends ConsumerWidget {
                             'Despesas: ${_fmtMoeda(m.despesas)}',
                             'Total: ${_fmtMoeda(m.total)}',
                           ];
+                          // Colors.white mantido intencionalmente: o fundo
+                          // padrão do tooltip do fl_chart é blueGrey.shade700
+                          // (escuro), portanto branco tem contraste adequado
+                          // em ambos os modos. Ver PR #108 para detalhes.
                           return BarTooltipItem(
                             linhas.join('\n'),
                             const TextStyle(color: Colors.white, fontSize: 10),
@@ -311,7 +332,13 @@ class _LegendaItem extends StatelessWidget {
           decoration: BoxDecoration(color: cor, shape: BoxShape.rectangle),
         ),
         const SizedBox(width: 4),
-        Text(rotulo, style: const TextStyle(fontSize: 11)),
+        Text(
+          rotulo,
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
       ],
     );
   }
@@ -329,6 +356,7 @@ class _ConsumoLineChart extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(consumoMensalProvider(placa));
+    final labelColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return async.when(
       loading: _loading,
@@ -337,6 +365,7 @@ class _ConsumoLineChart extends ConsumerWidget {
         final comDados = meses.any((m) => m.kmPorLitro != null);
         if (!comDados) {
           return _semDados(
+            context,
             'Dados insuficientes.\nRegistre abastecimentos com tanque cheio para ver o consumo.',
           );
         }
@@ -383,7 +412,7 @@ class _ConsumoLineChart extends ConsumerWidget {
                         if (value == 0) return const SizedBox.shrink();
                         return Text(
                           '${_fmtKmL(value)} km/l',
-                          style: const TextStyle(fontSize: 9),
+                          style: TextStyle(fontSize: 9, color: labelColor),
                         );
                       },
                     ),
@@ -406,7 +435,7 @@ class _ConsumoLineChart extends ConsumerWidget {
                         }
                         return Text(
                           _fmtMes(meses[idx].mes),
-                          style: const TextStyle(fontSize: 9),
+                          style: TextStyle(fontSize: 9, color: labelColor),
                         );
                       },
                     ),
@@ -418,6 +447,10 @@ class _ConsumoLineChart extends ConsumerWidget {
                       return touchedSpots.map((s) {
                         final idx = s.spotIndex;
                         final m = spots[idx];
+                        // Colors.white mantido intencionalmente: o fundo
+                        // padrão do tooltip do fl_chart é blueGrey.shade700
+                        // (escuro), portanto branco tem contraste adequado
+                        // em ambos os modos. Ver PR #108 para detalhes.
                         return LineTooltipItem(
                           '${_fmtKmL(m.y)} km/l',
                           const TextStyle(color: Colors.white, fontSize: 11),
@@ -453,7 +486,7 @@ class _DistribuicaoPieChart extends ConsumerWidget {
       error: (e, _) => _erro(e),
       data: (categorias) {
         if (categorias.isEmpty) {
-          return _semDados('Nenhum gasto nos últimos 12 meses.');
+          return _semDados(context, 'Nenhum gasto nos últimos 12 meses.');
         }
 
         final total = categorias.fold<double>(0, (s, c) => s + c.total);
@@ -469,6 +502,11 @@ class _DistribuicaoPieChart extends ConsumerWidget {
               title: '${pct.toStringAsFixed(1).replaceAll('.', ',')}%',
               color: cor,
               radius: 70,
+              // Colors.white mantido intencionalmente: o rótulo é renderizado
+              // sobre a fatia colorida da pizza (não sobre o fundo do Scaffold).
+              // As cores da paleta _coresPie são suficientemente saturadas para
+              // fornecer contraste adequado contra branco em ambos os modos.
+              // Ver PR #108 para detalhes.
               titleStyle: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -549,7 +587,10 @@ class _LegendaPieItem extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           '$rotulo: ${_fmtMoeda(valor)}',
-          style: const TextStyle(fontSize: 11),
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
       ],
     );

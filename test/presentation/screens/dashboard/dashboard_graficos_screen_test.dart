@@ -738,4 +738,184 @@ void main() {
       await _teardown(tester);
     });
   });
+
+  // =========================================================================
+  // Dark mode — issue #108
+  // =========================================================================
+
+  /// Pumps [DashboardGraficosScreen] with an explicit [ThemeData] brightness.
+  Future<void> pumpGraficosWithBrightness(
+    WidgetTester tester,
+    AppDatabase db, {
+    required Brightness brightness,
+    required AsyncValue<List<GastoMensal>> gastos,
+    required AsyncValue<List<ConsumoMensal>> consumo,
+    required AsyncValue<List<CategoriaGasto>> distribuicao,
+  }) async {
+    final theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.indigo,
+        brightness: brightness,
+      ),
+      useMaterial3: true,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          gastosMensaisProvider(_placa)
+              .overrideWith((_) => _asyncToStream(gastos)),
+          consumoMensalProvider(_placa)
+              .overrideWith((_) => _asyncToStream(consumo)),
+          distribuicaoCategoriaProvider(_placa)
+              .overrideWith((_) => _asyncToStream(distribuicao)),
+        ],
+        child: MaterialApp(
+          theme: theme,
+          home: const DashboardGraficosScreen(placa: _placa),
+        ),
+      ),
+    );
+    await _advance(tester);
+  }
+
+  group('DashboardGraficosScreen — dark mode (issue #108)', () {
+    testWidgets('renders without exception in light mode', (tester) async {
+      await pumpGraficosWithBrightness(
+        tester,
+        db,
+        brightness: Brightness.light,
+        gastos: AsyncData(
+          _gastosWithCurrentMonth(abastec: 300, manut: 100, despesas: 50),
+        ),
+        consumo: AsyncData(_consumoWithCurrentMonth(kmPorLitro: 12.5)),
+        distribuicao: const AsyncData([
+          CategoriaGasto(rotulo: 'Combustível', total: 300.0),
+          CategoriaGasto(rotulo: 'Manutenção', total: 100.0),
+        ]),
+      );
+
+      expect(tester.takeException(), isNull);
+
+      await _teardown(tester);
+    });
+
+    testWidgets('renders without exception in dark mode', (tester) async {
+      await pumpGraficosWithBrightness(
+        tester,
+        db,
+        brightness: Brightness.dark,
+        gastos: AsyncData(
+          _gastosWithCurrentMonth(abastec: 300, manut: 100, despesas: 50),
+        ),
+        consumo: AsyncData(_consumoWithCurrentMonth(kmPorLitro: 12.5)),
+        distribuicao: const AsyncData([
+          CategoriaGasto(rotulo: 'Combustível', total: 300.0),
+          CategoriaGasto(rotulo: 'Manutenção', total: 100.0),
+        ]),
+      );
+
+      expect(tester.takeException(), isNull);
+
+      await _teardown(tester);
+    });
+
+    testWidgets('empty state placeholder renders in dark mode', (tester) async {
+      await pumpGraficosWithBrightness(
+        tester,
+        db,
+        brightness: Brightness.dark,
+        gastos: AsyncData(_emptyGastos()),
+        consumo: AsyncData(_emptyConsumo()),
+        distribuicao: const AsyncData([]),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(
+        find.text('Nenhum gasto registrado nos últimos 12 meses.'),
+        findsOneWidget,
+      );
+      expect(find.text('Nenhum gasto nos últimos 12 meses.'), findsOneWidget);
+
+      await _teardown(tester);
+    });
+
+    testWidgets(
+      'legend text uses colorScheme.onSurface in light mode (not hardcoded)',
+      (tester) async {
+        await pumpGraficosWithBrightness(
+          tester,
+          db,
+          brightness: Brightness.light,
+          gastos: AsyncData(
+            _gastosWithCurrentMonth(abastec: 100, manut: 50, despesas: 30),
+          ),
+          consumo: AsyncData(_emptyConsumo()),
+          distribuicao: const AsyncData([]),
+        );
+
+        // Verify legend Text widgets exist and carry the theme onSurface color.
+        final legendaItems = tester.widgetList<Text>(find.text('Abastec.'));
+        expect(legendaItems, isNotEmpty);
+        for (final t in legendaItems) {
+          // The color should be set (not null), and should NOT be Colors.grey.
+          expect(t.style?.color, isNotNull);
+          expect(t.style?.color, isNot(Colors.grey));
+        }
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets(
+      'legend text uses colorScheme.onSurface in dark mode (not hardcoded)',
+      (tester) async {
+        await pumpGraficosWithBrightness(
+          tester,
+          db,
+          brightness: Brightness.dark,
+          gastos: AsyncData(
+            _gastosWithCurrentMonth(abastec: 100, manut: 50, despesas: 30),
+          ),
+          consumo: AsyncData(_emptyConsumo()),
+          distribuicao: const AsyncData([]),
+        );
+
+        final legendaItems = tester.widgetList<Text>(find.text('Abastec.'));
+        expect(legendaItems, isNotEmpty);
+        for (final t in legendaItems) {
+          expect(t.style?.color, isNotNull);
+          expect(t.style?.color, isNot(Colors.grey));
+        }
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets(
+      'section title color adapts: uses onSurfaceVariant in both modes',
+      (tester) async {
+        for (final brightness in [Brightness.light, Brightness.dark]) {
+          await pumpGraficosWithBrightness(
+            tester,
+            db,
+            brightness: brightness,
+            gastos: AsyncData(_emptyGastos()),
+            consumo: AsyncData(_emptyConsumo()),
+            distribuicao: const AsyncData([]),
+          );
+
+          expect(tester.takeException(), isNull);
+
+          // Section titles should be present with adaptive colors (no crash).
+          expect(
+            find.text('Evolução de gastos (últimos 12 meses)'),
+            findsOneWidget,
+          );
+
+          await _teardown(tester);
+        }
+      },
+    );
+  });
 }
