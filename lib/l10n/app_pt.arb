@@ -166,9 +166,9 @@
     "description": "Aviso banner de km retroativo"
   },
 
-  "abastecimentoNaoPossivel": "Não foi possível salvar: {erro}",
+  "abastecimentoNaoPossivel": "Não foi possível realizar a operação: {erro}",
   "@abastecimentoNaoPossivel": {
-    "description": "Snackbar de erro ao salvar abastecimento",
+    "description": "Snackbar de erro ao salvar ou excluir abastecimento",
     "placeholders": {
       "erro": {
         "type": "String"
@@ -371,9 +371,9 @@
     "description": "Erro de placa duplicada"
   },
 
-  "veiculoNaoPossivel": "Não foi possível salvar: {erro}",
+  "veiculoNaoPossivel": "Não foi possível realizar a operação: {erro}",
   "@veiculoNaoPossivel": {
-    "description": "Snackbar de erro ao salvar veículo",
+    "description": "Snackbar de erro ao salvar ou excluir veículo",
     "placeholders": {
       "erro": {
         "type": "String"
@@ -681,9 +681,9 @@
     "description": "Título da tela de editar despesa recorrente"
   },
 
-  "despesaNaoPossivel": "Não foi possível salvar: {erro}",
+  "despesaNaoPossivel": "Não foi possível realizar a operação: {erro}",
   "@despesaNaoPossivel": {
-    "description": "Snackbar de erro ao salvar despesa",
+    "description": "Snackbar de erro ao salvar ou excluir despesa",
     "placeholders": {
       "erro": {
         "type": "String"
@@ -1237,9 +1237,9 @@
     "description": "Erro de validação de descrição muito curta"
   },
 
-  "lembreteFormNaoPossivel": "Não foi possível salvar: {erro}",
+  "lembreteFormNaoPossivel": "Não foi possível realizar a operação: {erro}",
   "@lembreteFormNaoPossivel": {
-    "description": "Snackbar de erro ao salvar lembrete avulso",
+    "description": "Snackbar de erro ao salvar ou excluir lembrete avulso",
     "placeholders": {
       "erro": {
         "type": "String"

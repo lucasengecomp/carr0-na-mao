@@ -117,7 +117,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String abastecimentoNaoPossivel(String erro) {
-    return 'Não foi possível salvar: $erro';
+    return 'Não foi possível realizar a operação: $erro';
   }
 
   @override
@@ -242,7 +242,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String veiculoNaoPossivel(String erro) {
-    return 'Não foi possível salvar: $erro';
+    return 'Não foi possível realizar a operação: $erro';
   }
 
   @override
@@ -430,7 +430,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String despesaNaoPossivel(String erro) {
-    return 'Não foi possível salvar: $erro';
+    return 'Não foi possível realizar a operação: $erro';
   }
 
   @override
@@ -778,7 +778,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String lembreteFormNaoPossivel(String erro) {
-    return 'Não foi possível salvar: $erro';
+    return 'Não foi possível realizar a operação: $erro';
   }
 
   @override
