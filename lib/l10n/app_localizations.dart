@@ -290,10 +290,10 @@ abstract class AppLocalizations {
   /// **'O km informado é menor que o último registrado. Você pode salvar normalmente se for um abastecimento retroativo.'**
   String get abastecimentoAvisoKmRetroativo;
 
-  /// Snackbar de erro ao salvar abastecimento
+  /// Snackbar de erro ao salvar ou excluir abastecimento
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar: {erro}'**
+  /// **'Não foi possível realizar a operação: {erro}'**
   String abastecimentoNaoPossivel(String erro);
 
   /// Ação de excluir abastecimento no menu de 3 pontos e no AppBar
@@ -512,10 +512,10 @@ abstract class AppLocalizations {
   /// **'Já existe um veículo com essa placa.'**
   String get veiculoPlacaExistente;
 
-  /// Snackbar de erro ao salvar veículo
+  /// Snackbar de erro ao salvar ou excluir veículo
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar: {erro}'**
+  /// **'Não foi possível realizar a operação: {erro}'**
   String veiculoNaoPossivel(String erro);
 
   /// Mensagem de validação de ano inválido
@@ -866,10 +866,10 @@ abstract class AppLocalizations {
   /// **'Editar despesa'**
   String get despesaEditarTitulo;
 
-  /// Snackbar de erro ao salvar despesa
+  /// Snackbar de erro ao salvar ou excluir despesa
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar: {erro}'**
+  /// **'Não foi possível realizar a operação: {erro}'**
   String despesaNaoPossivel(String erro);
 
   /// Aviso exibido no form de manutenção quando não há veículo
@@ -1508,10 +1508,10 @@ abstract class AppLocalizations {
   /// **'Mínimo de 2 caracteres'**
   String get lembreteFormValidacaoDescricaoMin;
 
-  /// Snackbar de erro ao salvar lembrete avulso
+  /// Snackbar de erro ao salvar ou excluir lembrete avulso
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível salvar: {erro}'**
+  /// **'Não foi possível realizar a operação: {erro}'**
   String lembreteFormNaoPossivel(String erro);
 
   /// Label do botão Cancelar

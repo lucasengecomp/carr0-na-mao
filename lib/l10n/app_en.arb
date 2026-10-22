@@ -33,7 +33,7 @@
   "abastecimentoTanqueCheio": "Full tank",
   "abastecimentoTanqueCheioSubtitulo": "Important for fuel consumption calculation (km/L).",
   "abastecimentoAvisoKmRetroativo": "The odometer reading is lower than the last recorded. You can save normally if this is a retroactive fuel-up.",
-  "abastecimentoNaoPossivel": "Could not save: {erro}",
+  "abastecimentoNaoPossivel": "Could not complete the operation: {erro}",
   "abastecimentoAcaoExcluir": "Delete",
   "abastecimentoExcluirTitulo": "Delete fuel-up",
   "abastecimentoExcluirMensagem": "Are you sure you want to delete this fuel-up? This action cannot be undone.",
@@ -70,7 +70,7 @@
   "veiculoCampoCombustivel": "Fuel type",
   "veiculoCampoHodometro": "Current odometer (km)",
   "veiculoPlacaExistente": "A vehicle with this license plate already exists.",
-  "veiculoNaoPossivel": "Could not save: {erro}",
+  "veiculoNaoPossivel": "Could not complete the operation: {erro}",
   "validacaoAnoInvalido": "Invalid year",
   "validacaoAnoForaDaFaixa": "Year out of range",
   "comparadorTitulo": "Ethanol × Gasoline Comparator",
@@ -149,7 +149,7 @@
   "despesasTitulo": "Expenses",
   "despesaNovoTitulo": "New expense",
   "despesaEditarTitulo": "Edit expense",
-  "despesaNaoPossivel": "Could not save: {erro}",
+  "despesaNaoPossivel": "Could not complete the operation: {erro}",
   "despesaCampoNome": "Name",
   "despesaCampoCategoria": "Category",
   "despesaCampoValor": "Amount (R$)",
@@ -452,9 +452,9 @@
     "description": "Validation error for description that is too short"
   },
 
-  "lembreteFormNaoPossivel": "Could not save: {erro}",
+  "lembreteFormNaoPossivel": "Could not complete the operation: {erro}",
   "@lembreteFormNaoPossivel": {
-    "description": "Snackbar error when saving a standalone reminder fails",
+    "description": "Snackbar error when saving or deleting a standalone reminder fails",
     "placeholders": {
       "erro": {
         "type": "String"
