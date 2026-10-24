@@ -885,10 +885,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Zero coleta · dados ficam no dispositivo';
 
   @override
-  String get configuracoesPrivacidadeUrl =>
-      'https://lucasengecomp.github.io/carr0-na-mao/privacidade/';
-
-  @override
   String get abastecimentoCtaComparador =>
       'Vale a pena comparar álcool x gasolina?';
 }

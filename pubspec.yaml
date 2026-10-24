@@ -48,6 +48,7 @@ dependencies:
   timezone: ^0.11.2
   shared_preferences: ^2.3.4
   fl_chart: ^0.70.2
+  flutter_markdown: ^0.7.7+1
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +79,7 @@ flutter:
 
   assets:
     - assets/data/marcas_modelos.json
+    - docs/privacidade/politica-de-privacidade.md
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
