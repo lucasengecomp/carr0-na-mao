@@ -5,6 +5,7 @@ import 'screens/abastecimentos/abastecimento_form_screen.dart';
 import 'screens/abastecimentos/abastecimentos_list_screen.dart';
 import 'screens/comparador/comparador_screen.dart';
 import 'screens/config/config_screen.dart';
+import 'screens/config/politica_privacidade_screen.dart';
 import 'screens/dashboard/dashboard_graficos_screen.dart';
 import 'screens/dashboard/dashboard_home_screen.dart';
 import 'screens/despesas/despesa_form_screen.dart';
@@ -130,6 +131,11 @@ final GoRouter appRouter = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/config',
       builder: (context, state) => const ConfigScreen(),
+    ),
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/config/privacidade',
+      builder: (context, state) => const PoliticaPrivacidadeScreen(),
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,

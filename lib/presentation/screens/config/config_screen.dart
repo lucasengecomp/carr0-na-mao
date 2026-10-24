@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -131,52 +130,8 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
             leading: const Icon(Icons.privacy_tip_outlined),
             title: Text(l10n.configuracoesPrivacidadeTitulo),
             subtitle: Text(l10n.configuracoesPrivacidadeSubtitulo),
-            trailing: const Icon(Icons.open_in_new, size: 18),
-            onTap: () => _abrirPoliticaPrivacidade(context, l10n),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _abrirPoliticaPrivacidade(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) async {
-    final url = l10n.configuracoesPrivacidadeUrl;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.configuracoesPrivacidadeTitulo),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.configuracoesPrivacidadeSubtitulo),
-            const SizedBox(height: 12),
-            SelectableText(
-              url,
-              style: Theme.of(ctx).textTheme.bodySmall
-                  ?.copyWith(color: Theme.of(ctx).colorScheme.primary),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton.icon(
-            icon: const Icon(Icons.copy, size: 18),
-            label: const Text('Copiar URL'),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: url));
-              if (!ctx.mounted) return;
-              Navigator.of(ctx).pop();
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text('URL copiada!')));
-            },
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.botaoCancelar),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/config/privacidade'),
           ),
         ],
       ),

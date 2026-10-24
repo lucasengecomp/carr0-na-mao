@@ -1694,12 +1694,6 @@ abstract class AppLocalizations {
   /// **'Zero coleta · dados ficam no dispositivo'**
   String get configuracoesPrivacidadeSubtitulo;
 
-  /// URL da política de privacidade hospedada no GitHub Pages
-  ///
-  /// In pt, this message translates to:
-  /// **'https://lucasengecomp.github.io/carr0-na-mao/privacidade/'**
-  String get configuracoesPrivacidadeUrl;
-
   /// Link contextual no form de abastecimento que abre o Comparador álcool×gasolina
   ///
   /// In pt, this message translates to:
