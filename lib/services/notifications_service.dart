@@ -152,6 +152,10 @@ class NotificationsService {
 
   bool _initialized = false;
 
+  /// Garante que a permissão de notificação foi solicitada ao SO uma única vez
+  /// por sessão do app. Idempotente: chamadas subsequentes retornam imediato.
+  bool _permissionsRequested = false;
+
   /// Inicializa timezone e configura canais/permissões.
   Future<void> init() async {
     if (_initialized) return;
@@ -197,13 +201,34 @@ class NotificationsService {
     return true;
   }
 
+  /// Solicita permissão de notificação ao SO na primeira vez que um
+  /// agendamento é solicitado nesta sessão.
+  ///
+  /// - No iOS: exibe o diálogo "Carro na Mão Would Like to Send You
+  ///   Notifications" somente na primeira chamada durante a sessão; o
+  ///   sistema ignora chamadas subsequentes se a permissão já foi
+  ///   concedida/negada anteriormente.
+  /// - No Android 13+: delega ao sistema conforme [requestPermissions].
+  /// - Idempotente por sessão: a flag [_permissionsRequested] evita múltiplos
+  ///   prompts dentro da mesma execução do app.
+  Future<void> _ensurePermissions() async {
+    if (_permissionsRequested) return;
+    _permissionsRequested = true;
+    await requestPermissions();
+  }
+
   /// Agenda (ou re-agenda) a notificação de [_kDiasAntecedencia] dias antes de
   /// [lembrete.dataAlvo].
+  ///
+  /// Solicita permissão de notificação ao SO na primeira chamada da sessão
+  /// (ver [_ensurePermissions]).
   ///
   /// Idempotente: cancela a notificação anterior (mesmo id) antes de agendar.
   /// Não agenda quando [dataAlvo] é nulo ou já passou (incluindo a janela de
   /// antecedência).
   Future<void> scheduleLembrete(Lembrete lembrete) async {
+    await _ensurePermissions();
+
     final dataAlvo = lembrete.dataAlvo;
     if (dataAlvo == null) return;
 
@@ -254,11 +279,16 @@ class NotificationsService {
 
   /// Dispara uma notificação **imediata** indicando que o km alvo foi atingido.
   ///
+  /// Solicita permissão de notificação ao SO na primeira chamada da sessão
+  /// (ver [_ensurePermissions]).
+  ///
   /// Usa um id derivado do lembrete (offset [_kKmNotifOffset]) para não
   /// colidir com as notificações agendadas por [scheduleLembrete].
   ///
   /// Retorna imediatamente sem agendar se [lembrete.kmAlvo] for nulo.
   Future<void> notifyKmReached(Lembrete lembrete) async {
+    await _ensurePermissions();
+
     final kmAlvo = lembrete.kmAlvo;
     if (kmAlvo == null) return;
 

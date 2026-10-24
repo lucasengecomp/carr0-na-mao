@@ -205,6 +205,107 @@ void main() {
     );
   });
 
+  group('NotificationsService — _ensurePermissions (#114)', () {
+    late FakeNotificationsPlugin fake;
+    late NotificationsService service;
+
+    setUp(() async {
+      fake = FakeNotificationsPlugin();
+      service = NotificationsService(plugin: fake);
+      await service.init();
+    });
+
+    test(
+      'scheduleLembrete solicita permissão na primeira chamada da sessão',
+      () async {
+        final lembrete = _novoLembrete(
+          id: 20,
+          placa: 'TST1A11',
+          dataAlvo: DateTime.now().add(const Duration(days: 30)),
+        );
+        await service.scheduleLembrete(lembrete);
+        expect(fake.calls, contains('requestAndroidPermission'));
+      },
+    );
+
+    test('scheduleLembrete solicita permissão apenas uma vez por sessão (idempotente)', () async {
+      final lembrete = _novoLembrete(
+        id: 21,
+        placa: 'TST1A11',
+        dataAlvo: DateTime.now().add(const Duration(days: 30)),
+      );
+      await service.scheduleLembrete(lembrete);
+      await service.scheduleLembrete(lembrete);
+      await service.scheduleLembrete(lembrete);
+
+      final permissionCalls = fake.calls
+          .where((c) => c == 'requestAndroidPermission')
+          .length;
+      expect(permissionCalls, 1);
+    });
+
+    test(
+      'notifyKmReached solicita permissão na primeira chamada da sessão',
+      () async {
+        final lembrete = _novoLembrete(id: 22, placa: 'TST1A11', kmAlvo: 60000);
+        await service.notifyKmReached(lembrete);
+        expect(fake.calls, contains('requestAndroidPermission'));
+      },
+    );
+
+    test('scheduleLembrete e notifyKmReached compartilham flag — só uma requisição', () async {
+      final lembreteData = _novoLembrete(
+        id: 23,
+        placa: 'TST1A11',
+        dataAlvo: DateTime.now().add(const Duration(days: 30)),
+      );
+      final lembreteKm = _novoLembrete(id: 24, placa: 'TST1A11', kmAlvo: 80000);
+      await service.scheduleLembrete(lembreteData);
+      await service.notifyKmReached(lembreteKm);
+
+      final permissionCalls = fake.calls
+          .where((c) => c == 'requestAndroidPermission')
+          .length;
+      expect(permissionCalls, 1);
+    });
+  });
+
+  group('NotificationsService — _ensurePermissions em iOS (#114)', () {
+    test('quando Android retorna null, solicita permissão iOS', () async {
+      final iosFake = _IosFakeNotificationsPlugin();
+      final svc = NotificationsService(plugin: iosFake);
+      await svc.init();
+
+      final lembrete = _novoLembrete(
+        id: 30,
+        placa: 'TST1B11',
+        dataAlvo: DateTime.now().add(const Duration(days: 30)),
+      );
+      await svc.scheduleLembrete(lembrete);
+
+      expect(iosFake.calls, contains('requestIosPermission'));
+    });
+
+    test('permissão iOS solicitada apenas uma vez por sessão', () async {
+      final iosFake = _IosFakeNotificationsPlugin();
+      final svc = NotificationsService(plugin: iosFake);
+      await svc.init();
+
+      final lembrete = _novoLembrete(
+        id: 31,
+        placa: 'TST1B11',
+        dataAlvo: DateTime.now().add(const Duration(days: 30)),
+      );
+      await svc.scheduleLembrete(lembrete);
+      await svc.scheduleLembrete(lembrete);
+
+      final iosCalls = iosFake.calls
+          .where((c) => c == 'requestIosPermission')
+          .length;
+      expect(iosCalls, 1);
+    });
+  });
+
   group('NotificationsService — data de agendamento', () {
     late FakeNotificationsPlugin fake;
     late NotificationsService service;
@@ -237,6 +338,65 @@ void main() {
       expect(scheduled.first.day, esperada.day);
     });
   });
+}
+
+/// Fake que simula comportamento iOS: requestAndroidPermission retorna null
+/// (plugin Android ausente), requestIosPermission retorna true.
+class _IosFakeNotificationsPlugin implements NotificationsPluginInterface {
+  final List<String> calls = [];
+
+  @override
+  Future<void> initialize(InitializationSettings settings) async {
+    calls.add('initialize');
+  }
+
+  @override
+  Future<void> createAndroidChannel(AndroidNotificationChannel channel) async {
+    calls.add('createAndroidChannel:${channel.id}');
+  }
+
+  @override
+  Future<bool?> requestAndroidPermission() async {
+    // No iOS não há plugin Android; retorna null para cair no iOS path.
+    return null;
+  }
+
+  @override
+  Future<bool?> requestIosPermission({
+    bool alert = true,
+    bool badge = true,
+    bool sound = true,
+  }) async {
+    calls.add('requestIosPermission');
+    return true;
+  }
+
+  @override
+  Future<void> zonedSchedule({
+    required int id,
+    required String? title,
+    required String? body,
+    required tz.TZDateTime scheduledDate,
+    required NotificationDetails details,
+    required AndroidScheduleMode androidScheduleMode,
+  }) async {
+    calls.add('zonedSchedule:$id');
+  }
+
+  @override
+  Future<void> show({
+    required int id,
+    required String? title,
+    required String? body,
+    required NotificationDetails details,
+  }) async {
+    calls.add('show:$id');
+  }
+
+  @override
+  Future<void> cancel(int id) async {
+    calls.add('cancel:$id');
+  }
 }
 
 /// Plugin auxiliar que captura a data agendada.
