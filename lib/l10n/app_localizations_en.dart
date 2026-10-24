@@ -887,7 +887,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get configuracoesPrivacidadeUrl =>
-      'https://lucasengecomp.github.io/carr0-na-mao/privacidade/';
+      'https://github.com/lucasengecomp/carr0-na-mao/blob/main/docs/privacidade/politica-de-privacidade.md';
 
   @override
   String get abastecimentoCtaComparador => 'Is ethanol worth it vs gasoline?';

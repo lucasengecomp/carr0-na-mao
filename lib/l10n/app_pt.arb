@@ -1412,9 +1412,9 @@
     "description": "Subtítulo do item de política de privacidade nas configurações"
   },
 
-  "configuracoesPrivacidadeUrl": "https://lucasengecomp.github.io/carr0-na-mao/privacidade/",
+  "configuracoesPrivacidadeUrl": "https://github.com/lucasengecomp/carr0-na-mao/blob/main/docs/privacidade/politica-de-privacidade.md",
   "@configuracoesPrivacidadeUrl": {
-    "description": "URL da política de privacidade hospedada no GitHub Pages"
+    "description": "URL da política de privacidade (arquivo Markdown no repositório do GitHub)"
   },
 
   "abastecimentoCtaComparador": "Vale a pena comparar álcool x gasolina?",
