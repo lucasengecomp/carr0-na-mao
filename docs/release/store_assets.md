@@ -1,53 +1,110 @@
-# Checklist de Assets de Loja — Carro na Mão
+# Assets de Loja — Carro na Mão
 
-Este documento lista o que ainda precisa ser produzido manualmente antes de
-publicar o app na App Store e no Google Play.
+## Informações gerais
 
-## Assets de ícone e splash
+- **Nome visível:** Carro na Mão
+- **Bundle ID (iOS):** com.lucasengecomp.carronamao
+- **Application ID (Android):** com.lucasengecomp.carronamao
+- **Versão inicial:** 1.0.0 (build 1)
 
-- [ ] `assets/icon/icon.png` — ícone master, 1024x1024 px, PNG sem transparência
-- [ ] `assets/icon/icon_foreground.png` — camada de frente do ícone adaptativo Android
-      (seguir [Material Design adaptive icons](https://developer.android.com/develop/ui/views/launch/icon_design_adaptive))
-- [ ] `assets/splash/splash_logo.png` — logo para a splash screen (tema claro)
-- [ ] `assets/splash/splash_logo_dark.png` — logo para a splash screen (tema escuro)
+## Descrição curta (Google Play — até 80 caracteres)
 
-## Screenshots de loja
+> Controle de abastecimentos, manutenções e despesas do seu veículo.
 
-Mínimo recomendado:
+## Descrição longa (App Store e Google Play — até 4000 caracteres)
 
-| Tela | iPhone 6.5" | Pixel 7 |
-|------|-------------|---------|
-| Home / Dashboard | obrigatória | obrigatória |
-| Lista de Abastecimentos | obrigatória | obrigatória |
-| Formulário de Abastecimento | obrigatória | obrigatória |
-| Comparador de Postos | recomendada | recomendada |
-| Configurações | recomendada | recomendada |
+Carro na Mão é o aplicativo completo para quem quer manter o controle financeiro e de manutenção do seu veículo — tudo offline, sem criar conta, sem anúncios e sem coleta de dados.
 
-## Textos de loja
+**Abastecimentos**
+Registre cada abastecimento com data, km, litros, valor e posto. Acompanhe o consumo médio em km/L e o gasto total por período.
 
-- [ ] Descrição curta (até 80 caracteres) — usada no Google Play
-- [ ] Descrição longa — até 4000 caracteres (App Store e Google Play)
-- [ ] Palavras-chave (App Store: até 100 chars separados por vírgula)
+**Manutenções**
+Cadastre revisões, trocas de óleo, pneus e qualquer serviço realizado. Veja o histórico completo e o custo acumulado de manutenção.
 
-## Como gerar ícones e splash depois que a arte estiver pronta
+**Despesas**
+Anote IPVA, seguro, multas e outras despesas avulsas. Visualize o total gasto com o veículo em qualquer intervalo de tempo.
 
-1. Coloque os arquivos PNG nos caminhos listados acima.
-2. Descomente os blocos `flutter_launcher_icons` e `flutter_native_splash`
-   no final do `pubspec.yaml`.
-3. Execute:
+**Lembretes com notificações**
+Configure alertas por data ou por km rodados para não perder a próxima troca de óleo, revisão ou vencimento do seguro. O app avisa quando o prazo estiver próximo.
 
+**Dashboard de gráficos**
+Painéis visuais mostram a evolução do consumo, o gasto mensal por categoria e o custo total por veículo, facilitando a tomada de decisão.
+
+**Múltiplos veículos**
+Gerencie carro, moto, caminhonete ou qualquer outro veículo cadastrado. Alterne entre eles com um toque.
+
+**Export de dados**
+Exporte todo o histórico em XLSX (Excel) ou ZIP com os arquivos separados por categoria — útil para planilhas, imposto de renda ou simplesmente para ter uma cópia.
+
+**Privacidade total**
+Zero coleta de dados. Tudo fica armazenado apenas no seu dispositivo. Não há login, nuvem, rastreamento ou publicidade.
+
+---
+
+## Screenshots disponíveis em `docs/release/screenshots/`
+
+| Arquivo | Tela | Uso recomendado |
+|---|---|---|
+| `inicio_dashboard.png` | Dashboard / Início | 1ª screenshot (obrigatória) |
+| `abastecimentos.png` | Lista de abastecimentos | 2ª screenshot (obrigatória) |
+| `comparador.png` | Comparador de postos | 3ª screenshot (recomendada) |
+| `despesas.png` | Lista de despesas | 4ª screenshot (recomendada) |
+| `lembretes.png` | Lista de lembretes | 5ª screenshot (recomendada) |
+| `manutencoes.png` | Lista de manutenções | 6ª screenshot (recomendada) |
+| `veiculos.png` | Lista de veículos | 7ª screenshot (recomendada) |
+
+> Nota: as screenshots foram capturadas em dispositivo Android. Para App Store,
+> é necessário capturar em iPhone 6.5" (1242x2688 px) ou iPhone 6.7" (1290x2796 px).
+> As imagens disponíveis servem como referência de conteúdo.
+
+## Palavras-chave (App Store — até 100 chars separados por vírgula)
+
+> carro,abastecimento,gasolina,combustível,manutenção,despesa,km,consumo,lembrete,veículo
+
+## Assets de ícone e splash (gerados automaticamente)
+
+Os arquivos fonte estão em:
+- `assets/icon/icon.png` — ícone master 1024x1024 px, sem transparência
+- `assets/icon/icon_foreground.png` — camada de frente para adaptive icon Android
+- `assets/splash/splash_logo.png` — logo para a splash screen (tema claro)
+
+Os arquivos gerados estão em:
+- **Android:** `android/app/src/main/res/mipmap-*/` e `mipmap-anydpi-v26/`
+- **iOS:** `ios/Runner/Assets.xcassets/AppIcon.appiconset/` e `LaunchImage.imageset/`
+
+Para regenerar:
 ```bash
 dart run flutter_launcher_icons
 dart run flutter_native_splash:create
 ```
 
-4. Confirme que os ícones foram gerados em
-   `android/app/src/main/res/mipmap-*/` e
-   `ios/Runner/Assets.xcassets/AppIcon.appiconset/`.
-5. Faça commit dos arquivos gerados junto com os assets originais.
+## Checklist de publicação
 
-## Nota sobre os blocos comentados no pubspec.yaml
+### Google Play
+- [ ] Criar conta Google Play Console
+- [ ] Criar novo app com bundle ID `com.lucasengecomp.carronamao`
+- [ ] Build de release: `flutter build appbundle --release`
+- [ ] Upload do `.aab` na faixa de produção
+- [ ] Preencher ficha do app com descrição curta e longa acima
+- [ ] Fazer upload das screenshots (mínimo 2, máximo 8 por tipo de dispositivo)
+- [ ] Preencher classificação de conteúdo (app sem coleta de dados)
+- [ ] Política de privacidade: hospedar e linkar `docs/privacidade/politica-de-privacidade.md`
+- [ ] Enviar para revisão
 
-Os blocos de configuração de `flutter_launcher_icons` e `flutter_native_splash`
-estão comentados no final do `pubspec.yaml` para não causar erros enquanto os
-arquivos de arte não existem. Descomente-os apenas na etapa 2 acima.
+### App Store
+- [ ] Criar registro no App Store Connect
+- [ ] Bundle ID `com.lucasengecomp.carronamao` já criado no Developer Portal
+- [ ] Build de release: `flutter build ipa --release`
+- [ ] Upload via Xcode ou Transporter
+- [ ] Preencher ficha com título, subtítulo, descrição longa e palavras-chave acima
+- [ ] Fazer upload de screenshots em iPhone 6.5" (obrigatório) e iPad 12.9" (se necessário)
+- [ ] Declarar coleta de dados: nenhuma (Privacy Nutrition Label)
+- [ ] Enviar para revisão
+
+## Nota sobre namespace Android
+
+O `namespace` em `android/app/build.gradle` permanece como `carro_na_mao`
+(com underscore) porque o `MainActivity.kt` usa esse pacote. O `applicationId`
+(que aparece na loja) já está correto: `com.lucasengecomp.carronamao`.
+Renomear o namespace exigiria mover diretórios Kotlin — pode ser feito em issue
+separada se necessário.
