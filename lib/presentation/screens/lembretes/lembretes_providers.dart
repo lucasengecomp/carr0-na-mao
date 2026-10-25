@@ -32,10 +32,16 @@ final kmAtualPorVeiculoProvider = StreamProvider<Map<String, int>>((ref) {
 });
 
 /// Retorna true se o lembrete está atrasado:
-///   status == pendente  E
+///   status IN (pendente, adiado)  E
 ///   ( dataAlvo < início de hoje  OU  (kmAlvo != null E kmAtual > kmAlvo) )
+///
+/// Lembretes adiados também participam da lógica de atraso (issue #116):
+/// se a nova data_alvo já passou, o lembrete é exibido como atrasado.
 bool _isAtrasado(Lembrete l, Map<String, int> kmAtualPorPlaca) {
-  if (l.status != StatusLembrete.pendente) return false;
+  if (l.status != StatusLembrete.pendente &&
+      l.status != StatusLembrete.adiado) {
+    return false;
+  }
   final hoje = DateTime.now();
   final inicioDia = DateTime(hoje.year, hoje.month, hoje.day);
   final atrasadoPorData = l.dataAlvo != null && l.dataAlvo!.isBefore(inicioDia);
@@ -45,7 +51,10 @@ bool _isAtrasado(Lembrete l, Map<String, int> kmAtualPorPlaca) {
   return atrasadoPorData || atrasadoPorKm;
 }
 
-/// Lembretes pendentes: status == pendente E NÃO atrasado.
+/// Lembretes pendentes: status IN (pendente, adiado) E NÃO atrasado.
+///
+/// Lembretes com status adiado e nova data futura aparecem aqui junto com
+/// os pendentes puros, preservando o histórico de adiamento (issue #116).
 ///
 /// Decisão de escopo: lista **global** (todos os veículos). A issue não
 /// especifica filtro por veículo ativo; exibir todos dá ao usuário uma visão
@@ -66,15 +75,20 @@ final lembretesPendentesProvider = StreamProvider<List<Lembrete>>((ref) {
       lista
           .where(
             (Lembrete l) =>
-                l.status == StatusLembrete.pendente && !_isAtrasado(l, kmMap),
+                (l.status == StatusLembrete.pendente ||
+                    l.status == StatusLembrete.adiado) &&
+                !_isAtrasado(l, kmMap),
           )
           .toList()
         ..sort(_sortPendentes);
   return Stream.value(filtrada);
 });
 
-/// Lembretes atrasados: status == pendente E
+/// Lembretes atrasados: status IN (pendente, adiado) E
 ///   (dataAlvo < início de hoje OU kmAtual > kmAlvo).
+///
+/// Lembretes adiados cuja nova data já passou também aparecem aqui
+/// (issue #116).
 final lembretesAtrasadosProvider = StreamProvider<List<Lembrete>>((ref) {
   final todosAsync = ref.watch(_todosLembretesProvider);
   final kmAsync = ref.watch(kmAtualPorVeiculoProvider);
@@ -92,8 +106,10 @@ final lembretesAtrasadosProvider = StreamProvider<List<Lembrete>>((ref) {
   return Stream.value(filtrada);
 });
 
-/// Lembretes concluídos ou adiados: status in {concluido, adiado}.
-/// Ordenados por dataAlvo desc (mais recentes primeiro).
+/// Lembretes concluídos: status == concluido apenas.
+///
+/// Lembretes adiados não aparecem mais aqui; eles ficam em Pendentes ou
+/// Atrasados conforme a nova data_alvo (issue #116).
 final lembretesConcluidosProvider = StreamProvider<List<Lembrete>>((ref) {
   final todosAsync = ref.watch(_todosLembretesProvider);
   if (todosAsync.isLoading) return const Stream.empty();
@@ -102,13 +118,7 @@ final lembretesConcluidosProvider = StreamProvider<List<Lembrete>>((ref) {
   }
   final lista = todosAsync.value ?? const <Lembrete>[];
   final filtrada =
-      lista
-          .where(
-            (Lembrete l) =>
-                l.status == StatusLembrete.concluido ||
-                l.status == StatusLembrete.adiado,
-          )
-          .toList()
+      lista.where((Lembrete l) => l.status == StatusLembrete.concluido).toList()
         ..sort(_sortConcluidos);
   return Stream.value(filtrada);
 });
