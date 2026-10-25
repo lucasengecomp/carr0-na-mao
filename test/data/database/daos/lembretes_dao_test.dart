@@ -95,6 +95,56 @@ void main() {
     expect(vencidos.map((l) => l.id).toSet(), {idA, idB});
   });
 
+  // Regressão #128 — findVencidosPorKm deve incluir status adiado.
+  group('findVencidosPorKm — regressão #128', () {
+    test('lembrete adiado com kmAlvo ultrapassado é incluído', () async {
+      // Lembrete pendente com km atingido (deve continuar incluso)
+      final idPendente = await db.lembretesDao.insertLembrete(
+        _novoLembrete(kmAlvo: 20000),
+      );
+      // Lembrete que será adiado com km atingido (deve passar a ser incluso)
+      final idAdiado = await db.lembretesDao.insertLembrete(
+        _novoLembrete(kmAlvo: 22000),
+      );
+      await db.lembretesDao.adiar(idAdiado, novoKm: 22000);
+
+      final vencidos = await db.lembretesDao.findVencidosPorKm(
+        'ABC1D23',
+        25000,
+      );
+      expect(vencidos.map((l) => l.id).toSet(), {idPendente, idAdiado});
+    });
+
+    test('lembrete concluido com kmAlvo ultrapassado NÃO é incluído', () async {
+      final idConcluido = await db.lembretesDao.insertLembrete(
+        _novoLembrete(kmAlvo: 20000),
+      );
+      await db.lembretesDao.marcarConcluido(idConcluido);
+
+      final vencidos = await db.lembretesDao.findVencidosPorKm(
+        'ABC1D23',
+        25000,
+      );
+      expect(vencidos, isEmpty);
+    });
+
+    test(
+      'lembrete adiado com kmAlvo NÃO ultrapassado NÃO é incluído',
+      () async {
+        final idAdiado = await db.lembretesDao.insertLembrete(
+          _novoLembrete(kmAlvo: 30000),
+        );
+        await db.lembretesDao.adiar(idAdiado, novoKm: 30000);
+
+        final vencidos = await db.lembretesDao.findVencidosPorKm(
+          'ABC1D23',
+          25000,
+        );
+        expect(vencidos, isEmpty);
+      },
+    );
+  });
+
   test('marcarConcluido muda status', () async {
     final id = await db.lembretesDao.insertLembrete(
       _novoLembrete(kmAlvo: 20000),
