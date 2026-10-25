@@ -1297,12 +1297,27 @@
     "description": "Título da seção de exportação em Configurações"
   },
 
-  "exportarDadosSubtitulo": "Gera arquivos CSV com todos os registros do veículo",
+  "exportarDadosSubtitulo": "Gera um pacote com todos os registros do veículo",
   "@exportarDadosSubtitulo": {
     "description": "Subtítulo da seção de exportação"
   },
 
-  "exportarBotao": "Exportar CSV",
+  "exportarFormatoTitulo": "Formato",
+  "@exportarFormatoTitulo": {
+    "description": "Rótulo do grupo de seleção de formato de exportação"
+  },
+
+  "exportarFormatoXlsx": "XLSX (planilha)",
+  "@exportarFormatoXlsx": {
+    "description": "Opção de formato XLSX"
+  },
+
+  "exportarFormatoZip": "ZIP (CSVs)",
+  "@exportarFormatoZip": {
+    "description": "Opção de formato ZIP com CSVs"
+  },
+
+  "exportarBotao": "Exportar",
   "@exportarBotao": {
     "description": "Rótulo do botão de exportar"
   },
@@ -1312,7 +1327,7 @@
     "description": "Mensagem quando nenhum veículo está selecionado"
   },
 
-  "exportarSucesso": "Arquivos exportados com sucesso!",
+  "exportarSucesso": "Arquivo exportado com sucesso!",
   "@exportarSucesso": {
     "description": "Snackbar de sucesso após exportação"
   },
@@ -1335,6 +1350,11 @@
         "type": "String"
       }
     }
+  },
+
+  "veiculoArquivadoBadge": "arquivado",
+  "@veiculoArquivadoBadge": {
+    "description": "Badge exibido após o nome do veículo arquivado no dropdown de export"
   },
 
   "graficosTooltip": "Gráficos",

@@ -508,12 +508,16 @@
   },
 
   "exportarDadosTitulo": "Export data",
-  "exportarDadosSubtitulo": "Generates CSV files with all vehicle records",
-  "exportarBotao": "Export CSV",
+  "exportarDadosSubtitulo": "Generates a package with all vehicle records",
+  "exportarFormatoTitulo": "Format",
+  "exportarFormatoXlsx": "XLSX (spreadsheet)",
+  "exportarFormatoZip": "ZIP (CSVs)",
+  "exportarBotao": "Export",
   "exportarSemVeiculo": "Select a vehicle to export.",
-  "exportarSucesso": "Files exported successfully!",
+  "exportarSucesso": "File exported successfully!",
   "exportarErro": "Export error: {erro}",
   "exportarShareSubject": "Carro na Mão — {placa}",
+  "veiculoArquivadoBadge": "archived",
 
   "graficosTooltip": "Charts",
   "@graficosTooltip": {

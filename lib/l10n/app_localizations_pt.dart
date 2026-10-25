@@ -813,16 +813,25 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get exportarDadosSubtitulo =>
-      'Gera arquivos CSV com todos os registros do veículo';
+      'Gera um pacote com todos os registros do veículo';
 
   @override
-  String get exportarBotao => 'Exportar CSV';
+  String get exportarFormatoTitulo => 'Formato';
+
+  @override
+  String get exportarFormatoXlsx => 'XLSX (planilha)';
+
+  @override
+  String get exportarFormatoZip => 'ZIP (CSVs)';
+
+  @override
+  String get exportarBotao => 'Exportar';
 
   @override
   String get exportarSemVeiculo => 'Selecione um veículo para exportar.';
 
   @override
-  String get exportarSucesso => 'Arquivos exportados com sucesso!';
+  String get exportarSucesso => 'Arquivo exportado com sucesso!';
 
   @override
   String exportarErro(String erro) {
@@ -833,6 +842,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String exportarShareSubject(String placa) {
     return 'Carro na Mão — $placa';
   }
+
+  @override
+  String get veiculoArquivadoBadge => 'arquivado';
 
   @override
   String get graficosTooltip => 'Gráficos';

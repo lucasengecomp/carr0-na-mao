@@ -49,6 +49,8 @@ dependencies:
   shared_preferences: ^2.3.4
   fl_chart: ^0.70.2
   flutter_markdown_plus: ^1.0.12
+  excel: ^4.0.6
+  archive: ^3.6.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
