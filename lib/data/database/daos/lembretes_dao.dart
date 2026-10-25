@@ -46,11 +46,14 @@ class LembretesDao extends DatabaseAccessor<AppDatabase>
 
   /// Lembretes cujo km_alvo foi atingido/ultrapassado pelo km informado.
   /// Útil para disparar notificação ao salvar um abastecimento (RF-15).
+  /// Inclui status [StatusLembrete.adiado] além de [StatusLembrete.pendente]
+  /// para coerência com #116: lembretes adiados continuam na fila ativa.
   Future<List<Lembrete>> findVencidosPorKm(String placa, int kmAtual) =>
       (select(lembretes)..where(
             (t) =>
                 t.veiculoPlaca.equals(placa) &
-                t.status.equalsValue(StatusLembrete.pendente) &
+                (t.status.equalsValue(StatusLembrete.pendente) |
+                    t.status.equalsValue(StatusLembrete.adiado)) &
                 t.kmAlvo.isNotNull() &
                 t.kmAlvo.isSmallerOrEqualValue(kmAtual),
           ))
