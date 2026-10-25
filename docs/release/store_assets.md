@@ -88,7 +88,7 @@ dart run flutter_native_splash:create
 - [ ] Preencher ficha do app com descrição curta e longa acima
 - [ ] Fazer upload das screenshots (mínimo 2, máximo 8 por tipo de dispositivo)
 - [ ] Preencher classificação de conteúdo (app sem coleta de dados)
-- [ ] Política de privacidade: hospedar e linkar `docs/privacidade/politica-de-privacidade.md`
+- [ ] Política de privacidade — linkar a URL pública: <https://castrolftech.com/carro-na-mao/privacidade/>
 - [ ] Enviar para revisão
 
 ### App Store
@@ -99,7 +99,16 @@ dart run flutter_native_splash:create
 - [ ] Preencher ficha com título, subtítulo, descrição longa e palavras-chave acima
 - [ ] Fazer upload de screenshots em iPhone 6.5" (obrigatório) e iPad 12.9" (se necessário)
 - [ ] Declarar coleta de dados: nenhuma (Privacy Nutrition Label)
+- [ ] Política de privacidade — linkar a URL pública: <https://castrolftech.com/carro-na-mao/privacidade/>
 - [ ] Enviar para revisão
+
+## Política de privacidade pública
+
+A política está publicada em: <https://castrolftech.com/carro-na-mao/privacidade/>
+
+Fonte: `docs/privacidade/politica-de-privacidade.md`. Qualquer atualização aqui
+deve ser replicada em `lucasengecomp.github.io` (`carro-na-mao/privacidade/index.html`)
+para manter a página pública em sincronia.
 
 ## Nota sobre namespace Android
 
