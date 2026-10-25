@@ -154,29 +154,20 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                     l10n.exportarFormatoTitulo,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<ExportFormat>(
-                          contentPadding: EdgeInsets.zero,
-                          value: ExportFormat.xlsx,
-                          groupValue: _formato,
-                          title: Text(l10n.exportarFormatoXlsx),
-                          onChanged: (v) => _salvarFormato(v!),
-                          dense: true,
-                        ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<ExportFormat>(
+                    segments: [
+                      ButtonSegment(
+                        value: ExportFormat.xlsx,
+                        label: Text(l10n.exportarFormatoXlsx),
                       ),
-                      Expanded(
-                        child: RadioListTile<ExportFormat>(
-                          contentPadding: EdgeInsets.zero,
-                          value: ExportFormat.zip,
-                          groupValue: _formato,
-                          title: Text(l10n.exportarFormatoZip),
-                          onChanged: (v) => _salvarFormato(v!),
-                          dense: true,
-                        ),
+                      ButtonSegment(
+                        value: ExportFormat.zip,
+                        label: Text(l10n.exportarFormatoZip),
                       ),
                     ],
+                    selected: {_formato},
+                    onSelectionChanged: (s) => _salvarFormato(s.first),
                   ),
                 ],
               ),
