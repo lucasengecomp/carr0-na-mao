@@ -100,6 +100,33 @@ Future<void> _pumpForm(
   await tester.pumpAndSettle();
 }
 
+/// Monta o formulário em modo novo com parâmetros de pré-preenchimento.
+Future<void> _pumpFormPrefill(
+  WidgetTester tester, {
+  required AppDatabase db,
+  String? tipoSugerido,
+  int? kmSugerido,
+  String? placaSugerida,
+}) async {
+  SharedPreferences.setMockInitialValues(const {});
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
+      child: MaterialApp(
+        locale: localeDefault,
+        localizationsDelegates: l10nDelegates,
+        supportedLocales: supportedLocales,
+        home: ManutencaoFormScreen(
+          tipoSugerido: tipoSugerido,
+          kmSugerido: kmSugerido,
+          placaSugerida: placaSugerida,
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 /// Desmonta o widget tree para drenar timers do Drift.
 Future<void> _teardown(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
@@ -1155,6 +1182,130 @@ void main() {
         await _teardown(tester);
       },
     );
+  });
+
+  // -------------------------------------------------------------------------
+  // Pré-preenchimento vindo de lembrete (issue #115)
+  // -------------------------------------------------------------------------
+  group('pré-preenchimento via parâmetros (issue #115)', () {
+    testWidgets('tipo sugerido é selecionado no dropdown', (tester) async {
+      await _pumpFormPrefill(
+        tester,
+        db: db,
+        tipoSugerido: 'pastilhasFreio',
+        kmSugerido: 45000,
+        placaSugerida: 'ABC1D23',
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+      // O tipo deve ter sido aplicado ao state; verificamos via dropdown
+      // encontrando o label correspondente visível no widget fechado.
+      expect(
+        find.text(_tipoLabel[TipoManutencao.pastilhasFreio]!),
+        findsOneWidget,
+      );
+
+      await _teardown(tester);
+    });
+
+    testWidgets('km sugerido é pré-preenchido no campo hodômetro', (
+      tester,
+    ) async {
+      await _pumpFormPrefill(
+        tester,
+        db: db,
+        tipoSugerido: 'oleoMotor',
+        kmSugerido: 72000,
+        placaSugerida: 'ABC1D23',
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+      final kmField = tester.widget<TextFormField>(_byKey('manut_km'));
+      expect(kmField.controller!.text, '72000');
+
+      await _teardown(tester);
+    });
+
+    testWidgets(
+      'km sugerido null → campo hodômetro fica em branco (não zero)',
+      (tester) async {
+        await _pumpFormPrefill(
+          tester,
+          db: db,
+          tipoSugerido: 'velas',
+          kmSugerido: null,
+          placaSugerida: 'ABC1D23',
+        );
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+        final kmField = tester.widget<TextFormField>(_byKey('manut_km'));
+        expect(kmField.controller!.text, isEmpty);
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets('placa sugerida exibe o veículo correspondente no chip', (
+      tester,
+    ) async {
+      await _pumpFormPrefill(
+        tester,
+        db: db,
+        tipoSugerido: 'filtroAr',
+        kmSugerido: 30000,
+        placaSugerida: 'ABC1D23',
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+      // O chip do veículo deve exibir a placa
+      expect(find.textContaining('ABC1D23'), findsOneWidget);
+
+      await _teardown(tester);
+    });
+
+    testWidgets(
+      'tipo sugerido inválido não altera o tipo default (oleoMotor)',
+      (tester) async {
+        await _pumpFormPrefill(
+          tester,
+          db: db,
+          tipoSugerido: 'tipoInexistente',
+          kmSugerido: 10000,
+          placaSugerida: 'ABC1D23',
+        );
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+        // Tipo default oleoMotor deve permanecer
+        expect(
+          find.text(_tipoLabel[TipoManutencao.oleoMotor]!),
+          findsOneWidget,
+        );
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets('data permanece como hoje independente do pré-preenchimento', (
+      tester,
+    ) async {
+      await _pumpFormPrefill(
+        tester,
+        db: db,
+        tipoSugerido: 'correiaDentada',
+        kmSugerido: 60000,
+        placaSugerida: 'ABC1D23',
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+      final hoje = DateTime.now();
+      final dd = hoje.day.toString().padLeft(2, '0');
+      final mm = hoje.month.toString().padLeft(2, '0');
+      final dataEsperada = '$dd/$mm/${hoje.year}';
+
+      expect(find.text(dataEsperada), findsOneWidget);
+
+      await _teardown(tester);
+    });
   });
 }
 
