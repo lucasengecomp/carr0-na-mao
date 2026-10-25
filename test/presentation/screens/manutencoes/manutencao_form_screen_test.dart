@@ -1285,28 +1285,27 @@ void main() {
       },
     );
 
-    testWidgets(
-      'data permanece como hoje independente do pré-preenchimento',
-      (tester) async {
-        await _pumpFormPrefill(
-          tester,
-          db: db,
-          tipoSugerido: 'correiaDentada',
-          kmSugerido: 60000,
-          placaSugerida: 'ABC1D23',
-        );
-        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    testWidgets('data permanece como hoje independente do pré-preenchimento', (
+      tester,
+    ) async {
+      await _pumpFormPrefill(
+        tester,
+        db: db,
+        tipoSugerido: 'correiaDentada',
+        kmSugerido: 60000,
+        placaSugerida: 'ABC1D23',
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
-        final hoje = DateTime.now();
-        final dd = hoje.day.toString().padLeft(2, '0');
-        final mm = hoje.month.toString().padLeft(2, '0');
-        final dataEsperada = '$dd/$mm/${hoje.year}';
+      final hoje = DateTime.now();
+      final dd = hoje.day.toString().padLeft(2, '0');
+      final mm = hoje.month.toString().padLeft(2, '0');
+      final dataEsperada = '$dd/$mm/${hoje.year}';
 
-        expect(find.text(dataEsperada), findsOneWidget);
+      expect(find.text(dataEsperada), findsOneWidget);
 
-        await _teardown(tester);
-      },
-    );
+      await _teardown(tester);
+    });
   });
 }
 
