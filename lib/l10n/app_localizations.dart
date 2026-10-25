@@ -1571,13 +1571,31 @@ abstract class AppLocalizations {
   /// Subtítulo da seção de exportação
   ///
   /// In pt, this message translates to:
-  /// **'Gera arquivos CSV com todos os registros do veículo'**
+  /// **'Gera um pacote com todos os registros do veículo'**
   String get exportarDadosSubtitulo;
+
+  /// Rótulo do grupo de seleção de formato de exportação
+  ///
+  /// In pt, this message translates to:
+  /// **'Formato'**
+  String get exportarFormatoTitulo;
+
+  /// Opção de formato XLSX
+  ///
+  /// In pt, this message translates to:
+  /// **'XLSX (planilha)'**
+  String get exportarFormatoXlsx;
+
+  /// Opção de formato ZIP com CSVs
+  ///
+  /// In pt, this message translates to:
+  /// **'ZIP (CSVs)'**
+  String get exportarFormatoZip;
 
   /// Rótulo do botão de exportar
   ///
   /// In pt, this message translates to:
-  /// **'Exportar CSV'**
+  /// **'Exportar'**
   String get exportarBotao;
 
   /// Mensagem quando nenhum veículo está selecionado
@@ -1589,7 +1607,7 @@ abstract class AppLocalizations {
   /// Snackbar de sucesso após exportação
   ///
   /// In pt, this message translates to:
-  /// **'Arquivos exportados com sucesso!'**
+  /// **'Arquivo exportado com sucesso!'**
   String get exportarSucesso;
 
   /// Snackbar de erro na exportação
@@ -1603,6 +1621,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Carro na Mão — {placa}'**
   String exportarShareSubject(String placa);
+
+  /// Badge exibido após o nome do veículo arquivado no dropdown de export
+  ///
+  /// In pt, this message translates to:
+  /// **'arquivado'**
+  String get veiculoArquivadoBadge;
 
   /// Tooltip do botão de gráficos na AppBar do dashboard
   ///

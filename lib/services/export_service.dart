@@ -2,26 +2,40 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../data/database/app_database.dart';
 import '../data/database/daos/abastecimentos_dao.dart';
 import '../data/database/daos/despesas_dao.dart';
 import '../data/database/daos/lembretes_dao.dart';
 import '../data/database/daos/manutencoes_dao.dart';
 import '../data/providers.dart';
+import 'export_labels.dart';
 
-/// Serviço responsável por exportar os dados de um veículo em 5 arquivos CSV.
+/// Formato de saída para exportação.
+enum ExportFormat { xlsx, zip }
+
+/// Serviço responsável por exportar os dados de um veículo.
 ///
-/// Formato:
-/// - UTF-8 com BOM (para compatibilidade com Excel no Windows).
-/// - Delimitador: vírgula.
+/// Formatos suportados:
+/// - **XLSX** — um arquivo `.xlsx` com 5 sheets (um por tabela).
+/// - **ZIP** — um arquivo `.zip` com 5 CSVs.
+///
+/// Regras comuns a ambos os formatos:
+/// - UTF-8 com BOM nos CSVs (para compatibilidade com Excel no Windows).
+/// - Delimitador CSV: vírgula.
 /// - Decimais com ponto.
 /// - Datas no formato `yyyy-MM-dd`.
-/// - Células com vírgula, aspas ou quebra de linha são envoltas em aspas duplas;
-///   aspas internas são escapadas como `""`.
+/// - Células CSV com vírgula, aspas ou quebra de linha são envoltas em aspas
+///   duplas; aspas internas são escapadas como `""`.
+/// - Enums → label PT-BR (via [export_labels.dart]).
+/// - Booleanos → `Sim` / `Não`.
+/// - Headers em PT-BR com acentos.
 class ExportService {
   ExportService({
     required AbastecimentosDao abastecimentosDao,
@@ -52,61 +66,269 @@ class ExportService {
   // UTF-8 BOM bytes
   static final List<int> _bom = [0xEF, 0xBB, 0xBF];
 
-  /// Exporta todos os dados do veículo identificado por [placa] e retorna
-  /// uma lista de [XFile] prontos para compartilhamento via `SharePlus`.
-  ///
-  /// Os arquivos são gravados em um diretório temporário exclusivo para esta
-  /// exportação: `<tmpDir>/export_<placa>_<timestamp>/`.
-  Future<List<XFile>> exportarVeiculo(String placa) async {
-    final tmpDir = await _tempDirProvider();
-    final ts = DateTime.now().millisecondsSinceEpoch;
-    final exportDir = Directory('${tmpDir.path}/export_${placa}_$ts');
-    await exportDir.create(recursive: true);
+  // ── Nomes canônicos ──────────────────────────────────────────────────────────
 
-    final files = await Future.wait([
-      _gerarAbastecimentos(placa, exportDir),
-      _gerarManutencoes(placa, exportDir),
-      _gerarDespesas(placa, exportDir),
-      _gerarOcorrencias(placa, exportDir),
-      _gerarLembretes(placa, exportDir),
-    ]);
+  static const _sheetAbastecimentos = 'Abastecimentos';
+  static const _sheetManutencoes = 'Manutenções';
+  static const _sheetDespesas = 'Despesas';
+  static const _sheetOcorrencias = 'Ocorrências';
+  static const _sheetLembretes = 'Lembretes';
 
-    return files.map((f) => XFile(f.path, mimeType: 'text/csv')).toList();
+  static const _csvAbastecimentos = 'abastecimentos.csv';
+  static const _csvManutencoes = 'manutencoes.csv';
+  static const _csvDespesas = 'despesas.csv';
+  static const _csvOcorrencias = 'ocorrencias.csv';
+  static const _csvLembretes = 'lembretes.csv';
+
+  // ── Headers PT-BR ────────────────────────────────────────────────────────────
+
+  static const _headersAbastecimentos = [
+    'Data',
+    'Km',
+    'Tipo de combustível',
+    'Litros',
+    'Preço por litro',
+    'Valor total',
+    'Posto',
+    'Tanque cheio',
+  ];
+
+  static const _headersManutencoes = [
+    'Data',
+    'Tipo',
+    'Descrição',
+    'Km',
+    'Valor',
+    'Oficina',
+    'Observações',
+  ];
+
+  static const _headersDespesas = [
+    'Nome',
+    'Categoria',
+    'Valor',
+    'Frequência',
+    'Dia do mês',
+    'Data de início',
+    'Data de fim',
+    'Ativa',
+  ];
+
+  static const _headersOcorrencias = [
+    'Despesa',
+    'Data de vencimento',
+    'Valor',
+    'Status',
+    'Data de pagamento',
+    'Valor pago',
+  ];
+
+  static const _headersLembretes = [
+    'Tipo',
+    'Descrição',
+    'Data alvo',
+    'Km alvo',
+    'Status',
+  ];
+
+  // ── API pública ──────────────────────────────────────────────────────────────
+
+  /// Exporta todos os dados do veículo identificado por [placa] no formato
+  /// escolhido via [format], retornando um único [XFile].
+  Future<XFile> exportarVeiculo(
+    String placa, {
+    ExportFormat format = ExportFormat.xlsx,
+  }) async {
+    return switch (format) {
+      ExportFormat.xlsx => exportarVeiculoXlsx(placa),
+      ExportFormat.zip => exportarVeiculoZip(placa),
+    };
   }
 
-  // ── Abastecimentos ──────────────────────────────────────────────────────────
+  /// Gera um `.xlsx` com 5 sheets para o veículo identificado por [placa].
+  Future<XFile> exportarVeiculoXlsx(String placa) async {
+    final tmpDir = await _tempDirProvider();
+    final date = _dateFmt.format(DateTime.now());
+    final filename = 'carro-na-mao-$placa-$date.xlsx';
+    final filePath = '${tmpDir.path}/$filename';
 
-  Future<File> _gerarAbastecimentos(String placa, Directory dir) async {
-    final rows = await _abastecimentosDao.listByVeiculo(placa);
+    final excel = Excel.createExcel();
+
+    await _preencherSheetAbastecimentos(excel, placa);
+    await _preencherSheetManutencoes(excel, placa);
+    await _preencherSheetDespesas(excel, placa);
+    await _preencherSheetOcorrencias(excel, placa);
+    await _preencherSheetLembretes(excel, placa);
+
+    // Remove a sheet padrão criada pelo Excel.createExcel() — precisa ser feito
+    // depois de adicionar pelo menos uma outra sheet (delete exige length > 1).
+    excel.delete('Sheet1');
+
+    final bytes = excel.encode();
+    if (bytes == null) throw StateError('Falha ao serializar o arquivo XLSX.');
+
+    await File(filePath).writeAsBytes(bytes, flush: true);
+    return XFile(
+      filePath,
+      mimeType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+  }
+
+  /// Gera um `.zip` com 5 CSVs para o veículo identificado por [placa].
+  Future<XFile> exportarVeiculoZip(String placa) async {
+    final tmpDir = await _tempDirProvider();
+    final date = _dateFmt.format(DateTime.now());
+    final filename = 'carro-na-mao-$placa-$date.zip';
+    final filePath = '${tmpDir.path}/$filename';
+
+    final csvAbast = _buildCsvAbastecimentos(
+      await _abastecimentosDao.listByVeiculo(placa),
+    );
+    final csvManut = _buildCsvManutencoes(
+      await _manutencoesDao.listByVeiculo(placa),
+    );
+    final csvDesp = _buildCsvDespesas(await _despesasDao.listByVeiculo(placa));
+    final csvOcorr = await _buildCsvOcorrencias(placa);
+    final csvLemb = _buildCsvLembretes(
+      await _lembretesDao.listByVeiculo(placa),
+    );
+
+    final archive = Archive()
+      ..addFile(_archiveFile(_csvAbastecimentos, csvAbast))
+      ..addFile(_archiveFile(_csvManutencoes, csvManut))
+      ..addFile(_archiveFile(_csvDespesas, csvDesp))
+      ..addFile(_archiveFile(_csvOcorrencias, csvOcorr))
+      ..addFile(_archiveFile(_csvLembretes, csvLemb));
+
+    final zipBytes = ZipEncoder().encode(archive);
+    if (zipBytes == null) {
+      throw StateError('Falha ao serializar o arquivo ZIP.');
+    }
+
+    await File(filePath).writeAsBytes(zipBytes, flush: true);
+    return XFile(filePath, mimeType: 'application/zip');
+  }
+
+  // ── Sheets XLSX ──────────────────────────────────────────────────────────────
+
+  Future<void> _preencherSheetAbastecimentos(Excel excel, String placa) async {
+    final sheet = excel[_sheetAbastecimentos];
+    sheet.appendRow(_headersAbastecimentos.map(TextCellValue.new).toList());
+    for (final r in await _abastecimentosDao.listByVeiculo(placa)) {
+      sheet.appendRow([
+        TextCellValue(_date(r.data)),
+        IntCellValue(r.km),
+        TextCellValue(r.tipoCombustivel.labelPt),
+        DoubleCellValue(r.litros),
+        DoubleCellValue(r.precoLitro),
+        DoubleCellValue(r.valorTotal),
+        TextCellValue(r.posto ?? ''),
+        TextCellValue(_bool(r.tanqueCheio)),
+      ]);
+    }
+  }
+
+  Future<void> _preencherSheetManutencoes(Excel excel, String placa) async {
+    final sheet = excel[_sheetManutencoes];
+    sheet.appendRow(_headersManutencoes.map(TextCellValue.new).toList());
+    for (final r in await _manutencoesDao.listByVeiculo(placa)) {
+      sheet.appendRow([
+        TextCellValue(_date(r.data)),
+        TextCellValue(r.tipo.labelPt),
+        TextCellValue(r.nomeLivre ?? ''),
+        IntCellValue(r.km),
+        if (r.valor != null) DoubleCellValue(r.valor!) else TextCellValue(''),
+        TextCellValue(r.oficina ?? ''),
+        TextCellValue(r.observacoes ?? ''),
+      ]);
+    }
+  }
+
+  Future<void> _preencherSheetDespesas(Excel excel, String placa) async {
+    final sheet = excel[_sheetDespesas];
+    sheet.appendRow(_headersDespesas.map(TextCellValue.new).toList());
+    for (final r in await _despesasDao.listByVeiculo(placa)) {
+      sheet.appendRow([
+        TextCellValue(r.nome),
+        TextCellValue(r.categoria.labelPt),
+        DoubleCellValue(r.valor),
+        TextCellValue(r.frequencia.labelPt),
+        TextCellValue(r.diaDoMes?.toString() ?? ''),
+        TextCellValue(_date(r.dataInicio)),
+        TextCellValue(r.dataFim != null ? _date(r.dataFim!) : ''),
+        TextCellValue(_bool(r.ativa)),
+      ]);
+    }
+  }
+
+  Future<void> _preencherSheetOcorrencias(Excel excel, String placa) async {
+    final sheet = excel[_sheetOcorrencias];
+    sheet.appendRow(_headersOcorrencias.map(TextCellValue.new).toList());
+
+    final despesas = await _despesasDao.listByVeiculo(placa);
+    final despesaById = {for (final d in despesas) d.id: d};
+
+    for (final despesa in despesas) {
+      for (final o in await _ocorrenciasDao.listByDespesa(despesa.id)) {
+        final nome = despesaById[o.despesaId]?.nome ?? '';
+        sheet.appendRow([
+          TextCellValue(nome),
+          TextCellValue(_date(o.dataVencimento)),
+          DoubleCellValue(despesa.valor),
+          TextCellValue(o.status.labelPt),
+          TextCellValue(o.dataPagamento != null ? _date(o.dataPagamento!) : ''),
+          if (o.valorPago != null)
+            DoubleCellValue(o.valorPago!)
+          else
+            TextCellValue(''),
+        ]);
+      }
+    }
+  }
+
+  Future<void> _preencherSheetLembretes(Excel excel, String placa) async {
+    final sheet = excel[_sheetLembretes];
+    sheet.appendRow(_headersLembretes.map(TextCellValue.new).toList());
+    for (final r in await _lembretesDao.listByVeiculo(placa)) {
+      sheet.appendRow([
+        TextCellValue(r.tipo),
+        TextCellValue(r.descricao),
+        TextCellValue(r.dataAlvo != null ? _date(r.dataAlvo!) : ''),
+        TextCellValue(r.kmAlvo?.toString() ?? ''),
+        TextCellValue(r.status.labelPt),
+      ]);
+    }
+  }
+
+  // ── Construtores CSV ─────────────────────────────────────────────────────────
+
+  String _buildCsvAbastecimentos(List<Abastecimento> rows) {
     final lines = <String>[
-      'data,km,tipo_combustivel,litros,preco,valor,posto,tanque_cheio,observacoes',
+      _row(_headersAbastecimentos),
       ...rows.map(
         (r) => _row([
           _date(r.data),
           r.km.toString(),
-          r.tipoCombustivel.name,
+          r.tipoCombustivel.labelPt,
           _dec(r.litros),
           _dec(r.precoLitro),
           _dec(r.valorTotal),
           r.posto ?? '',
-          r.tanqueCheio ? 'true' : 'false',
-          '', // Abastecimentos não têm coluna observacoes na tabela
+          _bool(r.tanqueCheio),
         ]),
       ),
     ];
-    return _write(dir, 'abastecimentos.csv', lines);
+    return '${lines.join('\n')}\n';
   }
 
-  // ── Manutenções ─────────────────────────────────────────────────────────────
-
-  Future<File> _gerarManutencoes(String placa, Directory dir) async {
-    final rows = await _manutencoesDao.listByVeiculo(placa);
+  String _buildCsvManutencoes(List<Manutencao> rows) {
     final lines = <String>[
-      'data,tipo,nome_livre,km,valor,oficina,observacoes',
+      _row(_headersManutencoes),
       ...rows.map(
         (r) => _row([
           _date(r.data),
-          r.tipo.name,
+          r.tipo.labelPt,
           r.nomeLivre ?? '',
           r.km.toString(),
           r.valor != null ? _dec(r.valor!) : '',
@@ -115,88 +337,74 @@ class ExportService {
         ]),
       ),
     ];
-    return _write(dir, 'manutencoes.csv', lines);
+    return '${lines.join('\n')}\n';
   }
 
-  // ── Despesas recorrentes ─────────────────────────────────────────────────────
-
-  Future<File> _gerarDespesas(String placa, Directory dir) async {
-    final rows = await _despesasDao.listByVeiculo(placa);
+  String _buildCsvDespesas(List<DespesaRecorrente> rows) {
     final lines = <String>[
-      'nome,categoria,valor,frequencia,dia_do_mes,data_inicio,data_fim,ativa',
+      _row(_headersDespesas),
       ...rows.map(
         (r) => _row([
           r.nome,
-          r.categoria.name,
+          r.categoria.labelPt,
           _dec(r.valor),
-          r.frequencia.name,
+          r.frequencia.labelPt,
           r.diaDoMes?.toString() ?? '',
           _date(r.dataInicio),
           r.dataFim != null ? _date(r.dataFim!) : '',
-          r.ativa ? 'true' : 'false',
+          _bool(r.ativa),
         ]),
       ),
     ];
-    return _write(dir, 'despesas.csv', lines);
+    return '${lines.join('\n')}\n';
   }
 
-  // ── Ocorrências de despesa ───────────────────────────────────────────────────
-
-  Future<File> _gerarOcorrencias(String placa, Directory dir) async {
-    // Busca despesas do veículo para obter nomes e ids.
+  Future<String> _buildCsvOcorrencias(String placa) async {
     final despesas = await _despesasDao.listByVeiculo(placa);
     final despesaById = {for (final d in despesas) d.id: d};
 
-    final lines = <String>[
-      'despesa_nome,data_vencimento,valor,status,data_pagamento,valor_pago',
-    ];
+    final lines = <String>[_row(_headersOcorrencias)];
 
     for (final despesa in despesas) {
-      final ocorrencias = await _ocorrenciasDao.listByDespesa(despesa.id);
-      for (final o in ocorrencias) {
+      for (final o in await _ocorrenciasDao.listByDespesa(despesa.id)) {
         final nome = despesaById[o.despesaId]?.nome ?? '';
         lines.add(
           _row([
             nome,
             _date(o.dataVencimento),
             _dec(despesa.valor),
-            o.status.name,
+            o.status.labelPt,
             o.dataPagamento != null ? _date(o.dataPagamento!) : '',
             o.valorPago != null ? _dec(o.valorPago!) : '',
           ]),
         );
       }
     }
-
-    return _write(dir, 'ocorrencias.csv', lines);
+    return '${lines.join('\n')}\n';
   }
 
-  // ── Lembretes ────────────────────────────────────────────────────────────────
-
-  Future<File> _gerarLembretes(String placa, Directory dir) async {
-    final rows = await _lembretesDao.listByVeiculo(placa);
+  String _buildCsvLembretes(List<Lembrete> rows) {
     final lines = <String>[
-      'tipo,descricao,data_alvo,km_alvo,status',
+      _row(_headersLembretes),
       ...rows.map(
         (r) => _row([
           r.tipo,
           r.descricao,
           r.dataAlvo != null ? _date(r.dataAlvo!) : '',
           r.kmAlvo?.toString() ?? '',
-          r.status.name,
+          r.status.labelPt,
         ]),
       ),
     ];
-    return _write(dir, 'lembretes.csv', lines);
+    return '${lines.join('\n')}\n';
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
-  /// Escreve [lines] como CSV UTF-8 com BOM em [dir]/[filename].
-  Future<File> _write(Directory dir, String filename, List<String> lines) {
-    final content = '${lines.join('\n')}\n';
-    final bytes = _bom + utf8.encode(content);
-    return File('${dir.path}/$filename').writeAsBytes(bytes, flush: true);
+  /// Cria um [ArchiveFile] com conteúdo CSV UTF-8 com BOM.
+  static ArchiveFile _archiveFile(String filename, String csvContent) {
+    final bytes = _bom + utf8.encode(csvContent);
+    return ArchiveFile(filename, bytes.length, bytes);
   }
 
   /// Formata uma célula CSV: envolve em aspas duplas se contém `,`, `"` ou
@@ -216,6 +424,9 @@ class ExportService {
 
   /// Formata um número decimal usando ponto como separador.
   static String _dec(double v) => v.toStringAsFixed(2);
+
+  /// Converte um booleano em label PT-BR.
+  static String _bool(bool v) => v ? 'Sim' : 'Não';
 }
 
 // ── Provider ──────────────────────────────────────────────────────────────────

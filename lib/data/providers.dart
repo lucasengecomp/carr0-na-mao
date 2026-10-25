@@ -55,6 +55,12 @@ final postoSugestaoDaoProvider = Provider<PostoSugestaoDao>(
   (ref) => ref.watch(appDatabaseProvider).postoSugestaoDao,
 );
 
+/// Todos os veículos (ativos e arquivados) — usado na tela de export para
+/// exibir veículos arquivados com badge.
+final veiculosTodosProvider = StreamProvider<List<Veiculo>>(
+  (ref) => ref.watch(veiculosDaoProvider).watchTodos(),
+);
+
 /// Lista de marcas disponíveis para o form de veículo. Alimentado pelo seed
 /// do asset `assets/data/marcas_modelos.json`.
 final marcasProvider = FutureProvider<List<String>>(

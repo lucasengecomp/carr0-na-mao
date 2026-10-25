@@ -1,11 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../data/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/export_service.dart';
 import '../veiculos/veiculos_providers.dart';
+
+/// Chave para persistir o último formato de exportação escolhido.
+const _kPrefExportFormat = 'export_format';
 
 class ConfigScreen extends ConsumerStatefulWidget {
   const ConfigScreen({super.key});
@@ -17,15 +24,47 @@ class ConfigScreen extends ConsumerStatefulWidget {
 class _ConfigScreenState extends ConsumerState<ConfigScreen> {
   bool _exportando = false;
   String? _placaSelecionada;
+  ExportFormat _formato = ExportFormat.xlsx;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_carregarFormatoSalvo());
+  }
+
+  Future<void> _carregarFormatoSalvo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_kPrefExportFormat);
+    if (saved != null && mounted) {
+      setState(() {
+        _formato = saved == 'zip' ? ExportFormat.zip : ExportFormat.xlsx;
+      });
+    }
+  }
+
+  Future<void> _salvarFormato(ExportFormat fmt) async {
+    setState(() => _formato = fmt);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _kPrefExportFormat,
+      fmt == ExportFormat.zip ? 'zip' : 'xlsx',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final todos = ref.watch(veiculosTodosProvider).value ?? const [];
     final ativos = ref.watch(veiculosAtivosProvider).value ?? const [];
     final veiculoAtivo = ref.watch(veiculoAtivoProvider);
 
     // Veículo selecionado para export: inicia no ativo; permite trocar.
     final placaEfetiva = _placaSelecionada ?? veiculoAtivo?.placa;
+
+    // Se a placa selecionada não existe em todos os veículos, reseta.
+    final placaValida = todos.any((v) => v.placa == placaEfetiva)
+        ? placaEfetiva
+        : null;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.configuracoesTitulo)),
@@ -47,7 +86,7 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   ?.copyWith(color: Theme.of(context).colorScheme.primary),
             ),
           ),
-          if (ativos.isEmpty)
+          if (todos.isEmpty && ativos.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
@@ -73,15 +112,28 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   child: DropdownButton<String>(
                     isExpanded: true,
                     isDense: true,
-                    value: placaEfetiva,
-                    items: ativos
+                    value: placaValida,
+                    items: todos
                         .map(
                           (v) => DropdownMenuItem(
                             value: v.placa,
-                            child: Text(
-                              v.apelido != null
-                                  ? '${v.apelido} (${v.placa})'
-                                  : '${v.marca} ${v.modelo} — ${v.placa}',
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    v.apelido != null
+                                        ? '${v.apelido} (${v.placa})'
+                                        : '${v.marca} ${v.modelo} — ${v.placa}',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (v.arquivado) ...[
+                                  const SizedBox(width: 6),
+                                  _ArquivadoBadge(
+                                    label: l10n.veiculoArquivadoBadge,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                         )
@@ -91,7 +143,44 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            // ── Seletor de formato ─────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.exportarFormatoTitulo,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: RadioListTile<ExportFormat>(
+                          contentPadding: EdgeInsets.zero,
+                          value: ExportFormat.xlsx,
+                          groupValue: _formato,
+                          title: Text(l10n.exportarFormatoXlsx),
+                          onChanged: (v) => _salvarFormato(v!),
+                          dense: true,
+                        ),
+                      ),
+                      Expanded(
+                        child: RadioListTile<ExportFormat>(
+                          contentPadding: EdgeInsets.zero,
+                          value: ExportFormat.zip,
+                          groupValue: _formato,
+                          title: Text(l10n.exportarFormatoZip),
+                          onChanged: (v) => _salvarFormato(v!),
+                          dense: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Text(
@@ -109,9 +198,9 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton.icon(
-                    onPressed: (_exportando || placaEfetiva == null)
+                    onPressed: (_exportando || placaValida == null)
                         ? null
-                        : () => _exportar(context, l10n, placaEfetiva),
+                        : () => _exportar(context, l10n, placaValida),
                     icon: _exportando
                         ? const SizedBox(
                             width: 18,
@@ -146,16 +235,14 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     setState(() => _exportando = true);
     try {
       final service = ref.read(exportServiceProvider);
-      final xFiles = await service.exportarVeiculo(placa);
+      final xFile = await service.exportarVeiculo(placa, format: _formato);
       if (!context.mounted) return;
       // Mostra o snackbar de sucesso antes de abrir o share sheet.
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.exportarSucesso)));
-      if (xFiles.isNotEmpty) {
-        await SharePlus.instance.share(
-          ShareParams(files: xFiles, subject: l10n.exportarShareSubject(placa)),
-        );
-      }
+      await SharePlus.instance.share(
+        ShareParams(files: [xFile], subject: l10n.exportarShareSubject(placa)),
+      );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(
@@ -164,5 +251,29 @@ class _ConfigScreenState extends ConsumerState<ConfigScreen> {
     } finally {
       if (mounted) setState(() => _exportando = false);
     }
+  }
+}
+
+/// Badge compacto exibido ao lado de veículos arquivados no dropdown.
+class _ArquivadoBadge extends StatelessWidget {
+  const _ArquivadoBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall
+            ?.copyWith(color: cs.onSurfaceVariant),
+      ),
+    );
   }
 }
