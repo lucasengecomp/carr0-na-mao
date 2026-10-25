@@ -35,7 +35,8 @@ class LembretesDao extends DatabaseAccessor<AppDatabase>
             ..where(
               (t) =>
                   t.veiculoPlaca.equals(placa) &
-                  t.status.equalsValue(StatusLembrete.pendente),
+                  (t.status.equalsValue(StatusLembrete.pendente) |
+                      t.status.equalsValue(StatusLembrete.adiado)),
             )
             ..orderBy([
               (t) => OrderingTerm(expression: t.dataAlvo),
@@ -55,12 +56,17 @@ class LembretesDao extends DatabaseAccessor<AppDatabase>
           ))
           .get();
 
+  /// Lembretes pendentes ou adiados do veículo, ordenados por dataAlvo/kmAlvo.
+  /// Usado pelo dashboard (card "próximas manutenções") e pelo serviço de
+  /// lembretes. Inclui adiados pois, após adiar, o lembrete volta para a fila
+  /// de pendentes com nova data_alvo (issue #116).
   Stream<List<Lembrete>> watchPendentesByVeiculo(String placa) =>
       (select(lembretes)
             ..where(
               (t) =>
                   t.veiculoPlaca.equals(placa) &
-                  t.status.equalsValue(StatusLembrete.pendente),
+                  (t.status.equalsValue(StatusLembrete.pendente) |
+                      t.status.equalsValue(StatusLembrete.adiado)),
             )
             ..orderBy([
               (t) => OrderingTerm(expression: t.dataAlvo),

@@ -612,7 +612,8 @@ void main() {
       },
     );
 
-    test('ignora lembretes concluídos e adiados', () async {
+    // issue #116: adiados agora aparecem junto com pendentes no card do dashboard.
+    test('ignora concluídos mas inclui adiados (issue #116)', () async {
       await db.lembretesDao.insertLembrete(
         _novoLembrete(
           descricao: 'Concluído',
@@ -633,8 +634,11 @@ void main() {
 
       final val = await _awaitManutenco(container);
       expect(val.value, isNotNull);
-      expect(val.value!.length, 1);
-      expect(val.value!.first.descricao, 'Pendente');
+      // Concluído ignorado; adiado e pendente aparecem (2 itens).
+      expect(val.value!.length, 2);
+      final descricoes = val.value!.map((l) => l.descricao).toList();
+      expect(descricoes, containsAll(['Adiado', 'Pendente']));
+      expect(descricoes, isNot(contains('Concluído')));
     });
 
     test('retorna null quando não há veículo ativo', () async {

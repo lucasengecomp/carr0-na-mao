@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 //
 // Testa a lógica de filtragem e ordenação dos providers de lembretes (issue #25,
-// bug #68).
+// bug #68, issue #116).
 //
 // Nota de arquitetura: os providers derivados (lembretesPendentesProvider,
 // lembretesAtrasadosProvider, lembretesConcluidosProvider) dependem de um
@@ -66,11 +66,14 @@ DateTime get _inicioDia {
   return DateTime(hoje.year, hoje.month, hoje.day);
 }
 
-/// Replica a lógica de _isAtrasado do provider (issue #68):
-///   status == pendente E
+/// Replica a lógica de _isAtrasado do provider (issue #68, #116):
+///   status IN (pendente, adiado) E
 ///   (dataAlvo < hoje OU (kmAlvo != null E kmAtual > kmAlvo))
 bool _isAtrasado(Lembrete l, Map<String, int> kmAtualPorPlaca) {
-  if (l.status != StatusLembrete.pendente) return false;
+  if (l.status != StatusLembrete.pendente &&
+      l.status != StatusLembrete.adiado) {
+    return false;
+  }
   final atrasadoPorData =
       l.dataAlvo != null && l.dataAlvo!.isBefore(_inicioDia);
   final kmAtual = kmAtualPorPlaca[l.veiculoPlaca];
@@ -79,16 +82,18 @@ bool _isAtrasado(Lembrete l, Map<String, int> kmAtualPorPlaca) {
   return atrasadoPorData || atrasadoPorKm;
 }
 
-/// Replica a lógica de _isPendente do provider:
-///   status == pendente E NÃO atrasado.
+/// Replica a lógica de _isPendente do provider (issue #116):
+///   status IN (pendente, adiado) E NÃO atrasado.
 bool _isPendente(Lembrete l, Map<String, int> kmAtualPorPlaca) {
-  return l.status == StatusLembrete.pendente &&
+  return (l.status == StatusLembrete.pendente ||
+          l.status == StatusLembrete.adiado) &&
       !_isAtrasado(l, kmAtualPorPlaca);
 }
 
+/// Replica a lógica de _isConcluido do provider (issue #116):
+///   status == concluido apenas (adiado saiu daqui).
 bool _isConcluido(Lembrete l) {
-  return l.status == StatusLembrete.concluido ||
-      l.status == StatusLembrete.adiado;
+  return l.status == StatusLembrete.concluido;
 }
 
 int _sortPendentes(Lembrete a, Lembrete b) {
@@ -280,7 +285,7 @@ void main() {
   });
 
   // -------------------------------------------------------------------------
-  // Lógica de filtragem — _isConcluido
+  // Lógica de filtragem — _isConcluido (issue #116: adiado saiu daqui)
   // -------------------------------------------------------------------------
   group('filtro concluido (_isConcluido)', () {
     test('status=concluido → true', () {
@@ -295,12 +300,12 @@ void main() {
       );
     });
 
-    test('status=adiado → true', () {
+    test('status=adiado → false (issue #116: adiado vai para Pendentes)', () {
       expect(
         _isConcluido(
           _fakeLembrete(dataAlvo: _dataFutura, status: StatusLembrete.adiado),
         ),
-        isTrue,
+        isFalse,
       );
     });
 
@@ -337,14 +342,14 @@ void main() {
       expect(_isConcluido(l), isTrue);
     });
 
-    test('adiado: só isConcluido', () {
+    test('adiado com data futura: só isPendente (issue #116)', () {
       final l = _fakeLembrete(
         dataAlvo: _dataFutura,
         status: StatusLembrete.adiado,
       );
-      expect(_isPendente(l, _semKm), isFalse);
+      expect(_isPendente(l, _semKm), isTrue);
       expect(_isAtrasado(l, _semKm), isFalse);
-      expect(_isConcluido(l), isTrue);
+      expect(_isConcluido(l), isFalse);
     });
 
     test('pendente sem data e sem km atrasado: só isPendente', () {
@@ -577,6 +582,88 @@ void main() {
               .any((l) => l.descricao == 'MigrandoConcluido'),
           isTrue,
         );
+      },
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  // issue #116: lembrete adiado deve aparecer em Pendentes, não em Concluídos
+  // -------------------------------------------------------------------------
+  group('adiado em Pendentes (issue #116)', () {
+    test(
+      'adiado com dataAlvo futura → isPendente=true, isConcluido=false',
+      () async {
+        final id = await db.lembretesDao.insertLembrete(
+          _novoLembrete(dataAlvo: _dataPassada, descricao: 'ParaAdiar'),
+        );
+        await db.lembretesDao.adiar(id, novaData: _dataFutura);
+
+        final lista = await db.lembretesDao.watchAll().first;
+        final l = lista.firstWhere((x) => x.descricao == 'ParaAdiar');
+
+        expect(l.status, StatusLembrete.adiado);
+        expect(
+          _isPendente(l, _semKm),
+          isTrue,
+          reason: 'adiado com nova data futura deve estar em Pendentes',
+        );
+        expect(
+          _isConcluido(l),
+          isFalse,
+          reason: 'adiado NÃO deve mais estar em Concluídos',
+        );
+        expect(_isAtrasado(l, _semKm), isFalse);
+      },
+    );
+
+    test('adiado com dataAlvo passada → isAtrasado=true, isPendente=false, isConcluido=false', () async {
+      final id = await db.lembretesDao.insertLembrete(
+        _novoLembrete(dataAlvo: _dataFutura, descricao: 'AdiadorPassado'),
+      );
+      await db.lembretesDao.adiar(id, novaData: _dataPassada);
+
+      final lista = await db.lembretesDao.watchAll().first;
+      final l = lista.firstWhere((x) => x.descricao == 'AdiadorPassado');
+
+      expect(l.status, StatusLembrete.adiado);
+      expect(
+        _isAtrasado(l, _semKm),
+        isTrue,
+        reason: 'adiado com nova data já passada deve estar em Atrasados',
+      );
+      expect(_isPendente(l, _semKm), isFalse);
+      expect(_isConcluido(l), isFalse);
+    });
+
+    test('concluído permanece apenas em Concluídos (regressão)', () async {
+      final id = await db.lembretesDao.insertLembrete(
+        _novoLembrete(dataAlvo: _dataPassada, descricao: 'ConcluídoPuro'),
+      );
+      await db.lembretesDao.marcarConcluido(id);
+
+      final lista = await db.lembretesDao.watchAll().first;
+      final l = lista.firstWhere((x) => x.descricao == 'ConcluídoPuro');
+
+      expect(l.status, StatusLembrete.concluido);
+      expect(_isConcluido(l), isTrue);
+      expect(_isPendente(l, _semKm), isFalse);
+      expect(_isAtrasado(l, _semKm), isFalse);
+    });
+
+    test(
+      'pendente puro com data futura continua em Pendentes (regressão)',
+      () async {
+        await db.lembretesDao.insertLembrete(
+          _novoLembrete(dataAlvo: _dataFutura, descricao: 'PendentePuro'),
+        );
+
+        final lista = await db.lembretesDao.watchAll().first;
+        final l = lista.firstWhere((x) => x.descricao == 'PendentePuro');
+
+        expect(l.status, StatusLembrete.pendente);
+        expect(_isPendente(l, _semKm), isTrue);
+        expect(_isAtrasado(l, _semKm), isFalse);
+        expect(_isConcluido(l), isFalse);
       },
     );
   });

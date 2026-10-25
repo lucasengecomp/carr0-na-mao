@@ -344,14 +344,31 @@ void main() {
       expect(val.value!.any((l) => l.descricao == 'Concluido'), isTrue);
     });
 
-    test('lembrete adiado aparece na lista de concluídos', () async {
-      final id = await db.lembretesDao.insertLembrete(
-        _novoLembrete(descricao: 'Adiado', dataAlvo: DateTime(2030, 1, 1)),
-      );
-      await db.lembretesDao.adiar(id, novaData: DateTime(2031, 1, 1));
-      final val = await _awaitConcluidos(container);
-      expect(val.value!.any((l) => l.descricao == 'Adiado'), isTrue);
-    });
+    // issue #116: lembrete adiado NÃO aparece em concluídos — vai para pendentes.
+    test(
+      'lembrete adiado NÃO aparece na lista de concluídos (issue #116)',
+      () async {
+        final id = await db.lembretesDao.insertLembrete(
+          _novoLembrete(descricao: 'Adiado', dataAlvo: DateTime(2030, 1, 1)),
+        );
+        await db.lembretesDao.adiar(id, novaData: DateTime(2031, 1, 1));
+        final val = await _awaitConcluidos(container);
+        expect(val.value!.any((l) => l.descricao == 'Adiado'), isFalse);
+      },
+    );
+
+    // issue #116: lembrete adiado com data futura aparece em pendentes.
+    test(
+      'lembrete adiado com data futura aparece em pendentes (issue #116)',
+      () async {
+        final id = await db.lembretesDao.insertLembrete(
+          _novoLembrete(descricao: 'Adiado', dataAlvo: DateTime(2030, 1, 1)),
+        );
+        await db.lembretesDao.adiar(id, novaData: DateTime(2031, 1, 1));
+        final val = await _awaitPendentes(container);
+        expect(val.value!.any((l) => l.descricao == 'Adiado'), isTrue);
+      },
+    );
 
     // Cobre _sortConcluidos: dois com data → mais recente (maior data) primeiro
     test('ordena concluídos por data desc (mais recente primeiro)', () async {

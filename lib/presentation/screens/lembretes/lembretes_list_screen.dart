@@ -9,13 +9,13 @@ import '../../../data/database/enums.dart';
 import '../../../l10n/app_localizations.dart';
 import 'lembretes_providers.dart';
 
-/// Tela de lembretes agrupados por status (issue #25).
+/// Tela de lembretes agrupados por status (issue #25, #116).
 ///
 /// Três abas:
-///  - Pendentes: status=pendente, dataAlvo futura ou nula, ordenados por
-///    proximidade.
-///  - Atrasados: status=pendente, dataAlvo < hoje.
-///  - Concluídos: status in {concluido, adiado}, histórico por dataAlvo desc.
+///  - Pendentes: status in {pendente, adiado}, dataAlvo futura ou nula,
+///    ordenados por proximidade.
+///  - Atrasados: status in {pendente, adiado}, dataAlvo < hoje.
+///  - Concluídos: status == concluido apenas.
 ///
 /// Escopo: lista global (todos os veículos). A placa é exibida em cada linha.
 ///
