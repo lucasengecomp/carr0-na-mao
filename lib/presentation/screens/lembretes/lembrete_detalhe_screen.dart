@@ -144,13 +144,16 @@ class _LembreteDetalheBody extends ConsumerWidget {
       if (!context.mounted) return;
 
       if (result == _ConcluirResult.registrarManutencao) {
-        // Navega para o form de manutenção.
-        // Decisão de implementação: o ManutencaoFormScreen atual não aceita
-        // query params de pré-preenchimento. Navegar para /manutencoes/novo
-        // abre o form vazio para o usuário preencher. O fluxo completo de
-        // pré-preenchimento requer alteração do ManutencaoFormScreen (RF-17
-        // completo) e está fora do escopo desta issue.
-        unawaited(context.push('/manutencoes/novo'));
+        // Navega para o form de manutenção pré-preenchido com os dados do
+        // lembrete (RF-17 / issue #115).
+        final tipo = Uri.encodeQueryComponent(lembrete.tipo);
+        final placa = Uri.encodeQueryComponent(lembrete.veiculoPlaca);
+        final km = lembrete.kmAlvo;
+        final query = StringBuffer('/manutencoes/novo?tipo=$tipo&placa=$placa');
+        if (km != null) {
+          query.write('&kmSugerido=$km');
+        }
+        unawaited(context.push(query.toString()));
       } else {
         // Apenas confirma e volta para a lista
         messenger.showSnackBar(

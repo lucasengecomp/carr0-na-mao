@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../../helpers/l10n_delegates.dart';
@@ -543,6 +545,165 @@ void main() {
       );
       await _teardown(tester);
     });
+  });
+
+  // -------------------------------------------------------------------------
+  // Navegação para form de manutenção com pré-preenchimento (issue #115)
+  // -------------------------------------------------------------------------
+  group('registrar manutenção — navegação pré-preenchida (issue #115)', () {
+    testWidgets(
+      'concluir + registrar manutenção navega para /manutencoes/novo '
+      'com tipo, placa e kmSugerido',
+      (tester) async {
+        String? capturedPath;
+        final manutId = await _insertManutencao(db);
+        final id = await _insertLembrete(
+          db,
+          tipo: 'pastilhasFreio',
+          manutencaoId: manutId,
+          placa: 'ABC1D23',
+          kmAlvo: 85000,
+        );
+
+        SharedPreferences.setMockInitialValues(const {});
+        final router = GoRouter(
+          initialLocation: '/lembretes/$id',
+          routes: [
+            GoRoute(
+              path: '/lembretes/:id',
+              builder: (c, s) => ProviderScope(
+                overrides: [
+                  appDatabaseProvider.overrideWithValue(db),
+                  lembretesServiceProvider.overrideWith(
+                    (ref) => LembretesService(
+                      dao: ref.watch(lembretesDaoProvider),
+                      notifications:
+                          NotificationsService(plugin: _FakeNotifPlugin()),
+                    ),
+                  ),
+                ],
+                child: LembreteDetalheScreen(
+                  id: int.parse(s.pathParameters['id']!),
+                ),
+              ),
+            ),
+            GoRoute(
+              path: '/manutencoes/novo',
+              builder: (c, s) {
+                capturedPath = s.uri.toString();
+                return const Scaffold(body: Text('FORM_MANUTENCAO'));
+              },
+            ),
+          ],
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [appDatabaseProvider.overrideWithValue(db)],
+            child: MaterialApp.router(
+              locale: localeDefault,
+              localizationsDelegates: l10nDelegates,
+              supportedLocales: supportedLocales,
+              routerConfig: router,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('btn_concluir')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_concluir_registrar_manutencao')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('FORM_MANUTENCAO'), findsOneWidget);
+        expect(capturedPath, isNotNull);
+        expect(capturedPath, contains('tipo=pastilhasFreio'));
+        expect(capturedPath, contains('placa=ABC1D23'));
+        expect(capturedPath, contains('kmSugerido=85000'));
+
+        await _teardown(tester);
+      },
+    );
+
+    testWidgets(
+      'lembrete sem kmAlvo navega sem kmSugerido na query string',
+      (tester) async {
+        String? capturedPath;
+        // Lembrete com dataAlvo mas sem kmAlvo
+        final manutId = await _insertManutencao(db);
+        final id = await _insertLembrete(
+          db,
+          tipo: 'filtroAr',
+          manutencaoId: manutId,
+          placa: 'ABC1D23',
+          kmAlvo: null,
+          dataAlvo: DateTime(2027, 6, 1),
+        );
+
+        SharedPreferences.setMockInitialValues(const {});
+        final router = GoRouter(
+          initialLocation: '/lembretes/$id',
+          routes: [
+            GoRoute(
+              path: '/lembretes/:id',
+              builder: (c, s) => ProviderScope(
+                overrides: [
+                  appDatabaseProvider.overrideWithValue(db),
+                  lembretesServiceProvider.overrideWith(
+                    (ref) => LembretesService(
+                      dao: ref.watch(lembretesDaoProvider),
+                      notifications:
+                          NotificationsService(plugin: _FakeNotifPlugin()),
+                    ),
+                  ),
+                ],
+                child: LembreteDetalheScreen(
+                  id: int.parse(s.pathParameters['id']!),
+                ),
+              ),
+            ),
+            GoRoute(
+              path: '/manutencoes/novo',
+              builder: (c, s) {
+                capturedPath = s.uri.toString();
+                return const Scaffold(body: Text('FORM_MANUTENCAO'));
+              },
+            ),
+          ],
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [appDatabaseProvider.overrideWithValue(db)],
+            child: MaterialApp.router(
+              locale: localeDefault,
+              localizationsDelegates: l10nDelegates,
+              supportedLocales: supportedLocales,
+              routerConfig: router,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('btn_concluir')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('btn_concluir_registrar_manutencao')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('FORM_MANUTENCAO'), findsOneWidget);
+        expect(capturedPath, isNotNull);
+        expect(capturedPath, contains('tipo=filtroAr'));
+        expect(capturedPath, contains('placa=ABC1D23'));
+        // Sem kmAlvo, não deve conter kmSugerido
+        expect(capturedPath, isNot(contains('kmSugerido')));
+
+        await _teardown(tester);
+      },
+    );
   });
 
   // -------------------------------------------------------------------------

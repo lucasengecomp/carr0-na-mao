@@ -16,10 +16,32 @@ import 'manutencao_enum_labels.dart';
 
 /// Form de manutenção. Em modo novo, usa o veículo ativo; em modo edição,
 /// carrega o registro pelo id e trava o veículo.
+///
+/// Quando aberto a partir de um lembrete com `manutencao_id` (RF-17), aceita
+/// parâmetros opcionais de pré-preenchimento:
+/// - [tipoSugerido]: nome do enum [TipoManutencao] (ex: `"pastilhasFreio"`).
+/// - [kmSugerido]: hodômetro alvo do lembrete.
+/// - [placaSugerida]: placa do veículo do lembrete.
 class ManutencaoFormScreen extends ConsumerStatefulWidget {
-  const ManutencaoFormScreen({this.id, super.key});
+  const ManutencaoFormScreen({
+    this.id,
+    this.tipoSugerido,
+    this.kmSugerido,
+    this.placaSugerida,
+    super.key,
+  });
 
   final int? id;
+
+  /// Nome do enum [TipoManutencao] a pré-selecionar em modo novo.
+  final String? tipoSugerido;
+
+  /// Valor de hodômetro a pré-preencher em modo novo.
+  final int? kmSugerido;
+
+  /// Placa do veículo a usar como ativo em modo novo (quando diferente do
+  /// veículo selecionado pelo usuário).
+  final String? placaSugerida;
 
   @override
   ConsumerState<ManutencaoFormScreen> createState() =>
@@ -44,6 +66,10 @@ class _ManutencaoFormScreenState extends ConsumerState<ManutencaoFormScreen> {
   /// Veículo em modo edição. Em modo novo, vem do [veiculoAtivoProvider].
   Veiculo? _veiculoEdit;
 
+  /// Veículo pré-selecionado via [widget.placaSugerida] (modo novo).
+  /// Quando não nulo, substitui o [veiculoAtivoProvider] no formulário.
+  Veiculo? _veiculoPrefill;
+
   bool get _isEdit => widget.id != null;
 
   /// Quando `true`, o campo `nomeLivre` fica visível.
@@ -55,11 +81,49 @@ class _ManutencaoFormScreenState extends ConsumerState<ManutencaoFormScreen> {
     if (_isEdit) {
       unawaited(_loadExisting());
     } else {
-      // Pré-preenche os campos de próximo intervalo com o padrão do tipo default.
+      // Aplica pré-preenchimento vindo do lembrete (RF-17).
+      _aplicarPrefill();
+      // Pré-preenche os campos de próximo intervalo com o padrão do tipo.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(_carregarPadrao(_tipo));
       });
     }
+  }
+
+  /// Aplica os parâmetros de pré-preenchimento vindos de [widget.tipoSugerido],
+  /// [widget.kmSugerido] e [widget.placaSugerida] em modo novo.
+  void _aplicarPrefill() {
+    // Tipo: tenta mapear o nome do enum; ignora se inválido.
+    final tipoStr = widget.tipoSugerido;
+    if (tipoStr != null && tipoStr.isNotEmpty) {
+      final tipoEncontrado = TipoManutencao.values
+          .where((t) => t.name == tipoStr)
+          .firstOrNull;
+      if (tipoEncontrado != null) {
+        _tipo = tipoEncontrado;
+      }
+    }
+
+    // KM: preenche se positivo.
+    final km = widget.kmSugerido;
+    if (km != null && km > 0) {
+      _kmCtrl.text = km.toString();
+    }
+
+    // Placa: carrega o veículo correspondente assíncronamente.
+    final placa = widget.placaSugerida;
+    if (placa != null && placa.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_carregarVeiculoPrefill(placa));
+      });
+    }
+  }
+
+  /// Carrega o veículo pela placa sugerida e o armazena em [_veiculoPrefill].
+  Future<void> _carregarVeiculoPrefill(String placa) async {
+    final veiculo = await ref.read(veiculosDaoProvider).byPlaca(placa);
+    if (!mounted) return;
+    setState(() => _veiculoPrefill = veiculo);
   }
 
   @override
@@ -315,6 +379,18 @@ class _ManutencaoFormScreenState extends ConsumerState<ManutencaoFormScreen> {
 
   Widget _buildNewBody() {
     final l10n = AppLocalizations.of(context)!;
+
+    // Quando há uma placa sugerida mas o veículo ainda não carregou, mostra
+    // loading. Quando o veículo sugerido carregou, usa-o diretamente.
+    if (widget.placaSugerida != null && widget.placaSugerida!.isNotEmpty) {
+      final prefill = _veiculoPrefill;
+      if (prefill == null) {
+        // Ainda aguardando a carga do veículo sugerido.
+        return const Center(child: CircularProgressIndicator());
+      }
+      return _buildForm(prefill);
+    }
+
     final ativos = ref.watch(veiculosAtivosProvider);
     return ativos.when(
       loading: () => const Center(child: CircularProgressIndicator()),

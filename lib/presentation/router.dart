@@ -84,7 +84,16 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
       path: '/manutencoes/novo',
-      builder: (context, state) => const ManutencaoFormScreen(),
+      builder: (context, state) {
+        final params = state.uri.queryParameters;
+        return ManutencaoFormScreen(
+          tipoSugerido: params['tipo'],
+          kmSugerido: params['kmSugerido'] != null
+              ? int.tryParse(params['kmSugerido']!)
+              : null,
+          placaSugerida: params['placa'],
+        );
+      },
     ),
     GoRoute(
       parentNavigatorKey: _rootNavigatorKey,
