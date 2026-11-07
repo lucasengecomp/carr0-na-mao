@@ -1,0 +1,17 @@
+# Template para android/key.properties (nao commitado).
+#
+# Copie este arquivo para android/key.properties no seu dev local
+# e preencha com os valores reais do upload-keystore.jks.
+#
+# O arquivo real (android/key.properties) esta gitignored e NUNCA
+# deve entrar no repo. O keystore em si tambem nao deve estar no
+# repo — recomendacao: guardar em ~/.config/carr0-na-mao/upload-keystore.jks
+# e ter backup externo (1Password, Bitwarden, Drive criptografado).
+#
+# Perder as senhas OU o .jks = perder a capacidade de atualizar o
+# app nos devices dos usuarios (nova chave = reinstalacao limpa).
+
+storePassword=TROCAR_PELA_SENHA_DO_KEYSTORE
+keyPassword=TROCAR_PELA_SENHA_DA_CHAVE
+keyAlias=upload
+storeFile=/Users/SEU_USUARIO/.config/carr0-na-mao/upload-keystore.jks

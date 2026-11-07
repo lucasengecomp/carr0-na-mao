@@ -50,3 +50,8 @@ app.*.map.json
 
 # Coverage
 coverage/
+
+# Release signing (NEVER commit — contains the keystore path and secrets)
+**/key.properties
+**/*.jks
+**/*.keystore
