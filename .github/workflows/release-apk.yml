@@ -1,0 +1,116 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag pra criar o release (ex: v1.0.0-test)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    name: Build APK release e publicar no GitHub Releases
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Flutter version from .fvmrc
+        id: fvm
+        run: |
+          FLUTTER_CHANNEL=$(jq -r '.flutter' .fvmrc)
+          echo "channel=${FLUTTER_CHANNEL}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ steps.fvm.outputs.channel }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Decode upload keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Secret ANDROID_KEYSTORE_BASE64 ausente. Configure em Settings > Secrets > Actions."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          # Sanity check: keystore valido tem pelo menos alguns KB
+          FILESIZE=$(stat -c%s android/app/upload-keystore.jks)
+          if [ "$FILESIZE" -lt 1000 ]; then
+            echo "::error::Keystore decodificado tem ${FILESIZE} bytes — base64 provavelmente mal formado."
+            exit 1
+          fi
+
+      - name: Create key.properties
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
+            echo "::error::Faltando ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_PASSWORD ou ANDROID_KEY_ALIAS."
+            exit 1
+          fi
+          cat > android/key.properties <<EOF
+          storePassword=${STORE_PASSWORD}
+          keyPassword=${KEY_PASSWORD}
+          keyAlias=${KEY_ALIAS}
+          storeFile=upload-keystore.jks
+          EOF
+
+      - name: Build APK release
+        run: flutter build apk --release
+
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag: ${TAG}"
+
+      - name: Rename APK with tag
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/carro-na-mao-${{ steps.tag.outputs.tag }}.apk
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Carro na Mão ${{ steps.tag.outputs.tag }}
+          files: build/app/outputs/flutter-apk/carro-na-mao-${{ steps.tag.outputs.tag }}.apk
+          draft: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+
+      - name: Cleanup secrets from runner
+        if: always()
+        run: |
+          rm -f android/key.properties android/app/upload-keystore.jks
