@@ -261,7 +261,7 @@ class NotificationsService {
       body: _formatarDataAlvo(dataAlvo),
       scheduledDate: tzDataNot,
       details: details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }
 
