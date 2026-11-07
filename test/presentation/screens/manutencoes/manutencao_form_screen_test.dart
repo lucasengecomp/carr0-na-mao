@@ -737,6 +737,61 @@ void main() {
   // -------------------------------------------------------------------------
   // Sem veículo cadastrado
   // -------------------------------------------------------------------------
+  group('autocomplete de oficina (#143)', () {
+    Future<void> seed() async {
+      await db.manutencoesDao.insertManutencao(
+        ManutencoesCompanion.insert(
+          veiculoPlaca: 'ABC1D23',
+          tipo: TipoManutencao.oleoMotor,
+          data: DateTime(2024, 1, 1),
+          km: 1000,
+          oficina: const Value('Oficina do Zé'),
+        ),
+      );
+    }
+
+    Future<void> digitar(WidgetTester tester, String texto) async {
+      await tester.enterText(_byKey('manut_oficina'), texto);
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+
+    testWidgets('digitar mostra sugestões do histórico', (tester) async {
+      await seed();
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+      await digitar(tester, 'Zé');
+      expect(find.text('Oficina do Zé'), findsOneWidget);
+      await _teardown(tester);
+    });
+
+    testWidgets('query sem match não mostra sugestões', (tester) async {
+      await seed();
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+      await digitar(tester, 'XYZ');
+      expect(find.text('Oficina do Zé'), findsNothing);
+      await _teardown(tester);
+    });
+
+    testWidgets('tocar na sugestão preenche o campo', (tester) async {
+      await seed();
+      await _pumpForm(tester, db: db, placaAtiva: 'ABC1D23');
+      await digitar(tester, 'Oficina');
+
+      final inkWell = tester.widget<InkWell>(
+        find.ancestor(
+          of: find.text('Oficina do Zé').first,
+          matching: find.byType(InkWell),
+        ),
+      );
+      inkWell.onTap!.call();
+      await tester.pumpAndSettle();
+
+      final field = tester.widget<TextFormField>(_byKey('manut_oficina'));
+      expect(field.controller!.text, 'Oficina do Zé');
+      await _teardown(tester);
+    });
+  });
+
   group('sem veículo', () {
     testWidgets('exibe aviso quando não há veículo ativo cadastrado', (
       tester,

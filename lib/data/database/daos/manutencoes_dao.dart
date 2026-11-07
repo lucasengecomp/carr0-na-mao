@@ -31,6 +31,28 @@ class ManutencoesDao extends DatabaseAccessor<AppDatabase>
             ]))
           .get();
 
+  /// Sugestões de oficina/local a partir do histórico de manutenções: até
+  /// [limit] valores distintos de `oficina` contendo [query], ordenados por
+  /// frequência de uso desc e data mais recente desc (mesmo critério do
+  /// autocomplete de posto). Não exige tabela auxiliar: novos cadastros
+  /// alimentam as sugestões automaticamente.
+  Future<List<String>> searchOficinas(String query, {int limit = 10}) async {
+    final escaped = query
+        .replaceAll(r'\', r'\\')
+        .replaceAll('%', r'\%')
+        .replaceAll('_', r'\_');
+    final rows = await customSelect(
+      'SELECT oficina FROM manutencoes '
+      "WHERE oficina IS NOT NULL AND TRIM(oficina) <> '' "
+      "AND oficina LIKE ? ESCAPE '\\' "
+      'GROUP BY oficina '
+      'ORDER BY COUNT(*) DESC, MAX(data) DESC, oficina ASC '
+      'LIMIT ?',
+      variables: [Variable.withString('%$escaped%'), Variable.withInt(limit)],
+    ).get();
+    return rows.map((r) => r.read<String>('oficina')).toList();
+  }
+
   /// Última manutenção do tipo registrada para o veículo — usada para calcular
   /// o próximo intervalo e disparar lembretes.
   Future<Manutencao?> lastByTipo(String placa, TipoManutencao tipo) =>
