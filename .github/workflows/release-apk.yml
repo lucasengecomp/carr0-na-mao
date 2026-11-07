@@ -106,6 +106,8 @@ jobs:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: Carro na Mão ${{ steps.tag.outputs.tag }}
           files: build/app/outputs/flutter-apk/carro-na-mao-${{ steps.tag.outputs.tag }}.apk
+          body_path: docs/release/instalar-apk.md
+          append_body: true
           draft: true
           generate_release_notes: true
           fail_on_unmatched_files: true
