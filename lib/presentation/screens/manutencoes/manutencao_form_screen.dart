@@ -481,14 +481,7 @@ class _ManutencaoFormScreenState extends ConsumerState<ManutencaoFormScreen> {
             ),
             const SizedBox(height: 12),
             // Oficina (opcional)
-            TextFormField(
-              key: const Key('manut_oficina'),
-              controller: _oficinaCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.manutencaoCampoOficina,
-              ),
-              textCapitalization: TextCapitalization.words,
-            ),
+            _OficinaAutocomplete(controller: _oficinaCtrl),
             const SizedBox(height: 12),
             // Observações (opcional)
             TextFormField(
@@ -558,6 +551,65 @@ class _ManutencaoFormScreenState extends ConsumerState<ManutencaoFormScreen> {
 // ---------------------------------------------------------------------------
 // Dialog de confirmação de exclusão (StatelessWidget local — padrão do app)
 // ---------------------------------------------------------------------------
+
+/// Autocomplete do campo Oficina/Local, alimentado pelo histórico de
+/// manutenções (mesma UX do autocomplete de posto no abastecimento).
+class _OficinaAutocomplete extends ConsumerStatefulWidget {
+  const _OficinaAutocomplete({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  ConsumerState<_OficinaAutocomplete> createState() =>
+      _OficinaAutocompleteState();
+}
+
+class _OficinaAutocompleteState extends ConsumerState<_OficinaAutocomplete> {
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<Iterable<String>> _fetchSugestoes(String query) =>
+      ref.read(manutencoesDaoProvider).searchOficinas(query);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Autocomplete<String>(
+      textEditingController: widget.controller,
+      focusNode: _focusNode,
+      optionsBuilder: (value) {
+        final query = value.text.trim();
+        if (query.isEmpty) return const Iterable<String>.empty();
+        return _fetchSugestoes(query);
+      },
+      displayStringForOption: (s) => s,
+      fieldViewBuilder: (context, fieldController, focusNode, onSubmitted) {
+        return TextFormField(
+          key: const Key('manut_oficina'),
+          controller: fieldController,
+          focusNode: focusNode,
+          decoration: InputDecoration(labelText: l10n.manutencaoCampoOficina),
+          textCapitalization: TextCapitalization.words,
+          onFieldSubmitted: (_) => onSubmitted(),
+        );
+      },
+      onSelected: (option) {
+        widget.controller.text = option;
+      },
+    );
+  }
+}
 
 class _ExcluirManutencaoDialog extends StatelessWidget {
   const _ExcluirManutencaoDialog();

@@ -162,4 +162,32 @@ void main() {
       expect(todos.length, greaterThanOrEqualTo(11));
     });
   });
+
+  group('searchOficinas', () {
+    Future<void> ins(String? of, DateTime d) => db.manutencoesDao
+        .insertManutencao(_novaManut(data: d, km: 1000, oficina: of));
+
+    test('ordena por frequência, depois recência; sem nulos', () async {
+      await ins('Oficina do Zé', DateTime(2024, 1, 1));
+      await ins('Oficina Beta', DateTime(2024, 6, 1));
+      await ins('Oficina do Zé', DateTime(2024, 2, 1));
+      await ins(null, DateTime(2024, 3, 1));
+      await ins('  ', DateTime(2024, 3, 1));
+      await ins('Oficina Alfa', DateTime(2024, 1, 5));
+
+      final r = await db.manutencoesDao.searchOficinas('oficina');
+      expect(r, ['Oficina do Zé', 'Oficina Beta', 'Oficina Alfa']);
+    });
+
+    test('filtra por substring, escapa curingas e respeita limit', () async {
+      await ins('Auto 100% Car', DateTime(2024, 1, 1));
+      await ins('Auto Center', DateTime(2024, 1, 2));
+      expect(await db.manutencoesDao.searchOficinas('100%'), ['Auto 100% Car']);
+      expect(await db.manutencoesDao.searchOficinas('xyz'), isEmpty);
+      expect(
+        await db.manutencoesDao.searchOficinas('auto', limit: 1),
+        hasLength(1),
+      );
+    });
+  });
 }
